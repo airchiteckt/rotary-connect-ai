@@ -116,8 +116,7 @@ serve(async (req) => {
             content: userPrompt 
           }
         ],
-        max_tokens: 4000,
-        temperature: 0.7,
+        max_completion_tokens: 4000,
       }),
     });
 
