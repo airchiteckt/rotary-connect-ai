@@ -7,6 +7,13 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Segreteria from "./pages/Segreteria";
+import Tesoreria from "./pages/Tesoreria";
+import Presidenza from "./pages/Presidenza";
+import Prefettura from "./pages/Prefettura";
+import Direttivo from "./pages/Direttivo";
+import Comunicazione from "./pages/Comunicazione";
+import Soci from "./pages/Soci";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +29,13 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/segreteria" element={<Segreteria />} />
+            <Route path="/tesoreria" element={<Tesoreria />} />
+            <Route path="/presidenza" element={<Presidenza />} />
+            <Route path="/prefettura" element={<Prefettura />} />
+            <Route path="/direttivo" element={<Direttivo />} />
+            <Route path="/comunicazione" element={<Comunicazione />} />
+            <Route path="/soci" element={<Soci />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

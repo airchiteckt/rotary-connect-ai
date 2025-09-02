@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Mail, Image, Users, Calendar, Settings, LogOut } from 'lucide-react';
+import { FileText, Mail, Image, Users, Calendar, Settings, LogOut, Crown, DollarSign, Shield, UserCheck, Megaphone, Building } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, signOut, checkTrialStatus } = useAuth();
@@ -70,32 +70,53 @@ export default function Dashboard() {
 
   const menuItems = [
     {
-      title: "Documenti",
-      description: "Crea programmi mensili, verbali e comunicazioni con AI",
+      title: "Segreteria",
+      description: "Documenti, verbali, programmi mensili e comunicazioni ufficiali",
       icon: FileText,
-      href: "/documents",
-      color: "bg-blue-500"
+      href: "/segreteria",
+      color: "bg-blue-600"
     },
     {
-      title: "Email",
-      description: "Gestisci anagrafiche e invii email di massa",
-      icon: Mail,
-      href: "/emails",
-      color: "bg-green-500"
+      title: "Tesoreria", 
+      description: "Gestione finanziaria, bilanci e rendiconti del club",
+      icon: DollarSign,
+      href: "/tesoreria",
+      color: "bg-emerald-600"
     },
     {
-      title: "Locandine",
-      description: "Genera flyer per eventi con intelligenza artificiale",
-      icon: Image,
-      href: "/flyers",
-      color: "bg-purple-500"
+      title: "Presidenza",
+      description: "Strumenti per la governance e coordinamento club",
+      icon: Crown,
+      href: "/presidenza", 
+      color: "bg-amber-600"
     },
     {
-      title: "Contatti",
-      description: "Gestisci l'anagrafica dei membri e categorie",
+      title: "Prefettura",
+      description: "Cerimoniale, protocollo e organizzazione eventi",
+      icon: Shield,
+      href: "/prefettura",
+      color: "bg-red-600"
+    },
+    {
+      title: "Direttivo",
+      description: "Coordinamento consiglio direttivo e commissioni",
+      icon: Building,
+      href: "/direttivo",
+      color: "bg-indigo-600"
+    },
+    {
+      title: "Comunicazione",
+      description: "Locandine, social media e comunicazione esterna",
+      icon: Megaphone,
+      href: "/comunicazione",
+      color: "bg-purple-600"
+    },
+    {
+      title: "Soci",
+      description: "Anagrafica soci, presenze e gestione membri",
       icon: Users,
-      href: "/contacts",
-      color: "bg-orange-500"
+      href: "/soci",
+      color: "bg-orange-600"
     }
   ];
 
@@ -151,58 +172,80 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Documenti</p>
-                  <p className="text-2xl font-bold">0</p>
-                </div>
-                <FileText className="w-8 h-8 text-blue-500" />
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <FileText className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Documenti</p>
+                <p className="text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Email Inviate</p>
-                  <p className="text-2xl font-bold">0</p>
-                </div>
-                <Mail className="w-8 h-8 text-green-500" />
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <DollarSign className="w-6 h-6 text-emerald-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Budget</p>
+                <p className="text-lg font-bold">€0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Locandine</p>
-                  <p className="text-2xl font-bold">0</p>
-                </div>
-                <Image className="w-8 h-8 text-purple-500" />
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Crown className="w-6 h-6 text-amber-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Progetti</p>
+                <p className="text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Contatti</p>
-                  <p className="text-2xl font-bold">0</p>
-                </div>
-                <Users className="w-8 h-8 text-orange-500" />
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Shield className="w-6 h-6 text-red-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Eventi</p>
+                <p className="text-lg font-bold">0</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Building className="w-6 h-6 text-indigo-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Commissioni</p>
+                <p className="text-lg font-bold">0</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Megaphone className="w-6 h-6 text-purple-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Campagne</p>
+                <p className="text-lg font-bold">0</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-4">
+              <div className="text-center">
+                <Users className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Soci Attivi</p>
+                <p className="text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Menu */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuItems.map((item) => (
             <Card key={item.title} className="cursor-pointer hover:shadow-lg transition-all duration-200 group">
               <CardHeader>
@@ -221,7 +264,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button className="w-full" variant="outline">
+                <Button className="w-full" variant="outline" onClick={() => window.location.href = item.href}>
                   Accedi a {item.title}
                 </Button>
               </CardContent>
