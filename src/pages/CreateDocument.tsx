@@ -153,11 +153,12 @@ export default function CreateDocument() {
       sections: [
         { key: 'mese', label: 'Mese', type: 'month-select', required: true },
         { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: true },
-        { key: 'eventi', label: 'Eventi Principali', type: 'events', required: true },
-        { key: 'riunioni', label: 'Calendario Riunioni', type: 'meetings', required: true },
-        { key: 'comunicazioni_presidente', label: 'Comunicazioni dal Presidente', type: 'richtext', required: false },
-        { key: 'progetti', label: 'Progetti in Corso', type: 'richtext', required: false },
-        { key: 'service', label: 'Attività di Service', type: 'richtext', required: false },
+        { key: 'messaggio_presidente', label: '2. Messaggio del Presidente', type: 'president-message', required: true },
+        { key: 'calendario_incontri', label: '3. Calendario degli incontri e attività', type: 'meetings-calendar', required: true },
+        { key: 'attivita_servizio', label: '4. Attività di servizio', type: 'service-activities', required: true },
+        { key: 'comunicazioni_club', label: '5. Comunicazioni di club', type: 'club-communications', required: true },
+        { key: 'agenda_distrettuale', label: '6. Agenda distrettuale e internazionale', type: 'district-agenda', required: false },
+        { key: 'sezione_motivazionale', label: '7. Sezione motivazionale o culturale', type: 'motivational-section', required: false },
         { key: 'background_template', label: 'Template di Sfondo', type: 'template-select', required: false }
       ]
     },
@@ -663,6 +664,281 @@ export default function CreateDocument() {
               ))}
             </SelectContent>
           </Select>
+        );
+      case 'president-message':
+        const presMessage = typeof value === 'object' ? value : {};
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold">Saluto ai soci</Label>
+              <Textarea
+                value={presMessage.saluto || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...presMessage, saluto: e.target.value });
+                }}
+                placeholder="Saluto iniziale del presidente ai soci..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Riflessione sul mese in corso</Label>
+              <Textarea
+                value={presMessage.riflessione_mese || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...presMessage, riflessione_mese: e.target.value });
+                }}
+                placeholder="Riflessione collegata al tema Rotary internazionale del mese..."
+                rows={4}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Tema Rotary Internazionale</Label>
+              <Input
+                value={presMessage.tema_rotary || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...presMessage, tema_rotary: e.target.value });
+                }}
+                placeholder="Es. Mese dell'Azione Professionale"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Ringraziamenti e motivazione</Label>
+              <Textarea
+                value={presMessage.ringraziamenti || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...presMessage, ringraziamenti: e.target.value });
+                }}
+                placeholder="Ringraziamenti e parole di motivazione per i soci..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        );
+      case 'meetings-calendar':
+        const calendar = typeof value === 'object' ? value : {};
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold">Riunioni settimanali</Label>
+              <Textarea
+                value={calendar.riunioni_settimanali || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...calendar, riunioni_settimanali: e.target.value });
+                }}
+                placeholder="Elenco delle riunioni settimanali con data, ora e luogo..."
+                rows={4}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Relatori previsti</Label>
+              <Textarea
+                value={calendar.relatori || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...calendar, relatori: e.target.value });
+                }}
+                placeholder="Relatori previsti o temi degli incontri..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Eventi speciali e fellowship</Label>
+              <Textarea
+                value={calendar.eventi_speciali || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...calendar, eventi_speciali: e.target.value });
+                }}
+                placeholder="Conviviali, eventi speciali o fellowship..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        );
+      case 'service-activities':
+        const service = typeof value === 'object' ? value : {};
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold">Progetti in corso o in avvio</Label>
+              <Textarea
+                value={service.progetti_corso || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...service, progetti_corso: e.target.value });
+                }}
+                placeholder="Progetti locali e internazionali in corso o in avvio..."
+                rows={4}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Attività benefiche e raccolte fondi</Label>
+              <Textarea
+                value={service.beneficenza || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...service, beneficenza: e.target.value });
+                }}
+                placeholder="Attività benefiche e raccolte fondi programmate..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Opportunità di volontariato</Label>
+              <Textarea
+                value={service.volontariato || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...service, volontariato: e.target.value });
+                }}
+                placeholder="Opportunità di volontariato per i soci..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        );
+      case 'club-communications':
+        const clubComm = typeof value === 'object' ? value : {};
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold">Compleanni e anniversari</Label>
+              <Textarea
+                value={clubComm.compleanni || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...clubComm, compleanni: e.target.value });
+                }}
+                placeholder="Compleanni e anniversari dei soci del mese..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Nuovi ingressi o candidature</Label>
+              <Textarea
+                value={clubComm.nuovi_ingressi || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...clubComm, nuovi_ingressi: e.target.value });
+                }}
+                placeholder="Nuovi ingressi o candidature in corso..."
+                rows={2}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Comunicazioni dal Direttivo</Label>
+              <Textarea
+                value={clubComm.comunicazioni_direttivo || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...clubComm, comunicazioni_direttivo: e.target.value });
+                }}
+                placeholder="Comunicazioni importanti dal Consiglio Direttivo..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Scadenze importanti</Label>
+              <Textarea
+                value={clubComm.scadenze || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...clubComm, scadenze: e.target.value });
+                }}
+                placeholder="Quote, iscrizioni, eventi distrettuali o internazionali..."
+                rows={2}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        );
+      case 'district-agenda':
+        const district = typeof value === 'object' ? value : {};
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold">Eventi del Distretto Rotary</Label>
+              <Textarea
+                value={district.eventi_distretto || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...district, eventi_distretto: e.target.value });
+                }}
+                placeholder="Eventi del Distretto di interesse per il club..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Seminari e conferenze</Label>
+              <Textarea
+                value={district.seminari || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...district, seminari: e.target.value });
+                }}
+                placeholder="Seminari di formazione, conferenze e congressi..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Giorni significativi del Rotary</Label>
+              <Textarea
+                value={district.giorni_significativi || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...district, giorni_significativi: e.target.value });
+                }}
+                placeholder="Giorni significativi del Rotary International..."
+                rows={2}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        );
+      case 'motivational-section':
+        const motivational = typeof value === 'object' ? value : {};
+        return (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm font-semibold">Riflessione sul Rotary</Label>
+              <Textarea
+                value={motivational.riflessione_rotary || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...motivational, riflessione_rotary: e.target.value });
+                }}
+                placeholder="Una breve nota di riflessione sui valori Rotary..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Progetto internazionale</Label>
+              <Textarea
+                value={motivational.progetto_internazionale || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...motivational, progetto_internazionale: e.target.value });
+                }}
+                placeholder="Approfondimento su un progetto internazionale..."
+                rows={3}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-semibold">Citazioni ispirazionali</Label>
+              <Textarea
+                value={motivational.citazioni || ''}
+                onChange={(e) => {
+                  updateContent(section.key, { ...motivational, citazioni: e.target.value });
+                }}
+                placeholder="Citazioni o messaggi ispirazionali..."
+                rows={2}
+                className="mt-1"
+              />
+            </div>
+          </div>
         );
       default:
         return (

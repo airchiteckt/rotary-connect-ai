@@ -37,15 +37,16 @@ ${Object.entries(content).map(([key, value]) => `${key}: ${value || 'da definire
 
 Genera un JSON con le seguenti strutture:
 - mese: nome del mese in italiano (gennaio, febbraio, etc.)
-- anno_rotariano: formato "A.R. YYYY-YYYY+1" 
-- eventi: array di oggetti con {title, date (YYYY-MM-DD), location, time (HH:MM), description}
-- riunioni: array di oggetti con {type (direttivo/assemblea/caminetto), date (YYYY-MM-DD), time (HH:MM), location}
-- comunicazioni_presidente: messaggio formale del presidente
-- progetti: testo sui progetti in corso
-- service: testo sulle attività di service
+- anno_rotariano: formato "A.R. YYYY-YYYY+1"
+- messaggio_presidente: oggetto con {saluto, riflessione_mese, tema_rotary, ringraziamenti}
+- calendario_incontri: oggetto con {riunioni_settimanali: array, relatori: array, eventi_speciali: array}
+- attivita_servizio: oggetto con {progetti_corso: array, beneficenza: array, volontariato: array}
+- comunicazioni_club: oggetto con {compleanni: array, anniversari: array, nuovi_ingressi: array, comunicazioni_direttivo: string, scadenze: array}
+- agenda_distrettuale: oggetto con {eventi_distretto: array, seminari: array, giorni_significativi: array}
+- sezione_motivazionale: oggetto con {riflessione_rotary: string, progetto_internazionale: string, citazioni: array}
 - background_template: uno tra classic/modern/elegant/minimal
 
-Crea eventi e riunioni realistici per il mese specificato. Usa date future appropriate.
+Crea contenuti realistici e appropriati per il mese specificato. Usa date future appropriate.
 `
   },
   comunicazioni: {
@@ -109,8 +110,6 @@ serve(async (req) => {
             content: userPrompt 
           }
         ],
-        max_completion_tokens: 2000,
-        temperature: 0.7,
       }),
     });
 
