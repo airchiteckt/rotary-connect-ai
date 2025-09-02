@@ -851,183 +851,435 @@ export default function CreateDocument() {
           </div>
         );
       case 'service-activities':
-        const service = typeof value === 'object' ? value : {};
+        const serviceActivities = Array.isArray(value) ? value : [];
         return (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-semibold">Progetti in corso o in avvio</Label>
-              <Textarea
-                value={service.progetti_corso || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...service, progetti_corso: e.target.value });
-                }}
-                placeholder="Progetti locali e internazionali in corso o in avvio..."
-                rows={4}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Attività benefiche e raccolte fondi</Label>
-              <Textarea
-                value={service.beneficenza || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...service, beneficenza: e.target.value });
-                }}
-                placeholder="Attività benefiche e raccolte fondi programmate..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Opportunità di volontariato</Label>
-              <Textarea
-                value={service.volontariato || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...service, volontariato: e.target.value });
-                }}
-                placeholder="Opportunità di volontariato per i soci..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
+          <div className="space-y-4">            
+            {serviceActivities.map((activity, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Attività {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedActivities = serviceActivities.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedActivities);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Testo *</Label>
+                    <Input
+                      value={activity.testo || ''}
+                      onChange={(e) => {
+                        const updatedActivities = [...serviceActivities];
+                        updatedActivities[index] = { ...activity, testo: e.target.value };
+                        updateContent(section.key, updatedActivities);
+                      }}
+                      placeholder="Nome attività"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data</Label>
+                    <Input
+                      type="date"
+                      value={activity.data || ''}
+                      onChange={(e) => {
+                        const updatedActivities = [...serviceActivities];
+                        updatedActivities[index] = { ...activity, data: e.target.value };
+                        updateContent(section.key, updatedActivities);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={activity.orario || ''}
+                      onChange={(e) => {
+                        const updatedActivities = [...serviceActivities];
+                        updatedActivities[index] = { ...activity, orario: e.target.value };
+                        updateContent(section.key, updatedActivities);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={activity.luogo || ''}
+                      onChange={(e) => {
+                        const updatedActivities = [...serviceActivities];
+                        updatedActivities[index] = { ...activity, luogo: e.target.value };
+                        updateContent(section.key, updatedActivities);
+                      }}
+                      placeholder="Luogo attività"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Descrizione</Label>
+                  <Textarea
+                    value={activity.descrizione || ''}
+                    onChange={(e) => {
+                      const updatedActivities = [...serviceActivities];
+                      updatedActivities[index] = { ...activity, descrizione: e.target.value };
+                      updateContent(section.key, updatedActivities);
+                    }}
+                    placeholder="Descrizione dell'attività"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newActivity = {
+                  testo: '',
+                  data: '',
+                  orario: '',
+                  luogo: '',
+                  descrizione: ''
+                };
+                updateContent(section.key, [...serviceActivities, newActivity]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Attività
+            </Button>
           </div>
         );
       case 'club-communications':
-        const clubComm = typeof value === 'object' ? value : {};
+        const clubCommunications = Array.isArray(value) ? value : [];
         return (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-semibold">Compleanni e anniversari</Label>
-              <Textarea
-                value={clubComm.compleanni || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...clubComm, compleanni: e.target.value });
-                }}
-                placeholder="Compleanni e anniversari dei soci del mese..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Nuovi ingressi o candidature</Label>
-              <Textarea
-                value={clubComm.nuovi_ingressi || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...clubComm, nuovi_ingressi: e.target.value });
-                }}
-                placeholder="Nuovi ingressi o candidature in corso..."
-                rows={2}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Comunicazioni dal Direttivo</Label>
-              <Textarea
-                value={clubComm.comunicazioni_direttivo || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...clubComm, comunicazioni_direttivo: e.target.value });
-                }}
-                placeholder="Comunicazioni importanti dal Consiglio Direttivo..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Scadenze importanti</Label>
-              <Textarea
-                value={clubComm.scadenze || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...clubComm, scadenze: e.target.value });
-                }}
-                placeholder="Quote, iscrizioni, eventi distrettuali o internazionali..."
-                rows={2}
-                className="mt-1"
-              />
-            </div>
+          <div className="space-y-4">            
+            {clubCommunications.map((communication, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Comunicazione {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedCommunications = clubCommunications.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedCommunications);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Testo *</Label>
+                    <Input
+                      value={communication.testo || ''}
+                      onChange={(e) => {
+                        const updatedCommunications = [...clubCommunications];
+                        updatedCommunications[index] = { ...communication, testo: e.target.value };
+                        updateContent(section.key, updatedCommunications);
+                      }}
+                      placeholder="Titolo comunicazione"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data</Label>
+                    <Input
+                      type="date"
+                      value={communication.data || ''}
+                      onChange={(e) => {
+                        const updatedCommunications = [...clubCommunications];
+                        updatedCommunications[index] = { ...communication, data: e.target.value };
+                        updateContent(section.key, updatedCommunications);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={communication.orario || ''}
+                      onChange={(e) => {
+                        const updatedCommunications = [...clubCommunications];
+                        updatedCommunications[index] = { ...communication, orario: e.target.value };
+                        updateContent(section.key, updatedCommunications);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={communication.luogo || ''}
+                      onChange={(e) => {
+                        const updatedCommunications = [...clubCommunications];
+                        updatedCommunications[index] = { ...communication, luogo: e.target.value };
+                        updateContent(section.key, updatedCommunications);
+                      }}
+                      placeholder="Luogo comunicazione"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Descrizione</Label>
+                  <Textarea
+                    value={communication.descrizione || ''}
+                    onChange={(e) => {
+                      const updatedCommunications = [...clubCommunications];
+                      updatedCommunications[index] = { ...communication, descrizione: e.target.value };
+                      updateContent(section.key, updatedCommunications);
+                    }}
+                    placeholder="Descrizione della comunicazione"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newCommunication = {
+                  testo: '',
+                  data: '',
+                  orario: '',
+                  luogo: '',
+                  descrizione: ''
+                };
+                updateContent(section.key, [...clubCommunications, newCommunication]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Comunicazione
+            </Button>
           </div>
         );
       case 'district-agenda':
-        const district = typeof value === 'object' ? value : {};
+        const districtAgenda = Array.isArray(value) ? value : [];
         return (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-semibold">Eventi del Distretto Rotary</Label>
-              <Textarea
-                value={district.eventi_distretto || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...district, eventi_distretto: e.target.value });
-                }}
-                placeholder="Eventi del Distretto di interesse per il club..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Seminari e conferenze</Label>
-              <Textarea
-                value={district.seminari || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...district, seminari: e.target.value });
-                }}
-                placeholder="Seminari di formazione, conferenze e congressi..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Giorni significativi del Rotary</Label>
-              <Textarea
-                value={district.giorni_significativi || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...district, giorni_significativi: e.target.value });
-                }}
-                placeholder="Giorni significativi del Rotary International..."
-                rows={2}
-                className="mt-1"
-              />
-            </div>
+          <div className="space-y-4">            
+            {districtAgenda.map((event, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Evento Distrettuale {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedEvents = districtAgenda.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedEvents);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Testo *</Label>
+                    <Input
+                      value={event.testo || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...districtAgenda];
+                        updatedEvents[index] = { ...event, testo: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      placeholder="Nome evento"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data</Label>
+                    <Input
+                      type="date"
+                      value={event.data || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...districtAgenda];
+                        updatedEvents[index] = { ...event, data: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={event.orario || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...districtAgenda];
+                        updatedEvents[index] = { ...event, orario: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={event.luogo || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...districtAgenda];
+                        updatedEvents[index] = { ...event, luogo: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      placeholder="Luogo evento"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Descrizione</Label>
+                  <Textarea
+                    value={event.descrizione || ''}
+                    onChange={(e) => {
+                      const updatedEvents = [...districtAgenda];
+                      updatedEvents[index] = { ...event, descrizione: e.target.value };
+                      updateContent(section.key, updatedEvents);
+                    }}
+                    placeholder="Descrizione dell'evento"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newEvent = {
+                  testo: '',
+                  data: '',
+                  orario: '',
+                  luogo: '',
+                  descrizione: ''
+                };
+                updateContent(section.key, [...districtAgenda, newEvent]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Evento
+            </Button>
           </div>
         );
       case 'motivational-section':
-        const motivational = typeof value === 'object' ? value : {};
+        const motivationalSection = Array.isArray(value) ? value : [];
         return (
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-semibold">Riflessione sul Rotary</Label>
-              <Textarea
-                value={motivational.riflessione_rotary || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...motivational, riflessione_rotary: e.target.value });
-                }}
-                placeholder="Una breve nota di riflessione sui valori Rotary..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Progetto internazionale</Label>
-              <Textarea
-                value={motivational.progetto_internazionale || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...motivational, progetto_internazionale: e.target.value });
-                }}
-                placeholder="Approfondimento su un progetto internazionale..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Citazioni ispirazionali</Label>
-              <Textarea
-                value={motivational.citazioni || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...motivational, citazioni: e.target.value });
-                }}
-                placeholder="Citazioni o messaggi ispirazionali..."
-                rows={2}
-                className="mt-1"
-              />
-            </div>
+          <div className="space-y-4">            
+            {motivationalSection.map((item, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Elemento Motivazionale {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedItems = motivationalSection.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedItems);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Testo *</Label>
+                    <Input
+                      value={item.testo || ''}
+                      onChange={(e) => {
+                        const updatedItems = [...motivationalSection];
+                        updatedItems[index] = { ...item, testo: e.target.value };
+                        updateContent(section.key, updatedItems);
+                      }}
+                      placeholder="Titolo elemento"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data</Label>
+                    <Input
+                      type="date"
+                      value={item.data || ''}
+                      onChange={(e) => {
+                        const updatedItems = [...motivationalSection];
+                        updatedItems[index] = { ...item, data: e.target.value };
+                        updateContent(section.key, updatedItems);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={item.orario || ''}
+                      onChange={(e) => {
+                        const updatedItems = [...motivationalSection];
+                        updatedItems[index] = { ...item, orario: e.target.value };
+                        updateContent(section.key, updatedItems);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={item.luogo || ''}
+                      onChange={(e) => {
+                        const updatedItems = [...motivationalSection];
+                        updatedItems[index] = { ...item, luogo: e.target.value };
+                        updateContent(section.key, updatedItems);
+                      }}
+                      placeholder="Luogo elemento"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Descrizione</Label>
+                  <Textarea
+                    value={item.descrizione || ''}
+                    onChange={(e) => {
+                      const updatedItems = [...motivationalSection];
+                      updatedItems[index] = { ...item, descrizione: e.target.value };
+                      updateContent(section.key, updatedItems);
+                    }}
+                    placeholder="Descrizione dell'elemento"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newItem = {
+                  testo: '',
+                  data: '',
+                  orario: '',
+                  luogo: '',
+                  descrizione: ''
+                };
+                updateContent(section.key, [...motivationalSection, newItem]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Elemento
+            </Button>
           </div>
         );
       default:
