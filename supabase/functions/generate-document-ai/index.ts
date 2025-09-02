@@ -139,7 +139,7 @@ serve(async (req) => {
       success: true,
       generatedContent,
       suggestions,
-      summary: generateSummary(generatedContent)
+      summary: generateSummary(generatedContent, type)
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -216,9 +216,52 @@ function parseGeneratedContent(content: string, type: string): Record<string, an
   return suggestions;
 }
 
-function generateSummary(content: string): string {
-  // Generate a brief summary of the content
+function generateSummary(content: string, type: string): string {
+  // For programmi type, create a specific summary
+  if (type === 'programmi') {
+    try {
+      const programData = JSON.parse(content);
+      let summary = '';
+      
+      if (programData.mese && programData.anno_rotariano) {
+        summary += `Programma ${programData.mese} ${programData.anno_rotariano}: `;
+      }
+      
+      const highlights = [];
+      
+      // Add key events
+      if (programData.calendario_incontri?.eventi_speciali?.length > 0) {
+        highlights.push(`${programData.calendario_incontri.eventi_speciali.length} eventi speciali`);
+      }
+      
+      if (programData.attivita_servizio?.progetti_corso?.length > 0) {
+        highlights.push(`${programData.attivita_servizio.progetti_corso.length} progetti di service`);
+      }
+      
+      if (programData.calendario_incontri?.relatori?.length > 0) {
+        highlights.push(`${programData.calendario_incontri.relatori.length} relatori`);
+      }
+      
+      if (highlights.length > 0) {
+        summary += highlights.join(', ') + '. ';
+      }
+      
+      // Add president message if available
+      if (programData.messaggio_presidente?.tema_rotary) {
+        summary += `Focus su: ${programData.messaggio_presidente.tema_rotary}.`;
+      }
+      
+      return summary || 'Programma mensile con attività di club e progetti di service.';
+    } catch (e) {
+      // Fallback for non-JSON content
+      const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+      const firstSentences = sentences.slice(0, 2).join('. ');
+      return firstSentences + (sentences.length > 2 ? '.' : '');
+    }
+  }
+  
+  // Generate a brief summary of the content for other types
   const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
   const firstSentences = sentences.slice(0, 2).join('. ');
-  return firstSentences + (sentences.length > 2 ? '...' : '');
+  return firstSentences + (sentences.length > 2 ? '.' : '');
 }
