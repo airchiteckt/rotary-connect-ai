@@ -80,6 +80,12 @@ serve(async (req) => {
 
     console.log('Generating AI content for document type:', type);
     console.log('Current content:', currentContent);
+    console.log('OpenAI API Key available:', !!openAIApiKey);
+    console.log('OpenAI API Key prefix:', openAIApiKey ? openAIApiKey.substring(0, 10) + '...' : 'NOT_SET');
+
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API Key non configurata');
+    }
 
     if (!documentPrompts[type]) {
       throw new Error(`Tipo di documento non supportato: ${type}`);
@@ -99,7 +105,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-mini-2025-04-14',
         messages: [
           { 
             role: 'system', 
@@ -110,6 +116,8 @@ serve(async (req) => {
             content: userPrompt 
           }
         ],
+        max_tokens: 4000,
+        temperature: 0.7,
       }),
     });
 
