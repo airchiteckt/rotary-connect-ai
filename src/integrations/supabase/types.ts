@@ -58,6 +58,7 @@ export type Database = {
           ai_summary: string | null
           content: Json
           created_at: string
+          document_number: string | null
           generated_pdf_url: string | null
           id: string
           logo_url: string | null
@@ -73,6 +74,7 @@ export type Database = {
           ai_summary?: string | null
           content: Json
           created_at?: string
+          document_number?: string | null
           generated_pdf_url?: string | null
           id?: string
           logo_url?: string | null
@@ -88,6 +90,7 @@ export type Database = {
           ai_summary?: string | null
           content?: Json
           created_at?: string
+          document_number?: string | null
           generated_pdf_url?: string | null
           id?: string
           logo_url?: string | null
@@ -228,6 +231,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_document_number: {
+        Args: { doc_type: string; user_uuid: string }
+        Returns: string
+      }
       is_trial_valid: {
         Args: { user_uuid: string }
         Returns: boolean
