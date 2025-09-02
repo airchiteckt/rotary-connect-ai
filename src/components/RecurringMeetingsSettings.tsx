@@ -153,11 +153,13 @@ export default function RecurringMeetingsSettings() {
 
       // Insert new meetings
       if (meetings.length > 0) {
-        const meetingsToInsert = meetings.map(meeting => ({
-          ...meeting,
-          user_id: user?.id,
-          id: undefined // Let the database generate new IDs
-        }));
+        const meetingsToInsert = meetings.map(meeting => {
+          const { id, ...meetingWithoutId } = meeting;
+          return {
+            ...meetingWithoutId,
+            user_id: user?.id,
+          };
+        });
 
         const { error } = await supabase
           .from('recurring_meetings')
