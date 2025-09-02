@@ -1768,6 +1768,40 @@ export default function CreateDocument() {
                           );
                         }
                         
+                        // Handle agenda_distrettuale display
+                        if (section.type === 'agenda_distrettuale' && Array.isArray(value)) {
+                          return (
+                            <div key={section.key} className="space-y-3">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="space-y-3">
+                                {value.map((event, index) => (
+                                  <div key={index} className="bg-blue-50 p-4 rounded-lg">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h4 className="font-medium text-base">{event.testo}</h4>
+                                      {event.data && (
+                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                          <Calendar className="w-4 h-4" />
+                                          {new Date(event.data).toLocaleDateString('it-IT')}
+                                          {event.orario && ` - ${event.orario}`}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {event.luogo && (
+                                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                                        <MapPin className="w-4 h-4" />
+                                        {event.luogo}
+                                      </div>
+                                    )}
+                                    {event.descrizione && (
+                                      <p className="text-sm text-gray-700">{event.descrizione}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
                         // Handle regular text fields
                         return (
                           <div key={section.key} className="space-y-2">
