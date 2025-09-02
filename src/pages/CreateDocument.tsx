@@ -21,7 +21,10 @@ import {
   Settings,
   Clock,
   User,
-  Calendar
+  Calendar,
+  Plus,
+  X,
+  MapPin
 } from 'lucide-react';
 
 export default function CreateDocument() {
@@ -82,8 +85,8 @@ export default function CreateDocument() {
       sections: [
         { key: 'mese', label: 'Mese/Anno', type: 'text', required: true },
         { key: 'tema', label: 'Tema del Mese', type: 'text', required: true },
-        { key: 'eventi', label: 'Eventi Principali', type: 'richtext', required: true },
-        { key: 'riunioni', label: 'Calendario Riunioni', type: 'richtext', required: true },
+        { key: 'eventi', label: 'Eventi Principali', type: 'events', required: true },
+        { key: 'riunioni', label: 'Calendario Riunioni', type: 'meetings', required: true },
         { key: 'progetti', label: 'Progetti in Corso', type: 'richtext', required: false },
         { key: 'service', label: 'Attività di Service', type: 'richtext', required: false }
       ]
@@ -242,6 +245,224 @@ export default function CreateDocument() {
             rows={6}
             className="min-h-[150px]"
           />
+        );
+      case 'events':
+        const events = Array.isArray(value) ? value : [];
+        return (
+          <div className="space-y-4">
+            {events.map((event, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Evento {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedEvents = events.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedEvents);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Titolo *</Label>
+                    <Input
+                      value={event.title || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...events];
+                        updatedEvents[index] = { ...event, title: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      placeholder="Nome evento"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data *</Label>
+                    <Input
+                      type="date"
+                      value={event.date || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...events];
+                        updatedEvents[index] = { ...event, date: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={event.location || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...events];
+                        updatedEvents[index] = { ...event, location: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      placeholder="Luogo evento"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={event.time || ''}
+                      onChange={(e) => {
+                        const updatedEvents = [...events];
+                        updatedEvents[index] = { ...event, time: e.target.value };
+                        updateContent(section.key, updatedEvents);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Descrizione</Label>
+                  <Textarea
+                    value={event.description || ''}
+                    onChange={(e) => {
+                      const updatedEvents = [...events];
+                      updatedEvents[index] = { ...event, description: e.target.value };
+                      updateContent(section.key, updatedEvents);
+                    }}
+                    placeholder="Descrizione dell'evento"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newEvent = {
+                  title: '',
+                  date: '',
+                  location: '',
+                  time: '',
+                  description: ''
+                };
+                updateContent(section.key, [...events, newEvent]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Evento
+            </Button>
+          </div>
+        );
+      case 'meetings':
+        const meetings = Array.isArray(value) ? value : [];
+        const meetingTypes = [
+          { value: 'direttivo', label: 'Consiglio Direttivo', icon: '👥' },
+          { value: 'assemblea', label: 'Assemblea dei Soci', icon: '🏛️' },
+          { value: 'caminetto', label: 'Caminetto', icon: '🔥' }
+        ];
+        return (
+          <div className="space-y-4">
+            {meetings.map((meeting, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Riunione {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedMeetings = meetings.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedMeetings);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Tipo Riunione *</Label>
+                    <Select
+                      value={meeting.type || ''}
+                      onValueChange={(selectedType) => {
+                        const updatedMeetings = [...meetings];
+                        updatedMeetings[index] = { ...meeting, type: selectedType };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Seleziona tipo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {meetingTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            <span className="flex items-center gap-2">
+                              <span>{type.icon}</span>
+                              {type.label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data *</Label>
+                    <Input
+                      type="date"
+                      value={meeting.date || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...meetings];
+                        updatedMeetings[index] = { ...meeting, date: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={meeting.time || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...meetings];
+                        updatedMeetings[index] = { ...meeting, time: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={meeting.location || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...meetings];
+                        updatedMeetings[index] = { ...meeting, location: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      placeholder="Luogo riunione"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newMeeting = {
+                  type: '',
+                  date: '',
+                  time: '',
+                  location: ''
+                };
+                updateContent(section.key, [...meetings, newMeeting]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Riunione
+            </Button>
+          </div>
         );
       default:
         return (
@@ -480,6 +701,84 @@ export default function CreateDocument() {
                         const value = formData.content[section.key];
                         if (!value) return null;
                         
+                        // Handle events display
+                        if (section.type === 'events' && Array.isArray(value)) {
+                          return (
+                            <div key={section.key} className="space-y-3">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="space-y-3">
+                                {value.map((event, index) => (
+                                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h4 className="font-medium text-base">{event.title}</h4>
+                                      {event.date && (
+                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                          <Calendar className="w-4 h-4" />
+                                          {new Date(event.date).toLocaleDateString('it-IT')}
+                                          {event.time && ` - ${event.time}`}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {event.location && (
+                                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                                        <MapPin className="w-4 h-4" />
+                                        {event.location}
+                                      </div>
+                                    )}
+                                    {event.description && (
+                                      <p className="text-sm text-gray-700">{event.description}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Handle meetings display
+                        if (section.type === 'meetings' && Array.isArray(value)) {
+                          const meetingTypeLabels = {
+                            'direttivo': { label: 'Consiglio Direttivo', icon: '👥' },
+                            'assemblea': { label: 'Assemblea dei Soci', icon: '🏛️' },
+                            'caminetto': { label: 'Caminetto', icon: '🔥' }
+                          };
+                          
+                          return (
+                            <div key={section.key} className="space-y-3">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="space-y-3">
+                                {value.map((meeting, index) => {
+                                  const meetingInfo = meetingTypeLabels[meeting.type];
+                                  return (
+                                    <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <span>{meetingInfo?.icon}</span>
+                                          <h4 className="font-medium text-base">{meetingInfo?.label}</h4>
+                                        </div>
+                                        {meeting.date && (
+                                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                            <Calendar className="w-4 h-4" />
+                                            {new Date(meeting.date).toLocaleDateString('it-IT')}
+                                            {meeting.time && ` - ${meeting.time}`}
+                                          </div>
+                                        )}
+                                      </div>
+                                      {meeting.location && (
+                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                          <MapPin className="w-4 h-4" />
+                                          {meeting.location}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Handle regular text fields
                         return (
                           <div key={section.key} className="space-y-2">
                             <h3 className="font-semibold text-lg">{section.label}</h3>
