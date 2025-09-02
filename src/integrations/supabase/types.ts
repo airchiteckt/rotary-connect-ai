@@ -14,13 +14,224 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contacts: {
+        Row: {
+          category: string
+          club_name: string | null
+          created_at: string
+          district: string | null
+          email: string
+          full_name: string
+          id: string
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          club_name?: string | null
+          created_at?: string
+          district?: string | null
+          email: string
+          full_name: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          club_name?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          ai_summary: string | null
+          content: Json
+          created_at: string
+          generated_pdf_url: string | null
+          id: string
+          logo_url: string | null
+          signature_url: string | null
+          status: string | null
+          template_url: string | null
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          content: Json
+          created_at?: string
+          generated_pdf_url?: string | null
+          id?: string
+          logo_url?: string | null
+          signature_url?: string | null
+          status?: string | null
+          template_url?: string | null
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_summary?: string | null
+          content?: Json
+          created_at?: string
+          generated_pdf_url?: string | null
+          id?: string
+          logo_url?: string | null
+          signature_url?: string | null
+          status?: string | null
+          template_url?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      email_campaigns: {
+        Row: {
+          body: string
+          created_at: string
+          document_id: string | null
+          id: string
+          recipient_categories: string[]
+          sent_at: string | null
+          status: string | null
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          recipient_categories: string[]
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          recipient_categories?: string[]
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flyers: {
+        Row: {
+          additional_images: string[] | null
+          created_at: string
+          description: string
+          format: string
+          generated_image_url: string | null
+          id: string
+          logo_urls: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_images?: string[] | null
+          created_at?: string
+          description: string
+          format: string
+          generated_image_url?: string | null
+          id?: string
+          logo_urls?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_images?: string[] | null
+          created_at?: string
+          description?: string
+          format?: string
+          generated_image_url?: string | null
+          id?: string
+          logo_urls?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          club_name: string | null
+          created_at: string
+          full_name: string
+          id: string
+          role: string | null
+          subscription_type: string | null
+          trial_start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          club_name?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          role?: string | null
+          subscription_type?: string | null
+          trial_start_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          club_name?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          role?: string | null
+          subscription_type?: string | null
+          trial_start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_trial_valid: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
