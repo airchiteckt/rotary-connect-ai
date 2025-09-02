@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +31,7 @@ export default function CreateDocument() {
   const { user, loading, profile } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { id: documentId } = useParams();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
@@ -43,10 +44,60 @@ export default function CreateDocument() {
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('editor');
+  const [isLoadingDocument, setIsLoadingDocument] = useState(!!documentId);
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'editor');
   const [documentNumber, setDocumentNumber] = useState<string>('');
 
-  // Auto-generate title when type or relevant content changes
+  // Load existing document if documentId is provided
+  useEffect(() => {
+    if (documentId && user) {
+      loadDocument(documentId);
+    }
+  }, [documentId, user]);
+
+  const loadDocument = async (id: string) => {
+    try {
+      setIsLoadingDocument(true);
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading document:', error);
+        toast({
+          title: "Errore",
+          description: "Impossibile caricare il documento",
+          variant: "destructive",
+        });
+        navigate('/segreteria');
+        return;
+      }
+
+      if (data) {
+        setFormData({
+          title: data.title,
+          type: data.type,
+          content: data.content || {},
+          ai_summary: data.ai_summary || '',
+          status: data.status || 'draft'
+        });
+        setDocumentNumber(data.document_number || '');
+      }
+    } catch (error) {
+      console.error('Error loading document:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile caricare il documento",
+        variant: "destructive",
+      });
+      navigate('/segreteria');
+    } finally {
+      setIsLoadingDocument(false);
+    }
+  };
   useEffect(() => {
     generateAutoTitle();
   }, [formData.type, formData.content]);
@@ -113,12 +164,14 @@ export default function CreateDocument() {
     }
   };
 
-  if (loading) {
+  if (loading || isLoadingDocument) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Caricamento...</p>
+          <p className="text-muted-foreground">
+            {isLoadingDocument ? 'Caricamento documento...' : 'Caricamento...'}
+          </p>
         </div>
       </div>
     );
@@ -184,36 +237,60 @@ export default function CreateDocument() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { data, error } = await supabase
-        .from('documents')
-        .insert({
-          title: formData.title,
-          type: formData.type,
-          content: formData.content,
-          ai_summary: formData.ai_summary,
-          status: formData.status,
-          user_id: user.id
-        })
-        .select('document_number');
+      if (documentId) {
+        // Update existing document
+        const { data, error } = await supabase
+          .from('documents')
+          .update({
+            title: formData.title,
+            type: formData.type,
+            content: formData.content,
+            ai_summary: formData.ai_summary,
+            status: formData.status
+          })
+          .eq('id', documentId)
+          .eq('user_id', user.id)
+          .select('document_number');
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Get the generated document number
-      if (data && data[0]?.document_number) {
-        setDocumentNumber(data[0].document_number);
+        toast({
+          title: "Documento aggiornato",
+          description: `Il documento ${documentNumber} è stato aggiornato con successo`,
+        });
+      } else {
+        // Create new document
+        const { data, error } = await supabase
+          .from('documents')
+          .insert({
+            title: formData.title,
+            type: formData.type,
+            content: formData.content,
+            ai_summary: formData.ai_summary,
+            status: formData.status,
+            user_id: user.id
+          })
+          .select('document_number');
+
+        if (error) throw error;
+
+        // Get the generated document number
+        if (data && data[0]?.document_number) {
+          setDocumentNumber(data[0].document_number);
+        }
+
+        toast({
+          title: "Documento salvato",
+          description: `Il documento ${data[0]?.document_number || ''} è stato salvato con successo`,
+        });
       }
-
-      toast({
-        title: "Documento salvato",
-        description: `Il documento ${data[0]?.document_number || ''} è stato salvato con successo`,
-      });
 
       navigate('/segreteria');
     } catch (error) {
       console.error('Error saving document:', error);
       toast({
         title: "Errore",
-        description: "Errore nel salvataggio del documento",
+        description: documentId ? "Errore nell'aggiornamento del documento" : "Errore nel salvataggio del documento",
         variant: "destructive",
       });
     } finally {

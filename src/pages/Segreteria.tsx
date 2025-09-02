@@ -256,10 +256,18 @@ export default function Segreteria() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.location.href = `/document/${doc.id}?tab=preview`}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.location.href = `/document/${doc.id}/edit`}
+                          >
                             <Edit className="w-4 h-4" />
                           </Button>
                         </div>
@@ -341,10 +349,18 @@ export default function Segreteria() {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.location.href = `/document/${doc.id}?tab=preview`}
+                          >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.location.href = `/document/${doc.id}/edit`}
+                          >
                             <Edit className="w-4 h-4" />
                           </Button>
                         </div>

@@ -39,6 +39,8 @@ const App = () => (
             <Route path="/comunicazione" element={<Comunicazione />} />
             <Route path="/soci" element={<Soci />} />
             <Route path="/create-document" element={<CreateDocument />} />
+            <Route path="/document/:id" element={<CreateDocument />} />
+            <Route path="/document/:id/edit" element={<CreateDocument />} />
             <Route path="/recurring-meetings" element={<RecurringMeetingsSettings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
