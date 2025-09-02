@@ -144,16 +144,44 @@ export default function CreateDocument() {
   const generateWithAI = async () => {
     setIsGenerating(true);
     try {
-      // Qui implementeremo l'integrazione con AI per generare contenuto
-      toast({
-        title: "Funzione AI",
-        description: "Generazione AI in preparazione - sarà disponibile presto",
+      const { data, error } = await supabase.functions.invoke('generate-document-ai', {
+        body: {
+          type: formData.type,
+          currentContent: formData.content,
+          clubName: profile?.club_name || 'Rotary Club',
+          additionalContext: formData.title
+        }
       });
+
+      if (error) throw error;
+
+      if (data.success) {
+        // Apply AI suggestions to form content
+        const updatedContent = { ...formData.content };
+        Object.entries(data.suggestions).forEach(([key, value]) => {
+          if (!updatedContent[key] || updatedContent[key].trim() === '') {
+            updatedContent[key] = value;
+          }
+        });
+
+        setFormData(prev => ({
+          ...prev,
+          content: updatedContent,
+          ai_summary: data.summary || prev.ai_summary
+        }));
+
+        toast({
+          title: "Contenuto generato con AI",
+          description: "I campi sono stati compilati automaticamente",
+        });
+      } else {
+        throw new Error(data.error || 'Errore nella generazione AI');
+      }
     } catch (error) {
       console.error('Error generating with AI:', error);
       toast({
         title: "Errore",
-        description: "Errore nella generazione AI",
+        description: "Errore nella generazione AI. Riprova più tardi.",
         variant: "destructive",
       });
     } finally {
