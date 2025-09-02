@@ -152,11 +152,11 @@ export default function CreateDocument() {
     programmi: {
       sections: [
         { key: 'mese', label: 'Mese', type: 'month-select', required: true },
-        { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: true },
-        { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: true },
+        { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: false },
+        { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: false },
         { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
-        { key: 'attivita_servizio', label: 'Attività di servizio', type: 'service-activities', required: true },
-        { key: 'comunicazioni_club', label: 'Comunicazioni di club', type: 'club-communications', required: true },
+        { key: 'attivita_servizio', label: 'Attività di servizio', type: 'service-activities', required: false },
+        { key: 'comunicazioni_club', label: 'Comunicazioni di club', type: 'club-communications', required: false },
         { key: 'agenda_distrettuale', label: 'Agenda distrettuale e internazionale', type: 'district-agenda', required: false },
         { key: 'sezione_motivazionale', label: 'Sezione motivazionale o culturale', type: 'motivational-section', required: false },
         { key: 'background_template', label: 'Template di Sfondo', type: 'template-select', required: false }
