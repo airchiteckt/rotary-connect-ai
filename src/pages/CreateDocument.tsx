@@ -83,12 +83,15 @@ export default function CreateDocument() {
     },
     programmi: {
       sections: [
-        { key: 'mese', label: 'Mese/Anno', type: 'text', required: true },
+        { key: 'mese', label: 'Mese', type: 'month-select', required: true },
+        { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: true },
         { key: 'tema', label: 'Tema del Mese', type: 'text', required: true },
         { key: 'eventi', label: 'Eventi Principali', type: 'events', required: true },
         { key: 'riunioni', label: 'Calendario Riunioni', type: 'meetings', required: true },
+        { key: 'comunicazioni_presidente', label: 'Comunicazioni dal Presidente', type: 'richtext', required: false },
         { key: 'progetti', label: 'Progetti in Corso', type: 'richtext', required: false },
-        { key: 'service', label: 'Attività di Service', type: 'richtext', required: false }
+        { key: 'service', label: 'Attività di Service', type: 'richtext', required: false },
+        { key: 'background_template', label: 'Template di Sfondo', type: 'template-select', required: false }
       ]
     },
     comunicazioni: {
@@ -464,6 +467,82 @@ export default function CreateDocument() {
             </Button>
           </div>
         );
+      case 'month-select':
+        const months = [
+          { value: 'gennaio', label: 'Gennaio', short: 'Genn' },
+          { value: 'febbraio', label: 'Febbraio', short: 'Febb' },
+          { value: 'marzo', label: 'Marzo', short: 'Mar' },
+          { value: 'aprile', label: 'Aprile', short: 'Apr' },
+          { value: 'maggio', label: 'Maggio', short: 'Mag' },
+          { value: 'giugno', label: 'Giugno', short: 'Giu' },
+          { value: 'luglio', label: 'Luglio', short: 'Lug' },
+          { value: 'agosto', label: 'Agosto', short: 'Ago' },
+          { value: 'settembre', label: 'Settembre', short: 'Sett' },
+          { value: 'ottobre', label: 'Ottobre', short: 'Ott' },
+          { value: 'novembre', label: 'Novembre', short: 'Nov' },
+          { value: 'dicembre', label: 'Dicembre', short: 'Dic' }
+        ];
+        return (
+          <Select
+            value={value}
+            onValueChange={(selectedValue) => updateContent(section.key, selectedValue)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleziona mese" />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((month) => (
+                <SelectItem key={month.value} value={month.value}>
+                  <span className="flex items-center gap-2">
+                    <span className="font-medium">{month.short}</span>
+                    <span className="text-muted-foreground">({month.label})</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      case 'rotary-year':
+        const currentYear = new Date().getFullYear();
+        const rotaryYear = `A.R. ${currentYear}-${currentYear + 1}`;
+        // Auto-populate if empty
+        if (!value) {
+          updateContent(section.key, rotaryYear);
+        }
+        return (
+          <div className="bg-muted p-3 rounded-md flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span className="font-medium">{rotaryYear}</span>
+            <span className="text-xs text-muted-foreground ml-auto">Anno Rotariano Corrente</span>
+          </div>
+        );
+      case 'template-select':
+        const templates = [
+          { value: 'classic', label: 'Template Classico', description: 'Design tradizionale con intestazione Rotary' },
+          { value: 'modern', label: 'Template Moderno', description: 'Design contemporaneo con elementi grafici' },
+          { value: 'elegant', label: 'Template Elegante', description: 'Stile raffinato con bordi decorativi' },
+          { value: 'minimal', label: 'Template Minimal', description: 'Design pulito e minimalista' }
+        ];
+        return (
+          <Select
+            value={value}
+            onValueChange={(selectedValue) => updateContent(section.key, selectedValue)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleziona template di sfondo" />
+            </SelectTrigger>
+            <SelectContent>
+              {templates.map((template) => (
+                <SelectItem key={template.value} value={template.value}>
+                  <div className="flex flex-col">
+                    <span className="font-medium">{template.label}</span>
+                    <span className="text-xs text-muted-foreground">{template.description}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
       default:
         return (
           <Input
@@ -700,6 +779,42 @@ export default function CreateDocument() {
                       {templates[formData.type]?.sections.map((section) => {
                         const value = formData.content[section.key];
                         if (!value) return null;
+                        
+                        // Handle month-select display
+                        if (section.type === 'month-select') {
+                          return (
+                            <div key={section.key} className="space-y-2">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="text-sm capitalize font-medium">{value}</div>
+                            </div>
+                          );
+                        }
+                        
+                        // Handle rotary-year display
+                        if (section.type === 'rotary-year') {
+                          return (
+                            <div key={section.key} className="space-y-2">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="text-sm font-medium text-blue-600">{value}</div>
+                            </div>
+                          );
+                        }
+                        
+                        // Handle template-select display
+                        if (section.type === 'template-select') {
+                          const templateLabels = {
+                            'classic': 'Template Classico',
+                            'modern': 'Template Moderno', 
+                            'elegant': 'Template Elegante',
+                            'minimal': 'Template Minimal'
+                          };
+                          return (
+                            <div key={section.key} className="space-y-2">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="text-sm">{templateLabels[value] || value}</div>
+                            </div>
+                          );
+                        }
                         
                         // Handle events display
                         if (section.type === 'events' && Array.isArray(value)) {

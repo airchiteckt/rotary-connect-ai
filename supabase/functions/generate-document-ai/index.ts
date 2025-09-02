@@ -28,13 +28,25 @@ Mantieni un tono formale e rispetta il protocollo Rotary.
 `
   },
   programmi: {
-    system: "Sei un assistente specializzato nella creazione di programmi mensili per club Rotary. Crea contenuti coinvolgenti che riflettano i valori Rotary di servizio e fellowship.",
+    system: "Sei un assistente specializzato nella creazione di programmi mensili per club Rotary. Genera contenuto strutturato in formato JSON che rispetti i valori Rotary di servizio e fellowship. Rispondi SOLO con JSON valido.",
     generateContent: (content: any, clubName: string) => `
-Genera il contenuto per il programma mensile del ${clubName} con:
+Genera un oggetto JSON per il programma mensile del ${clubName} con queste specifiche:
+
+Contenuto esistente:
 ${Object.entries(content).map(([key, value]) => `${key}: ${value || 'da definire'}`).join('\n')}
 
-Suggerisci eventi, attività di service, speaker interessanti e opportunità di fellowship.
-Includi riferimenti ai valori Rotary e alle aree focus.
+Genera un JSON con le seguenti strutture:
+- mese: nome del mese in italiano (gennaio, febbraio, etc.)
+- anno_rotariano: formato "A.R. YYYY-YYYY+1" 
+- tema: tema del mese Rotary
+- eventi: array di oggetti con {title, date (YYYY-MM-DD), location, time (HH:MM), description}
+- riunioni: array di oggetti con {type (direttivo/assemblea/caminetto), date (YYYY-MM-DD), time (HH:MM), location}
+- comunicazioni_presidente: messaggio formale del presidente
+- progetti: testo sui progetti in corso
+- service: testo sulle attività di service
+- background_template: uno tra classic/modern/elegant/minimal
+
+Crea eventi e riunioni realistici per il mese specificato. Usa date future appropriate.
 `
   },
   comunicazioni: {
@@ -140,7 +152,18 @@ serve(async (req) => {
   }
 });
 
-function parseGeneratedContent(content: string, type: string): Record<string, string> {
+function parseGeneratedContent(content: string, type: string): Record<string, any> {
+  // For programmi type, try to parse as JSON first
+  if (type === 'programmi') {
+    try {
+      const jsonContent = JSON.parse(content);
+      console.log('Successfully parsed JSON content for programmi:', jsonContent);
+      return jsonContent;
+    } catch (e) {
+      console.log('Failed to parse as JSON, falling back to text parsing');
+    }
+  }
+  
   // Basic parsing logic to extract structured content
   const suggestions: Record<string, string> = {};
   
@@ -164,7 +187,17 @@ function parseGeneratedContent(content: string, type: string): Record<string, st
         suggestions['delibere'] = content;
         break;
       case 'programmi':
-        suggestions['eventi'] = content;
+        // Fallback for programmi - create basic structure
+        const currentYear = new Date().getFullYear();
+        suggestions['mese'] = 'gennaio';
+        suggestions['anno_rotariano'] = `A.R. ${currentYear}-${currentYear + 1}`;
+        suggestions['tema'] = 'Service e Solidarietà';
+        suggestions['eventi'] = [];
+        suggestions['riunioni'] = [];
+        suggestions['comunicazioni_presidente'] = content;
+        suggestions['progetti'] = 'Progetti in corso di definizione';
+        suggestions['service'] = 'Attività di service in programma';
+        suggestions['background_template'] = 'classic';
         break;
       case 'comunicazioni':
         suggestions['corpo'] = content;
