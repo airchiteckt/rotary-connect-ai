@@ -14,6 +14,7 @@ import Prefettura from "./pages/Prefettura";
 import Direttivo from "./pages/Direttivo";
 import Comunicazione from "./pages/Comunicazione";
 import Soci from "./pages/Soci";
+import CreateDocument from "./pages/CreateDocument";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/direttivo" element={<Direttivo />} />
             <Route path="/comunicazione" element={<Comunicazione />} />
             <Route path="/soci" element={<Soci />} />
+            <Route path="/create-document" element={<CreateDocument />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

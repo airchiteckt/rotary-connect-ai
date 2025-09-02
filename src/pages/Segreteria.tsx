@@ -53,7 +53,7 @@ export default function Segreteria() {
               </div>
             </div>
             
-            <Button>
+            <Button onClick={() => window.location.href = '/create-document'}>
               <Plus className="w-4 h-4 mr-2" />
               Nuovo Documento
             </Button>
@@ -104,7 +104,7 @@ export default function Segreteria() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button className="w-full" variant="outline" size="sm">
+                    <Button className="w-full" variant="outline" size="sm" onClick={() => window.location.href = `/create-document?type=${type.id}`}>
                       Gestisci
                     </Button>
                   </CardContent>
