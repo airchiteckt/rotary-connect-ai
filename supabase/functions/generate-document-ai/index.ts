@@ -38,7 +38,6 @@ ${Object.entries(content).map(([key, value]) => `${key}: ${value || 'da definire
 Genera un JSON con le seguenti strutture:
 - mese: nome del mese in italiano (gennaio, febbraio, etc.)
 - anno_rotariano: formato "A.R. YYYY-YYYY+1" 
-- tema: tema del mese Rotary
 - eventi: array di oggetti con {title, date (YYYY-MM-DD), location, time (HH:MM), description}
 - riunioni: array di oggetti con {type (direttivo/assemblea/caminetto), date (YYYY-MM-DD), time (HH:MM), location}
 - comunicazioni_presidente: messaggio formale del presidente
@@ -191,7 +190,6 @@ function parseGeneratedContent(content: string, type: string): Record<string, an
         const currentYear = new Date().getFullYear();
         suggestions['mese'] = 'gennaio';
         suggestions['anno_rotariano'] = `A.R. ${currentYear}-${currentYear + 1}`;
-        suggestions['tema'] = 'Service e Solidarietà';
         suggestions['eventi'] = [];
         suggestions['riunioni'] = [];
         suggestions['comunicazioni_presidente'] = content;

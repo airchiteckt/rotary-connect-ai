@@ -153,7 +153,6 @@ export default function CreateDocument() {
       sections: [
         { key: 'mese', label: 'Mese', type: 'month-select', required: true },
         { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: true },
-        { key: 'tema', label: 'Tema del Mese', type: 'text', required: true },
         { key: 'eventi', label: 'Eventi Principali', type: 'events', required: true },
         { key: 'riunioni', label: 'Calendario Riunioni', type: 'meetings', required: true },
         { key: 'comunicazioni_presidente', label: 'Comunicazioni dal Presidente', type: 'richtext', required: false },
