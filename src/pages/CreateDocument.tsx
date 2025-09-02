@@ -153,12 +153,12 @@ export default function CreateDocument() {
       sections: [
         { key: 'mese', label: 'Mese', type: 'month-select', required: true },
         { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: true },
-        { key: 'messaggio_presidente', label: '2. Messaggio del Presidente', type: 'president-message', required: true },
-        { key: 'calendario_incontri', label: '3. Calendario degli incontri e attività', type: 'meetings-calendar', required: true },
-        { key: 'attivita_servizio', label: '4. Attività di servizio', type: 'service-activities', required: true },
-        { key: 'comunicazioni_club', label: '5. Comunicazioni di club', type: 'club-communications', required: true },
-        { key: 'agenda_distrettuale', label: '6. Agenda distrettuale e internazionale', type: 'district-agenda', required: false },
-        { key: 'sezione_motivazionale', label: '7. Sezione motivazionale o culturale', type: 'motivational-section', required: false },
+        { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: true },
+        { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
+        { key: 'attivita_servizio', label: 'Attività di servizio', type: 'service-activities', required: true },
+        { key: 'comunicazioni_club', label: 'Comunicazioni di club', type: 'club-communications', required: true },
+        { key: 'agenda_distrettuale', label: 'Agenda distrettuale e internazionale', type: 'district-agenda', required: false },
+        { key: 'sezione_motivazionale', label: 'Sezione motivazionale o culturale', type: 'motivational-section', required: false },
         { key: 'background_template', label: 'Template di Sfondo', type: 'template-select', required: false }
       ]
     },
@@ -281,10 +281,11 @@ export default function CreateDocument() {
 
       // Convert the future meetings data to the meeting format expected by the form
       const futureMeetings = (data || []).map(meeting => ({
-        type: meeting.meeting_type,
-        date: meeting.meeting_date,
-        time: meeting.meeting_time,
-        location: meeting.location || ''
+        nome: meeting.meeting_type,
+        data: meeting.meeting_date,
+        orario: meeting.meeting_time,
+        luogo: meeting.location || '',
+        descrizione: ''
       }));
 
       // Update the form content with the loaded meetings
@@ -718,46 +719,123 @@ export default function CreateDocument() {
             </div>
           </div>
         );
-      case 'meetings-calendar':
-        const calendar = typeof value === 'object' ? value : {};
+      case 'club-meetings':
+        const clubMeetings = Array.isArray(value) ? value : [];
         return (
           <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-semibold">Riunioni settimanali</Label>
-              <Textarea
-                value={calendar.riunioni_settimanali || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...calendar, riunioni_settimanali: e.target.value });
-                }}
-                placeholder="Elenco delle riunioni settimanali con data, ora e luogo..."
-                rows={4}
-                className="mt-1"
-              />
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant="outline"
+                onClick={() => loadRecurringMeetings(section.key)}
+                className="flex-1"
+              >
+                <Clock className="w-4 h-4 mr-2" />
+                Carica Ricorrenti
+              </Button>
             </div>
-            <div>
-              <Label className="text-sm font-semibold">Relatori previsti</Label>
-              <Textarea
-                value={calendar.relatori || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...calendar, relatori: e.target.value });
-                }}
-                placeholder="Relatori previsti o temi degli incontri..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Eventi speciali e fellowship</Label>
-              <Textarea
-                value={calendar.eventi_speciali || ''}
-                onChange={(e) => {
-                  updateContent(section.key, { ...calendar, eventi_speciali: e.target.value });
-                }}
-                placeholder="Conviviali, eventi speciali o fellowship..."
-                rows={3}
-                className="mt-1"
-              />
-            </div>
+            
+            {clubMeetings.map((meeting, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Appuntamento {index + 1}</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updatedMeetings = clubMeetings.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedMeetings);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs">Nome *</Label>
+                    <Input
+                      value={meeting.nome || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...clubMeetings];
+                        updatedMeetings[index] = { ...meeting, nome: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      placeholder="Nome appuntamento"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Data *</Label>
+                    <Input
+                      type="date"
+                      value={meeting.data || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...clubMeetings];
+                        updatedMeetings[index] = { ...meeting, data: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Orario</Label>
+                    <Input
+                      type="time"
+                      value={meeting.orario || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...clubMeetings];
+                        updatedMeetings[index] = { ...meeting, orario: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Luogo</Label>
+                    <Input
+                      value={meeting.luogo || ''}
+                      onChange={(e) => {
+                        const updatedMeetings = [...clubMeetings];
+                        updatedMeetings[index] = { ...meeting, luogo: e.target.value };
+                        updateContent(section.key, updatedMeetings);
+                      }}
+                      placeholder="Luogo appuntamento"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Descrizione</Label>
+                  <Textarea
+                    value={meeting.descrizione || ''}
+                    onChange={(e) => {
+                      const updatedMeetings = [...clubMeetings];
+                      updatedMeetings[index] = { ...meeting, descrizione: e.target.value };
+                      updateContent(section.key, updatedMeetings);
+                    }}
+                    placeholder="Descrizione dell'appuntamento"
+                    rows={2}
+                    className="mt-1"
+                  />
+                </div>
+              </Card>
+            ))}
+            <Button
+              variant="outline"
+              onClick={() => {
+                const newMeeting = {
+                  nome: '',
+                  data: '',
+                  orario: '',
+                  luogo: '',
+                  descrizione: ''
+                };
+                updateContent(section.key, [...clubMeetings, newMeeting]);
+              }}
+              className="w-full"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Aggiungi Appuntamento
+            </Button>
           </div>
         );
       case 'service-activities':
