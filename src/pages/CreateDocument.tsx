@@ -274,13 +274,25 @@ export default function CreateDocument() {
       const { data, error } = await supabase
         .rpc('calculate_next_meeting_dates', {
           user_uuid: user?.id,
-          months_ahead: 3 // Load next 3 months
+          months_ahead: 1 // Load only current month
         });
 
       if (error) throw error;
 
+      // Get current month and year
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      // Filter meetings to include only those in the current month
+      const currentMonthMeetings = (data || []).filter(meeting => {
+        const meetingDate = new Date(meeting.meeting_date);
+        return meetingDate.getMonth() === currentMonth && 
+               meetingDate.getFullYear() === currentYear;
+      });
+
       // Convert the future meetings data to the meeting format expected by the form
-      const futureMeetings = (data || []).map(meeting => ({
+      const futureMeetings = currentMonthMeetings.map(meeting => ({
         nome: meeting.meeting_type,
         data: meeting.meeting_date,
         orario: meeting.meeting_time,
@@ -296,7 +308,7 @@ export default function CreateDocument() {
 
       toast({
         title: "Appuntamenti caricati",
-        description: `Caricati ${futureMeetings.length} appuntamenti ricorrenti`,
+        description: `Caricati ${futureMeetings.length} appuntamenti del mese corrente`,
       });
     } catch (error) {
       console.error('Error loading recurring meetings:', error);
