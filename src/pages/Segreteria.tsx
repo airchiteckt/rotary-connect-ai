@@ -1,16 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar } from 'lucide-react';
+import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Eye } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Document {
+  id: string;
+  title: string;
+  type: 'verbali' | 'programmi' | 'comunicazioni' | 'circolari';
+  status: 'draft' | 'published' | 'archived';
+  document_number: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export default function Segreteria() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('documenti');
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user) {
+      loadDocuments();
+    }
+  }, [user]);
+
+  const loadDocuments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setDocuments((data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        type: doc.type as 'verbali' | 'programmi' | 'comunicazioni' | 'circolari',
+        status: doc.status as 'draft' | 'published' | 'archived',
+        document_number: doc.document_number || '',
+        created_at: doc.created_at,
+        updated_at: doc.updated_at
+      })));
+    } catch (error) {
+      console.error('Error loading documents:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nel caricamento dei documenti",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingDocuments(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -28,11 +80,65 @@ export default function Segreteria() {
   }
 
   const documentTypes = [
-    { id: 'verbali', name: 'Verbali Riunioni', count: 0, color: 'bg-blue-100 text-blue-800' },
-    { id: 'programmi', name: 'Programmi Mensili', count: 0, color: 'bg-green-100 text-green-800' },
-    { id: 'comunicazioni', name: 'Comunicazioni Ufficiali', count: 0, color: 'bg-purple-100 text-purple-800' },
-    { id: 'circolari', name: 'Circolari', count: 0, color: 'bg-orange-100 text-orange-800' }
+    { 
+      id: 'verbali', 
+      name: 'Verbali Riunioni', 
+      count: documents.filter(d => d.type === 'verbali').length, 
+      color: 'bg-blue-100 text-blue-800' 
+    },
+    { 
+      id: 'programmi', 
+      name: 'Programmi Mensili', 
+      count: documents.filter(d => d.type === 'programmi').length, 
+      color: 'bg-green-100 text-green-800' 
+    },
+    { 
+      id: 'comunicazioni', 
+      name: 'Comunicazioni Ufficiali', 
+      count: documents.filter(d => d.type === 'comunicazioni').length, 
+      color: 'bg-purple-100 text-purple-800' 
+    },
+    { 
+      id: 'circolari', 
+      name: 'Circolari', 
+      count: documents.filter(d => d.type === 'circolari').length, 
+      color: 'bg-orange-100 text-orange-800' 
+    }
   ];
+
+  const recentDocuments = documents.slice(0, 5);
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('it-IT', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return <Badge variant="secondary">Bozza</Badge>;
+      case 'published':
+        return <Badge variant="default">Pubblicato</Badge>;
+      case 'archived':
+        return <Badge variant="outline">Archiviato</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    const typeMap = {
+      'verbali': 'Verbale',
+      'programmi': 'Programma',
+      'comunicazioni': 'Comunicazione', 
+      'circolari': 'Circolare'
+    };
+    return typeMap[type as keyof typeof typeMap] || type;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -122,11 +228,58 @@ export default function Segreteria() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessun documento trovato</p>
-                  <p className="text-sm">Inizia creando il tuo primo documento</p>
-                </div>
+                {isLoadingDocuments ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Caricamento documenti...</p>
+                  </div>
+                ) : recentDocuments.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentDocuments.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{doc.title}</h4>
+                              {getStatusBadge(doc.status)}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                              <span>{getTypeLabel(doc.type)}</span>
+                              <span>•</span>
+                              <span>{doc.document_number}</span>
+                              <span>•</span>
+                              <span>{formatDate(doc.updated_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {documents.length > 5 && (
+                      <div className="text-center pt-4">
+                        <Button variant="outline" size="sm">
+                          Vedi tutti i documenti ({documents.length})
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Nessun documento trovato</p>
+                    <p className="text-sm">Inizia creando il tuo primo documento</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -154,15 +307,57 @@ export default function Segreteria() {
               <CardHeader>
                 <CardTitle>Archivio Documenti</CardTitle>
                 <CardDescription>
-                  Documenti archiviati e cronologia
+                  Tutti i documenti salvati ({documents.length})
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Archivio vuoto</p>
-                  <p className="text-sm">I documenti archiviati appariranno qui</p>
-                </div>
+                {isLoadingDocuments ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Caricamento archivio...</p>
+                  </div>
+                ) : documents.length > 0 ? (
+                  <div className="space-y-4">
+                    {documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{doc.title}</h4>
+                              {getStatusBadge(doc.status)}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                              <span>{getTypeLabel(doc.type)}</span>
+                              <span>•</span>
+                              <span>{doc.document_number}</span>
+                              <span>•</span>
+                              <span>Creato: {formatDate(doc.created_at)}</span>
+                              <span>•</span>
+                              <span>Aggiornato: {formatDate(doc.updated_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Archivio vuoto</p>
+                    <p className="text-sm">I documenti salvati appariranno qui</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
