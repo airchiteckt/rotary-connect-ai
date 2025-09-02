@@ -44,6 +44,74 @@ export default function CreateDocument() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('editor');
+  const [documentNumber, setDocumentNumber] = useState<string>('');
+
+  // Auto-generate title when type or relevant content changes
+  useEffect(() => {
+    generateAutoTitle();
+  }, [formData.type, formData.content]);
+
+  const generateAutoTitle = () => {
+    let autoTitle = '';
+    const clubName = profile?.club_name || 'Rotary Club';
+    const content = formData.content as any; // Type assertion for content access
+    
+    switch (formData.type) {
+      case 'verbali':
+        const data = content?.data;
+        if (data) {
+          const date = new Date(data);
+          const dateStr = date.toLocaleDateString('it-IT', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric' 
+          });
+          autoTitle = `Verbale di Riunione del ${dateStr} - ${clubName}`;
+        } else {
+          autoTitle = `Verbale di Riunione - ${clubName}`;
+        }
+        break;
+        
+      case 'programmi':
+        const mese = content?.mese;
+        if (mese) {
+          const meseCapitalized = mese.charAt(0).toUpperCase() + mese.slice(1);
+          autoTitle = `Programma del Mese di ${meseCapitalized} - ${clubName}`;
+        } else {
+          autoTitle = `Programma del Mese - ${clubName}`;
+        }
+        break;
+        
+      case 'comunicazioni':
+        const oggetto = content?.oggetto;
+        if (oggetto) {
+          autoTitle = `Comunicazione: ${oggetto} - ${clubName}`;
+        } else {
+          autoTitle = `Comunicazione Ufficiale - ${clubName}`;
+        }
+        break;
+        
+      case 'circolari':
+        const numero = content?.numero;
+        const oggettoCircolare = content?.oggetto;
+        if (numero && oggettoCircolare) {
+          autoTitle = `Circolare n.${numero}: ${oggettoCircolare} - ${clubName}`;
+        } else if (numero) {
+          autoTitle = `Circolare n.${numero} - ${clubName}`;
+        } else {
+          autoTitle = `Circolare - ${clubName}`;
+        }
+        break;
+        
+      default:
+        autoTitle = `Documento - ${clubName}`;
+    }
+    
+    // Only update if title is empty or was auto-generated (contains club name)
+    if (!formData.title || formData.title.includes(clubName)) {
+      setFormData(prev => ({ ...prev, title: autoTitle }));
+    }
+  };
 
   if (loading) {
     return (
@@ -125,13 +193,19 @@ export default function CreateDocument() {
           ai_summary: formData.ai_summary,
           status: formData.status,
           user_id: user.id
-        });
+        })
+        .select('document_number');
 
       if (error) throw error;
 
+      // Get the generated document number
+      if (data && data[0]?.document_number) {
+        setDocumentNumber(data[0].document_number);
+      }
+
       toast({
         title: "Documento salvato",
-        description: "Il documento è stato salvato con successo",
+        description: `Il documento ${data[0]?.document_number || ''} è stato salvato con successo`,
       });
 
       navigate('/segreteria');
@@ -569,9 +643,16 @@ export default function CreateDocument() {
               </div>
               <div>
                 <h1 className="text-xl font-bold">Crea Documento</h1>
-                <p className="text-sm text-muted-foreground">
-                  {currentDocType?.label} - {currentDocType?.icon}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground">
+                    {currentDocType?.label} - {currentDocType?.icon}
+                  </p>
+                  {documentNumber && (
+                    <Badge variant="secondary" className="text-xs">
+                      {documentNumber}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             
