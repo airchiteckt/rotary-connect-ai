@@ -1734,6 +1734,40 @@ export default function CreateDocument() {
                           );
                         }
                         
+                        // Handle club-meetings display
+                        if (section.type === 'club-meetings' && Array.isArray(value)) {
+                          return (
+                            <div key={section.key} className="space-y-3">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="space-y-3">
+                                {value.map((meeting, index) => (
+                                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <h4 className="font-medium text-base">{meeting.nome}</h4>
+                                      {meeting.data && (
+                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                          <Calendar className="w-4 h-4" />
+                                          {new Date(meeting.data).toLocaleDateString('it-IT')}
+                                          {meeting.orario && ` - ${meeting.orario}`}
+                                        </div>
+                                      )}
+                                    </div>
+                                    {meeting.luogo && (
+                                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                                        <MapPin className="w-4 h-4" />
+                                        {meeting.luogo}
+                                      </div>
+                                    )}
+                                    {meeting.descrizione && (
+                                      <p className="text-sm text-gray-700">{meeting.descrizione}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
                         // Handle regular text fields
                         return (
                           <div key={section.key} className="space-y-2">
