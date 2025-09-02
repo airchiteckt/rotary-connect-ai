@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -23,7 +22,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isTrialValid, setIsTrialValid] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener
@@ -97,19 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     });
 
-    if (error) {
-      toast({
-        title: "Errore di accesso",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Accesso effettuato",
-        description: "Benvenuto nel gestionale Rotary!",
-      });
-    }
-
     return { error };
   };
 
@@ -125,19 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    if (error) {
-      toast({
-        title: "Errore di registrazione",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Registrazione completata",
-        description: "Verifica la tua email per attivare l'account. Inizia il tuo mese di prova gratuito!",
-      });
-    }
-
     return { error };
   };
 
@@ -147,10 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setIsTrialValid(false);
-    toast({
-      title: "Logout effettuato",
-      description: "A presto!",
-    });
   };
 
   const value = {

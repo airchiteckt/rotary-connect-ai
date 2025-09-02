@@ -4,10 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import { FileText, Mail, Image, Users, Calendar, Settings, LogOut } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, signOut, checkTrialStatus } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -49,7 +51,13 @@ export default function Dashboard() {
             </p>
             <div className="space-y-2">
               <Button className="w-full">Contatta il Team</Button>
-              <Button variant="outline" onClick={signOut} className="w-full">
+              <Button variant="outline" onClick={() => {
+                signOut();
+                toast({
+                  title: "Logout effettuato",
+                  description: "A presto!",
+                });
+              }} className="w-full">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -118,7 +126,13 @@ export default function Dashboard() {
                 <p className="font-medium">{profile?.full_name}</p>
                 <p className="text-sm text-muted-foreground capitalize">{profile?.role}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={signOut}>
+              <Button variant="ghost" size="sm" onClick={() => {
+                signOut();
+                toast({
+                  title: "Logout effettuato",
+                  description: "A presto!",
+                });
+              }}>
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>

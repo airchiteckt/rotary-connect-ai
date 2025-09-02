@@ -7,9 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   // Redirect if already logged in
@@ -25,7 +27,21 @@ export default function Auth() {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    await signIn(email, password);
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      toast({
+        title: "Errore di accesso",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Accesso effettuato",
+        description: "Benvenuto nel gestionale Rotary!",
+      });
+    }
+    
     setIsLoading(false);
   };
 
@@ -39,7 +55,21 @@ export default function Auth() {
     const full_name = formData.get('full_name') as string;
     const club_name = formData.get('club_name') as string;
 
-    await signUp(email, password, { full_name, club_name });
+    const { error } = await signUp(email, password, { full_name, club_name });
+    
+    if (error) {
+      toast({
+        title: "Errore di registrazione",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Registrazione completata",
+        description: "Verifica la tua email per attivare l'account. Inizia il tuo mese di prova gratuito!",
+      });
+    }
+    
     setIsLoading(false);
   };
 
