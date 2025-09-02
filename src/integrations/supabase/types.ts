@@ -53,6 +53,45 @@ export type Database = {
         }
         Relationships: []
       }
+      district_events: {
+        Row: {
+          created_at: string
+          descrizione: string | null
+          giorni_consecutivi: number | null
+          giorno: number | null
+          id: string
+          luogo: string | null
+          mese: number | null
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descrizione?: string | null
+          giorni_consecutivi?: number | null
+          giorno?: number | null
+          id?: string
+          luogo?: string | null
+          mese?: number | null
+          nome: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descrizione?: string | null
+          giorni_consecutivi?: number | null
+          giorno?: number | null
+          id?: string
+          luogo?: string | null
+          mese?: number | null
+          nome?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           ai_summary: string | null
@@ -282,6 +321,15 @@ export type Database = {
       generate_document_number: {
         Args: { doc_type: string; user_uuid: string }
         Returns: string
+      }
+      get_district_events_for_month: {
+        Args: { target_month?: number; user_uuid: string }
+        Returns: {
+          data_evento: string
+          descrizione: string
+          luogo: string
+          nome: string
+        }[]
       }
       is_trial_valid: {
         Args: { user_uuid: string }

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, X, Calendar, Clock, MapPin, Settings } from 'lucide-react';
+import DistrictEventsSettings from './DistrictEventsSettings';
 
 interface RecurringMeeting {
   id?: string;
@@ -396,6 +397,9 @@ export default function RecurringMeetingsSettings() {
           )}
         </CardContent>
       </Card>
+
+      {/* District Events Settings */}
+      <DistrictEventsSettings />
     </div>
   );
 }

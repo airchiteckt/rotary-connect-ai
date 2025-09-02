@@ -271,13 +271,19 @@ export default function CreateDocument() {
 
   const loadRecurringMeetings = async (sectionKey: string) => {
     try {
-      const { data, error } = await supabase
-        .rpc('calculate_next_meeting_dates', {
+      const [meetingsData, districtData] = await Promise.all([
+        supabase.rpc('calculate_next_meeting_dates', {
           user_uuid: user?.id,
           months_ahead: 1 // Load only current month
-        });
+        }),
+        supabase.rpc('get_district_events_for_month', {
+          user_uuid: user?.id,
+          target_month: new Date().getMonth() + 1 // JavaScript months are 0-based, SQL months are 1-based
+        })
+      ]);
 
-      if (error) throw error;
+      if (meetingsData.error) throw meetingsData.error;
+      if (districtData.error) throw districtData.error;
 
       // Get current month and year
       const now = new Date();
@@ -285,7 +291,7 @@ export default function CreateDocument() {
       const currentYear = now.getFullYear();
 
       // Filter meetings to include only those in the current month
-      const currentMonthMeetings = (data || []).filter(meeting => {
+      const currentMonthMeetings = (meetingsData.data || []).filter(meeting => {
         const meetingDate = new Date(meeting.meeting_date);
         return meetingDate.getMonth() === currentMonth && 
                meetingDate.getFullYear() === currentYear;
@@ -300,21 +306,33 @@ export default function CreateDocument() {
         descrizione: ''
       }));
 
+      // Convert district events to the same format
+      const districtMeetings = (districtData.data || []).map(event => ({
+        nome: event.nome,
+        data: event.data_evento,
+        orario: '', // District events don't have specific times
+        luogo: event.luogo || '',
+        descrizione: event.descrizione || ''
+      }));
+
+      // Combine both types of meetings
+      const allMeetings = [...futureMeetings, ...districtMeetings];
+
       // Update the form content with the loaded meetings
       setFormData(prev => ({
         ...prev,
-        content: { ...prev.content, [sectionKey]: futureMeetings }
+        content: { ...prev.content, [sectionKey]: allMeetings }
       }));
 
       toast({
-        title: "Appuntamenti caricati",
-        description: `Caricati ${futureMeetings.length} appuntamenti del mese corrente`,
+        title: "Eventi caricati",
+        description: `Caricati ${futureMeetings.length} appuntamenti club e ${districtMeetings.length} eventi distrettuali del mese corrente`,
       });
     } catch (error) {
-      console.error('Error loading recurring meetings:', error);
+      console.error('Error loading meetings:', error);
       toast({
         title: "Errore",
-        description: "Errore nel caricamento degli appuntamenti ricorrenti",
+        description: "Errore nel caricamento degli appuntamenti",
         variant: "destructive",
       });
     }
