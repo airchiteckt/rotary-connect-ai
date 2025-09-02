@@ -15,6 +15,7 @@ import Direttivo from "./pages/Direttivo";
 import Comunicazione from "./pages/Comunicazione";
 import Soci from "./pages/Soci";
 import CreateDocument from "./pages/CreateDocument";
+import RecurringMeetingsSettings from "./components/RecurringMeetingsSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/comunicazione" element={<Comunicazione />} />
             <Route path="/soci" element={<Soci />} />
             <Route path="/create-document" element={<CreateDocument />} />
+            <Route path="/recurring-meetings" element={<RecurringMeetingsSettings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

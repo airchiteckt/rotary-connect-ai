@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Search, Filter, ArrowLeft } from 'lucide-react';
+import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export default function Segreteria() {
@@ -64,11 +64,12 @@ export default function Segreteria() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="documenti">Documenti</TabsTrigger>
             <TabsTrigger value="templates">Template</TabsTrigger>
             <TabsTrigger value="archivio">Archivio</TabsTrigger>
             <TabsTrigger value="statistiche">Statistiche</TabsTrigger>
+            <TabsTrigger value="impostazioni">Impostazioni</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documenti" className="space-y-6">
@@ -179,6 +180,94 @@ export default function Segreteria() {
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Statistiche in preparazione</p>
                   <p className="text-sm">Le metriche appariranno qui</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="impostazioni" className="space-y-6">
+            {/* Quick Access Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="cursor-pointer hover:shadow-lg transition-all duration-200" onClick={() => window.location.href = '/recurring-meetings'}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Appuntamenti Ricorrenti</CardTitle>
+                      <CardDescription className="text-sm">
+                        Configura riunioni automatiche
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Imposta appuntamenti che si ripetono automaticamente come Consiglio Direttivo ogni terzo giovedì del mese.
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configura
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="opacity-50">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Template Personalizzati</CardTitle>
+                      <CardDescription className="text-sm">
+                        Modifica i template esistenti
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Personalizza i template per adattarli alle esigenze del tuo club.
+                  </p>
+                  <Button variant="outline" size="sm" className="w-full" disabled>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Prossimamente
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Settings Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Impostazioni Segreteria</CardTitle>
+                <CardDescription>
+                  Configura le impostazioni per ottimizzare il tuo flusso di lavoro
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="border-l-4 border-blue-500 pl-4">
+                  <h4 className="font-medium text-sm">Appuntamenti Ricorrenti</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Configura riunioni che si ripetono automaticamente (es. Consiglio Direttivo ogni terzo giovedì). 
+                    Una volta configurate, potrai caricarle automaticamente nei programmi mensili.
+                  </p>
+                </div>
+                
+                <div className="border-l-4 border-gray-300 pl-4 opacity-60">
+                  <h4 className="font-medium text-sm">Firme Digitali</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Carica le firme dei membri del direttivo per l'inserimento automatico nei documenti.
+                  </p>
+                </div>
+                
+                <div className="border-l-4 border-gray-300 pl-4 opacity-60">
+                  <h4 className="font-medium text-sm">Modelli Club</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Personalizza i template con logo, intestazioni e piè di pagina del tuo club.
+                  </p>
                 </div>
               </CardContent>
             </Card>

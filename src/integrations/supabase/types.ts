@@ -226,11 +226,59 @@ export type Database = {
         }
         Relationships: []
       }
+      recurring_meetings: {
+        Row: {
+          created_at: string
+          frequency_type: string
+          frequency_value: Json
+          id: string
+          is_active: boolean
+          location: string | null
+          meeting_time: string
+          meeting_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          frequency_type: string
+          frequency_value: Json
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          meeting_time?: string
+          meeting_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          frequency_type?: string
+          frequency_value?: Json
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          meeting_time?: string
+          meeting_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      calculate_next_meeting_dates: {
+        Args: { months_ahead?: number; user_uuid: string }
+        Returns: {
+          location: string
+          meeting_date: string
+          meeting_time: string
+          meeting_type: string
+        }[]
+      }
       generate_document_number: {
         Args: { doc_type: string; user_uuid: string }
         Returns: string

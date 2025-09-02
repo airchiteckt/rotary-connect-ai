@@ -268,6 +268,44 @@ export default function CreateDocument() {
     }
   };
 
+  const loadRecurringMeetings = async (sectionKey: string) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('calculate_next_meeting_dates', {
+          user_uuid: user?.id,
+          months_ahead: 3 // Load next 3 months
+        });
+
+      if (error) throw error;
+
+      // Convert the future meetings data to the meeting format expected by the form
+      const futureMeetings = (data || []).map(meeting => ({
+        type: meeting.meeting_type,
+        date: meeting.meeting_date,
+        time: meeting.meeting_time,
+        location: meeting.location || ''
+      }));
+
+      // Update the form content with the loaded meetings
+      setFormData(prev => ({
+        ...prev,
+        content: { ...prev.content, [sectionKey]: futureMeetings }
+      }));
+
+      toast({
+        title: "Appuntamenti caricati",
+        description: `Caricati ${futureMeetings.length} appuntamenti ricorrenti`,
+      });
+    } catch (error) {
+      console.error('Error loading recurring meetings:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nel caricamento degli appuntamenti ricorrenti",
+        variant: "destructive",
+      });
+    }
+  };
+
   const renderFormField = (section: any) => {
     const value = formData.content[section.key] || '';
     
@@ -522,22 +560,32 @@ export default function CreateDocument() {
                 </div>
               </Card>
             ))}
-            <Button
-              variant="outline"
-              onClick={() => {
-                const newMeeting = {
-                  type: '',
-                  date: '',
-                  time: '',
-                  location: ''
-                };
-                updateContent(section.key, [...meetings, newMeeting]);
-              }}
-              className="w-full"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Aggiungi Riunione
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const newMeeting = {
+                    type: '',
+                    date: '',
+                    time: '',
+                    location: ''
+                  };
+                  updateContent(section.key, [...meetings, newMeeting]);
+                }}
+                className="flex-1"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Aggiungi Riunione
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => loadRecurringMeetings(section.key)}
+                size="sm"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Carica Ricorrenti
+              </Button>
+            </div>
           </div>
         );
       case 'month-select':
