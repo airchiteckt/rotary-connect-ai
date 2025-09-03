@@ -990,7 +990,6 @@ export default function CreateDocument() {
         );
     }
   };
-  };
 
   const getTemplateStyles = (template: string) => {
     switch (template) {
