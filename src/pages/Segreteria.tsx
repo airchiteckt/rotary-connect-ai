@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Eye } from 'lucide-react';
+import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Eye, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TemplateEditor } from '@/components/TemplateEditor';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Document {
   id: string;
@@ -88,6 +89,32 @@ export default function Segreteria() {
       });
     } finally {
       setIsLoadingTemplates(false);
+    }
+  };
+
+  const deleteDocument = async (documentId: string, documentTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Documento eliminato",
+        description: `"${documentTitle}" è stato eliminato con successo`,
+      });
+      
+      loadDocuments();
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nell'eliminazione del documento",
+        variant: "destructive",
+      });
     }
   };
 
@@ -282,22 +309,51 @@ export default function Segreteria() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => window.location.href = `/document/${doc.id}?tab=preview`}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => window.location.href = `/document/${doc.id}/edit`}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </div>
+                         <div className="flex items-center space-x-2">
+                           <Button 
+                             variant="ghost" 
+                             size="sm"
+                             onClick={() => window.location.href = `/document/${doc.id}?tab=preview`}
+                           >
+                             <Eye className="w-4 h-4" />
+                           </Button>
+                           <Button 
+                             variant="ghost" 
+                             size="sm"
+                             onClick={() => window.location.href = `/document/${doc.id}/edit`}
+                           >
+                             <Edit className="w-4 h-4" />
+                           </Button>
+                           <AlertDialog>
+                             <AlertDialogTrigger asChild>
+                               <Button 
+                                 variant="ghost" 
+                                 size="sm"
+                                 className="text-destructive hover:text-destructive"
+                               >
+                                 <Trash2 className="w-4 h-4" />
+                               </Button>
+                             </AlertDialogTrigger>
+                             <AlertDialogContent>
+                               <AlertDialogHeader>
+                                 <AlertDialogTitle>Conferma eliminazione</AlertDialogTitle>
+                                 <AlertDialogDescription>
+                                   Sei sicuro di voler eliminare il documento "{doc.title}"? 
+                                   Questa azione non può essere annullata.
+                                 </AlertDialogDescription>
+                               </AlertDialogHeader>
+                               <AlertDialogFooter>
+                                 <AlertDialogCancel>Annulla</AlertDialogCancel>
+                                 <AlertDialogAction 
+                                   onClick={() => deleteDocument(doc.id, doc.title)}
+                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                 >
+                                   Elimina
+                                 </AlertDialogAction>
+                               </AlertDialogFooter>
+                             </AlertDialogContent>
+                           </AlertDialog>
+                         </div>
                       </div>
                     ))}
                     {documents.length > 5 && (
