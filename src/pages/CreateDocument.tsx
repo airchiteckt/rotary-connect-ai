@@ -312,8 +312,7 @@ export default function CreateDocument() {
         title: 'Programma mensile',
         content: {
           ...prev.content,
-          mese: currentMonth,
-          anno_rotariano: 'A.R. 2025 - 2026'
+          mese: currentMonth
         }
       }));
     }
@@ -1340,11 +1339,10 @@ export default function CreateDocument() {
       if (formData.type === 'programmi') {
         const mese = formData.content['mese'] || 'Mese';
         const meseCapitalized = mese.charAt(0).toUpperCase() + mese.slice(1);
-        const annoRotariano = formData.content['anno_rotariano'] || 'A.R. 2025 - 2026';
         pdfContent += `
           <div style="margin-bottom: 24px;">
             <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
-              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized} - ${annoRotariano}</h1>
+              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized}</h1>
               <p style="font-size: 14px; color: #6b7280; margin: 0;">
                 ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
               </p>
@@ -2017,11 +2015,11 @@ export default function CreateDocument() {
                     )}
                     
                     <div className="space-y-6">
-                     <div className="text-center border-b pb-4">
+                       <div className="text-center border-b pb-4">
                          {formData.type === 'programmi' ? (
                            <>
                              <h1 className="text-2xl font-bold">
-                               Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Mese'} - {formData.content['anno_rotariano'] || 'A.R. 2025 - 2026'}
+                               Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Mese'}
                              </h1>
                            </>
                          ) : (
