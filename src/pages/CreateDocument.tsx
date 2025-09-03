@@ -1803,15 +1803,62 @@ export default function CreateDocument() {
                         }
                         
                         // Handle regular text fields - check if value is object/array first
+                        if (typeof value === 'object' && value !== null) {
+                          // If it's an array of objects, display them nicely
+                          if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+                            return (
+                              <div key={section.key} className="space-y-3">
+                                <h3 className="font-semibold text-lg">{section.label}</h3>
+                                <div className="space-y-2">
+                                  {value.map((item, index) => (
+                                    <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                                      {Object.entries(item).map(([key, val]) => (
+                                        val && (
+                                          <div key={key} className="mb-1 last:mb-0">
+                                            <span className="font-medium capitalize text-sm text-gray-600">
+                                              {key.replace(/_/g, ' ')}: 
+                                            </span>
+                                            <span className="ml-2 text-sm">
+                                              {typeof val === 'string' && key === 'data' 
+                                                ? new Date(val).toLocaleDateString('it-IT')
+                                                : String(val)
+                                              }
+                                            </span>
+                                          </div>
+                                        )
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // For other objects, show as key-value pairs
+                          return (
+                            <div key={section.key} className="space-y-2">
+                              <h3 className="font-semibold text-lg">{section.label}</h3>
+                              <div className="bg-gray-50 p-3 rounded-lg border">
+                                {Object.entries(value).map(([key, val]) => (
+                                  val && (
+                                    <div key={key} className="mb-1 last:mb-0">
+                                      <span className="font-medium capitalize text-sm text-gray-600">
+                                        {key.replace(/_/g, ' ')}: 
+                                      </span>
+                                      <span className="ml-2 text-sm">{String(val)}</span>
+                                    </div>
+                                  )
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        
+                        // Handle regular text fields
                         return (
                           <div key={section.key} className="space-y-2">
                             <h3 className="font-semibold text-lg">{section.label}</h3>
-                            <div className="text-sm whitespace-pre-wrap">
-                              {typeof value === 'object' 
-                                ? JSON.stringify(value, null, 2) 
-                                : value
-                              }
-                            </div>
+                            <div className="text-sm whitespace-pre-wrap">{value}</div>
                           </div>
                         );
                       })}
