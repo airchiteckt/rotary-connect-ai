@@ -153,6 +153,15 @@ export const TemplateEditor = () => {
     }
   };
 
+  const getLogoAlignmentClass = (alignment: string) => {
+    switch (alignment) {
+      case 'left': return 'flex justify-start';
+      case 'center': return 'flex justify-center';
+      case 'right': return 'flex justify-end';
+      default: return 'flex justify-center';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -462,7 +471,7 @@ export const TemplateEditor = () => {
                 {/* Header */}
                 <div className={`mb-8 pb-6 border-b ${getAlignmentClass(template.header_alignment)}`}>
                   {template.logo_url && (
-                    <div className={`mb-4 ${getAlignmentClass(template.logo_position)}`}>
+                    <div className={`mb-4 ${getLogoAlignmentClass(template.logo_position)}`}>
                       <img 
                         src={template.logo_url} 
                         alt="Logo" 
