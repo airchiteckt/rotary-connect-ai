@@ -1499,6 +1499,9 @@ export default function CreateDocument() {
                         placeholder="Es. Hotel Villa Giulia, Valmontone"
                         className="mt-1"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Salvato automaticamente per documenti futuri
+                      </p>
                     </div>
                     
                     <div>
@@ -1514,6 +1517,9 @@ export default function CreateDocument() {
                         placeholder="Es. Mario Rossi"
                         className="mt-1"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Salvato automaticamente per documenti futuri
+                      </p>
                     </div>
                     
                     <div>
@@ -1529,6 +1535,9 @@ export default function CreateDocument() {
                         placeholder="Es. Giuseppe Bianchi"
                         className="mt-1"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Salvato automaticamente per documenti futuri
+                      </p>
                     </div>
                     
                     <div>
