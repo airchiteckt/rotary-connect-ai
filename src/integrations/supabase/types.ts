@@ -266,6 +266,8 @@ export type Database = {
         Row: {
           club_name: string | null
           created_at: string
+          default_footer_data: string | null
+          default_logo_url: string | null
           full_name: string
           id: string
           role: string | null
@@ -277,6 +279,8 @@ export type Database = {
         Insert: {
           club_name?: string | null
           created_at?: string
+          default_footer_data?: string | null
+          default_logo_url?: string | null
           full_name: string
           id?: string
           role?: string | null
@@ -288,6 +292,8 @@ export type Database = {
         Update: {
           club_name?: string | null
           created_at?: string
+          default_footer_data?: string | null
+          default_logo_url?: string | null
           full_name?: string
           id?: string
           role?: string | null

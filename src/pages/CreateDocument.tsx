@@ -117,6 +117,13 @@ export default function CreateDocument() {
     loadUserTemplates();
   }, [user]);
 
+  // Load profile defaults on component mount
+  useEffect(() => {
+    if (user) {
+      loadProfile();
+    }
+  }, [user]);
+
   const loadUserTemplates = async () => {
     if (!user) return;
     
@@ -176,6 +183,55 @@ export default function CreateDocument() {
       });
     } finally {
       setIsLoadingDocument(false);
+    }
+  };
+
+  const loadProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('default_logo_url, default_footer_data')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading profile:', error);
+        return;
+      }
+
+      // Load default settings for new documents only
+      if (!documentId && data) {
+        setFormData(prev => ({
+          ...prev,
+          logoUrl: data.default_logo_url || prev.logoUrl,
+          footerData: data.default_footer_data || prev.footerData
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  const updateProfileDefaults = async (logoUrl?: string, footerData?: string) => {
+    if (!user) return;
+    
+    try {
+      const updateData: any = {};
+      if (logoUrl !== undefined) updateData.default_logo_url = logoUrl;
+      if (footerData !== undefined) updateData.default_footer_data = footerData;
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error updating profile defaults:', error);
+      }
+    } catch (error) {
+      console.error('Error updating profile defaults:', error);
     }
   };
 
@@ -1372,6 +1428,8 @@ export default function CreateDocument() {
                             if (file) {
                               const url = URL.createObjectURL(file);
                               setFormData(prev => ({ ...prev, logoUrl: url }));
+                              // Save as default for future documents
+                              updateProfileDefaults(url, undefined);
                             }
                           }}
                         />
@@ -1385,7 +1443,12 @@ export default function CreateDocument() {
                       <Label>Intestazione Personalizzata</Label>
                       <Input
                         value={formData.headerText || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, headerText: e.target.value }))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, headerText: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, formData.footerData);
+                        }}
                         placeholder="Es. Rotary Club di..."
                         className="mt-1"
                       />
@@ -1395,7 +1458,12 @@ export default function CreateDocument() {
                       <Label>Dati Rotary a Piè di Pagina</Label>
                       <Textarea
                         value={formData.footerData || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, footerData: e.target.value }))}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, footerData: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, value);
+                        }}
                         placeholder="Es. Rotary Club di [Nome] - Distretto [Numero]&#10;Via [Indirizzo], [Città]&#10;www.rotary[nome].it - info@rotary[nome].it"
                         rows={4}
                         className="mt-1"
