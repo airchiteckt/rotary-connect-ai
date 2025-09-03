@@ -100,15 +100,20 @@ export const TemplateEditor = () => {
     
     setIsSaving(true);
     try {
-      // Temporarily save to localStorage while types are updating
       const templateData = {
         user_id: user.id,
-        settings: template,
+        settings: template as any,
         name: 'Default Template',
-        updated_at: new Date().toISOString()
+        is_default: true
       };
       
-      localStorage.setItem(`template_${user.id}`, JSON.stringify(templateData));
+      const { error } = await supabase
+        .from('document_templates')
+        .upsert(templateData, {
+          onConflict: 'user_id,is_default'
+        });
+
+      if (error) throw error;
       
       toast({
         title: "Successo",
