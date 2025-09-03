@@ -67,6 +67,7 @@ export default function CreateDocument() {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'editor');
   const [documentNumber, setDocumentNumber] = useState<string>('');
   const [userTemplates, setUserTemplates] = useState<any[]>([]);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   const templates = {
     verbali: {
@@ -244,6 +245,47 @@ export default function CreateDocument() {
       }
     } catch (error) {
       console.error('Error updating profile defaults:', error);
+    }
+  };
+
+  const saveSettings = async () => {
+    if (!user) return;
+    
+    setIsSavingSettings(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          default_logo_url: formData.logoUrl || null,
+          default_footer_data: formData.footerData || null,
+          default_location: formData.defaultLocation || null,
+          secretary_name: formData.secretaryName || null,
+          president_name: formData.presidentName || null
+        })
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error saving settings:', error);
+        toast({
+          title: "Errore",
+          description: "Errore nel salvataggio delle impostazioni",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Successo",
+          description: "Impostazioni salvate correttamente"
+        });
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nel salvataggio delle impostazioni",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSavingSettings(false);
     }
   };
 
@@ -1830,15 +1872,13 @@ export default function CreateDocument() {
                       </div>
                     </div>
                     
-                    <div>
+                     <div>
                       <Label>Intestazione Personalizzata</Label>
                       <Input
                         value={formData.headerText || ''}
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, headerText: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, formData.footerData);
                         }}
                         placeholder="Es. Rotary Club di..."
                         className="mt-1"
@@ -1852,8 +1892,6 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, footerData: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, value);
                         }}
                         placeholder="Es. Rotary Club di [Nome] - Distretto [Numero]&#10;Via [Indirizzo], [Città]&#10;www.rotary[nome].it - info@rotary[nome].it"
                         rows={4}
@@ -1868,15 +1906,10 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, defaultLocation: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, undefined, value);
                         }}
                         placeholder="Es. Hotel Villa Giulia, Valmontone"
                         className="mt-1"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Salvato automaticamente per documenti futuri
-                      </p>
                     </div>
                     
                     <div>
@@ -1886,15 +1919,10 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, secretaryName: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, undefined, undefined, value);
                         }}
                         placeholder="Es. Mario Rossi"
                         className="mt-1"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Salvato automaticamente per documenti futuri
-                      </p>
                     </div>
                     
                     <div>
@@ -1904,15 +1932,10 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, presidentName: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, undefined, undefined, undefined, value);
                         }}
                         placeholder="Es. Giuseppe Bianchi"
                         className="mt-1"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Salvato automaticamente per documenti futuri
-                      </p>
                     </div>
                     
                     <div>
@@ -1930,6 +1953,23 @@ export default function CreateDocument() {
                       <Calendar className="w-4 h-4" />
                       <span className="text-sm">{new Date().toLocaleDateString('it-IT')}</span>
                     </div>
+                  </div>
+                  
+                  <div className="flex justify-end pt-4 border-t">
+                    <Button 
+                      onClick={saveSettings} 
+                      disabled={isSavingSettings}
+                      className="w-full sm:w-auto"
+                    >
+                      {isSavingSettings ? (
+                        <>
+                          <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+                          Salvataggio...
+                        </>
+                      ) : (
+                        'Salva Impostazioni'
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
