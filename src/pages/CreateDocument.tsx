@@ -1332,14 +1332,44 @@ export default function CreateDocument() {
       // Build the PDF content with inline styles
       let pdfContent = '';
 
-      // Logo - Prioritize current form logo, fallback to profile default
+      // Logo - Handle logo loading properly
       const logoUrl = getLogoUrl();
+      let logoBase64 = '';
+      
       if (logoUrl) {
-        pdfContent += `
-          <div style="text-align: center; margin-bottom: 16px;">
-            <img src="${logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" crossorigin="anonymous" />
-          </div>
-        `;
+        try {
+          // Convert image to base64 to ensure it works in PDF
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          
+          await new Promise((resolve, reject) => {
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx?.drawImage(img, 0, 0);
+              logoBase64 = canvas.toDataURL('image/png');
+              resolve(logoBase64);
+            };
+            img.onerror = () => {
+              console.error('Errore nel caricamento del logo');
+              resolve(''); // Continue without logo if it fails to load
+            };
+            img.src = logoUrl;
+          });
+          
+          if (logoBase64) {
+            pdfContent += `
+              <div style="text-align: center; margin-bottom: 16px;">
+                <img src="${logoBase64}" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
+              </div>
+            `;
+          }
+        } catch (error) {
+          console.error('Errore nella conversione del logo:', error);
+          // Continue without logo if conversion fails
+        }
       }
 
       // Header text with rotary year
