@@ -223,6 +223,47 @@ export default function CreateDocument() {
     }
   };
 
+  const saveSettings = async () => {
+    if (!user) return;
+    
+    try {
+      const updateData = {
+        default_location: formData.defaultLocation || null,
+        secretary_name: formData.secretaryName || null,
+        president_name: formData.presidentName || null,
+        default_footer_data: formData.footerData || null,
+        default_logo_url: formData.logoUrl || null
+      };
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error saving settings:', error);
+        toast({
+          title: "Errore",
+          description: "Errore nel salvataggio delle impostazioni",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Successo",
+          description: "Impostazioni salvate con successo! Saranno utilizzate per i prossimi documenti.",
+          variant: "default"
+        });
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nel salvataggio delle impostazioni",
+        variant: "destructive"
+      });
+    }
+  };
+
   const updateProfileDefaults = async (logoUrl?: string, footerData?: string, location?: string, secretary?: string, president?: string) => {
     if (!user) return;
     
@@ -1505,8 +1546,6 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, defaultLocation: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, undefined, value);
                         }}
                         placeholder="Es. Hotel Villa Giulia, Valmontone"
                         className="mt-1"
@@ -1520,8 +1559,6 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, secretaryName: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, undefined, undefined, value);
                         }}
                         placeholder="Es. Mario Rossi"
                         className="mt-1"
@@ -1535,8 +1572,6 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, presidentName: value }));
-                          // Save as default for future documents
-                          updateProfileDefaults(undefined, undefined, undefined, undefined, value);
                         }}
                         placeholder="Es. Giuseppe Bianchi"
                         className="mt-1"
@@ -1557,6 +1592,21 @@ export default function CreateDocument() {
                     <div className="mt-1 p-2 bg-muted rounded-md flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       <span className="text-sm">{new Date().toLocaleDateString('it-IT')}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-semibold">Impostazioni Predefinite</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Salva luogo, segretario e presidente per riutilizzarli nei prossimi documenti
+                        </p>
+                      </div>
+                      <Button onClick={saveSettings} variant="outline">
+                        <Save className="w-4 h-4 mr-2" />
+                        Salva Impostazioni
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
