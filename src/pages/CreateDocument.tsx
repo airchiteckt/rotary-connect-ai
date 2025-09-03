@@ -175,16 +175,10 @@ export default function CreateDocument() {
           content: data.content as Record<string, any>,
           status: data.status || 'draft',
           logoUrl: data.logo_url || '',
-          headerText: '', // Will be loaded from template
-          footerData: data.template_url || '', // This contains footer data
-          defaultLocation: '', // Will be loaded from profile
-          secretaryName: '', // Will be loaded from profile  
-          presidentName: '' // Will be loaded from profile
+          headerText: data.signature_url || '',
+          footerData: data.template_url || ''
         });
         setDocumentNumber(data.document_number || '');
-        
-        // Load profile data to fill location, secretary, president
-        await loadProfile();
       }
     } catch (error) {
       console.error('Error loading document:', error);
@@ -223,58 +217,9 @@ export default function CreateDocument() {
           secretaryName: data.secretary_name || prev.secretaryName,
           presidentName: data.president_name || prev.presidentName
         }));
-      } else if (documentId && data) {
-        // For existing documents, only load secretary, president and location from profile
-        setFormData(prev => ({
-          ...prev,
-          defaultLocation: data.default_location || prev.defaultLocation,
-          secretaryName: data.secretary_name || prev.secretaryName,
-          presidentName: data.president_name || prev.presidentName
-        }));
       }
     } catch (error) {
       console.error('Error loading profile:', error);
-    }
-  };
-
-  const saveSettings = async () => {
-    if (!user) return;
-    
-    try {
-      const updateData = {
-        default_location: formData.defaultLocation || null,
-        secretary_name: formData.secretaryName || null,
-        president_name: formData.presidentName || null,
-        default_footer_data: formData.footerData || null,
-        default_logo_url: formData.logoUrl || null
-      };
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error saving settings:', error);
-        toast({
-          title: "Errore",
-          description: "Errore nel salvataggio delle impostazioni",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Successo",
-          description: "Impostazioni salvate con successo! Saranno utilizzate per i prossimi documenti.",
-          variant: "default"
-        });
-      }
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast({
-        title: "Errore",
-        description: "Errore nel salvataggio delle impostazioni",
-        variant: "destructive"
-      });
     }
   };
 
@@ -1134,21 +1079,15 @@ export default function CreateDocument() {
   };
 
   const downloadPDF = async () => {
-    console.log('🔍 Inizio download PDF...');
     const element = document.getElementById('document-preview');
-    
     if (!element) {
-      console.error('❌ Elemento document-preview non trovato');
       toast({
         title: "Errore",
-        description: "Errore nella creazione del PDF - elemento non trovato",
+        description: "Errore nella creazione del PDF",
         variant: "destructive"
       });
       return;
     }
-
-    console.log('✅ Elemento trovato:', element);
-    console.log('📄 Contenuto HTML da convertire:', element.innerHTML.substring(0, 200) + '...');
 
     try {
       toast({
@@ -1156,47 +1095,27 @@ export default function CreateDocument() {
         description: "Generazione PDF in corso..."
       });
       
-      console.log('📦 Caricamento html2pdf...');
       // Dynamically import html2pdf
       const html2pdf = (await import('html2pdf.js')).default;
-      console.log('✅ html2pdf caricato');
       
       const opt = {
-        margin: [10, 10, 10, 10], // margini in mm: top, right, bottom, left
+        margin: [0.2, 0.2, 0.2, 0.2], // margini minimi: top, right, bottom, left
         filename: `${formData.title || 'documento'}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { 
-          scale: 1.5,
-          useCORS: true,
-          allowTaint: true,
-          width: 794, // larghezza A4 in pixel (210mm)
-          height: 1123 // altezza A4 in pixel (297mm)
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait',
-          compress: true
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
       };
 
-      console.log('⚙️ Configurazione PDF:', opt);
-      console.log('🔄 Generazione in corso...');
-      
       await html2pdf().set(opt).from(element).save();
-      
-      console.log('✅ PDF generato con successo!');
       toast({
         title: "Successo", 
         description: "PDF scaricato con successo!"
       });
     } catch (error) {
-      console.error('❌ Errore nella generazione del PDF:', error);
-      console.error('📋 Stack trace:', error.stack);
+      console.error('Errore nella generazione del PDF:', error);
       toast({
         title: "Errore",
-        description: "Errore nella generazione del PDF: " + error.message,
+        description: "Errore nella generazione del PDF",
         variant: "destructive"
       });
     }
@@ -1206,9 +1125,9 @@ export default function CreateDocument() {
     // Handle month-select display
     if (section.type === 'month-select') {
       return (
-        <div key={section.key} style={{ marginBottom: '15px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
-          <div style={{ fontSize: '14px', fontWeight: '500', textTransform: 'capitalize' }}>{value}</div>
+        <div key={section.key} className="space-y-2">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="text-sm capitalize font-medium">{value}</div>
         </div>
       );
     }
@@ -1216,9 +1135,9 @@ export default function CreateDocument() {
     // Handle rotary-year display
     if (section.type === 'rotary-year') {
       return (
-        <div key={section.key} style={{ marginBottom: '15px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
-          <div style={{ fontSize: '14px', fontWeight: '500', color: '#2563eb' }}>{value}</div>
+        <div key={section.key} className="space-y-2">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="text-sm font-medium text-blue-600">{value}</div>
         </div>
       );
     }
@@ -1226,27 +1145,29 @@ export default function CreateDocument() {
     // Handle club-meetings display
     if (section.type === 'club-meetings' && Array.isArray(value)) {
       return (
-        <div key={section.key} style={{ marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000' }}>{section.label}</h3>
-          <div>
+        <div key={section.key} className="space-y-3">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="space-y-3">
             {value.map((meeting, index) => (
-              <div key={index} style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '6px', marginBottom: '12px', border: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <h4 style={{ fontSize: '14px', fontWeight: '500', margin: '0' }}>{meeting.nome}</h4>
+              <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-medium text-base">{meeting.nome}</h4>
                   {meeting.data && (
-                    <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                      📅 {new Date(meeting.data).toLocaleDateString('it-IT')}
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(meeting.data).toLocaleDateString('it-IT')}
                       {meeting.orario && ` - ${meeting.orario}`}
                     </div>
                   )}
                 </div>
                 {meeting.luogo && (
-                  <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
-                    📍 {meeting.luogo}
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                    <MapPin className="w-4 h-4" />
+                    {meeting.luogo}
                   </div>
                 )}
                 {meeting.descrizione && (
-                  <p style={{ fontSize: '12px', color: '#374151', margin: '0' }}>{meeting.descrizione}</p>
+                  <p className="text-sm text-gray-700">{meeting.descrizione}</p>
                 )}
               </div>
             ))}
@@ -1258,12 +1179,12 @@ export default function CreateDocument() {
     // Handle agenda_distrettuale display with new format
     if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
       return (
-        <div key={section.key} style={{ marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000' }}>{section.label}</h3>
-          <div>
+        <div key={section.key} className="space-y-3">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="space-y-2">
             {value.map((item, index) => (
-              <div key={index} style={{ backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', marginBottom: '8px' }}>
-                <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
+              <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                <div className="text-sm">
                   {item.testo && item.data && item.luogo 
                     ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
                     : item.testo && item.data
@@ -1274,7 +1195,7 @@ export default function CreateDocument() {
                   }
                 </div>
                 {item.descrizione && (
-                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                  <div className="text-xs text-gray-600 mt-1">
                     {item.descrizione}
                   </div>
                 )}
@@ -1291,18 +1212,18 @@ export default function CreateDocument() {
       if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
         // Default formatting for other sections
         return (
-          <div key={section.key} style={{ marginBottom: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000' }}>{section.label}</h3>
-            <div>
+          <div key={section.key} className="space-y-3">
+            <h3 className="font-semibold text-lg">{section.label}</h3>
+            <div className="space-y-2">
               {value.map((item, index) => (
-                <div key={index} style={{ backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', marginBottom: '8px' }}>
+                <div key={index} className="bg-gray-50 p-3 rounded-lg border">
                   {Object.entries(item).map(([key, val]) => (
                     val && (
-                      <div key={key} style={{ marginBottom: '4px' }}>
-                        <span style={{ fontWeight: '500', fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
+                      <div key={key} className="mb-1 last:mb-0">
+                        <span className="font-medium capitalize text-sm text-gray-600">
                           {key.replace(/_/g, ' ')}: 
                         </span>
-                        <span style={{ marginLeft: '8px', fontSize: '12px' }}>
+                        <span className="ml-2 text-sm">
                           {typeof val === 'string' && key === 'data' 
                             ? new Date(val).toLocaleDateString('it-IT')
                             : String(val)
@@ -1320,16 +1241,16 @@ export default function CreateDocument() {
       
       // For other objects, show as key-value pairs
       return (
-        <div key={section.key} style={{ marginBottom: '15px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
-          <div style={{ backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+        <div key={section.key} className="space-y-2">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="bg-gray-50 p-3 rounded-lg border">
             {Object.entries(value).map(([key, val]) => (
               val && (
-                <div key={key} style={{ marginBottom: '4px' }}>
-                  <span style={{ fontWeight: '500', fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
+                <div key={key} className="mb-1 last:mb-0">
+                  <span className="font-medium capitalize text-sm text-gray-600">
                     {key.replace(/_/g, ' ')}: 
                   </span>
-                  <span style={{ marginLeft: '8px', fontSize: '12px' }}>{String(val)}</span>
+                  <span className="ml-2 text-sm">{String(val)}</span>
                 </div>
               )
             ))}
@@ -1340,9 +1261,9 @@ export default function CreateDocument() {
     
     // Handle regular text fields
     return (
-      <div key={section.key} style={{ marginBottom: '15px' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
-        <div style={{ fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{value}</div>
+      <div key={section.key} className="space-y-2">
+        <h3 className="font-semibold text-lg">{section.label}</h3>
+        <div className="text-sm whitespace-pre-wrap">{value}</div>
       </div>
     );
   };
@@ -1572,6 +1493,8 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, defaultLocation: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, undefined, value);
                         }}
                         placeholder="Es. Hotel Villa Giulia, Valmontone"
                         className="mt-1"
@@ -1585,6 +1508,8 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, secretaryName: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, undefined, undefined, value);
                         }}
                         placeholder="Es. Mario Rossi"
                         className="mt-1"
@@ -1598,6 +1523,8 @@ export default function CreateDocument() {
                         onChange={(e) => {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, presidentName: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, undefined, undefined, undefined, value);
                         }}
                         placeholder="Es. Giuseppe Bianchi"
                         className="mt-1"
@@ -1620,21 +1547,6 @@ export default function CreateDocument() {
                       <span className="text-sm">{new Date().toLocaleDateString('it-IT')}</span>
                     </div>
                   </div>
-                  
-                  <div className="pt-4 border-t">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold">Impostazioni Predefinite</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Salva luogo, segretario e presidente per riutilizzarli nei prossimi documenti
-                        </p>
-                      </div>
-                      <Button onClick={saveSettings} variant="outline">
-                        <Save className="w-4 h-4 mr-2" />
-                        Salva Impostazioni
-                      </Button>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1648,86 +1560,61 @@ export default function CreateDocument() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div 
-                    id="document-preview" 
-                    className="mx-auto bg-white text-black"
-                    style={{ 
-                      width: '210mm', 
-                      minHeight: '297mm', 
-                      padding: '20mm 15mm',
-                      fontFamily: 'Arial, sans-serif',
-                      fontSize: '12px',
-                      lineHeight: '1.4',
-                      color: '#000',
-                      pageBreakInside: 'avoid'
-                    }}
-                  >
-                    {/* Use template logo if available, otherwise form logo */}
-                    {(userTemplates[0]?.settings?.logo_url || formData.logoUrl) && (
-                      <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-                        <img 
-                          src={userTemplates[0]?.settings?.logo_url || formData.logoUrl} 
-                          alt="Logo Club" 
-                          style={{ height: '50px', maxWidth: '100%', display: 'block', margin: '0 auto' }} 
-                        />
+                  <div id="document-preview" className="p-8 rounded-lg border bg-card text-card-foreground">
+                    {formData.logoUrl && (
+                      <div className="text-center mb-4">
+                        <img src={formData.logoUrl} alt="Logo Club" className="h-16 mx-auto" />
                       </div>
                     )}
                     
-                    {(userTemplates[0]?.settings?.header_text || formData.headerText) && (
-                      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#000', margin: '0' }}>
-                          {userTemplates[0]?.settings?.header_text || formData.headerText}
-                        </h2>
+                    {formData.headerText && (
+                      <div className="text-center mb-6">
+                        <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
                       </div>
                     )}
                     
-                    <div style={{ marginBottom: '25px' }}>
-                      <div style={{ textAlign: 'center', borderBottom: '1px solid #ccc', paddingBottom: '15px', marginBottom: '20px' }}>
-                        <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{formData.title || 'Titolo Documento'}</h1>
+                    <div className="space-y-6">
+                      <div className="text-center border-b pb-4">
+                        <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
                         {formData.type !== 'programmi' && (
-                          <p style={{ color: '#666', margin: '5px 0', fontSize: '14px' }}>{currentDocType?.label}</p>
+                          <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
                         )}
-                        <p style={{ fontSize: '11px', color: '#666', margin: '5px 0' }}>
+                        <p className="text-sm text-muted-foreground">
                           {profile?.club_name} - {new Date().toLocaleDateString('it-IT')}
                         </p>
                       </div>
                       
-                      {templates[formData.type]?.sections.map((section, index) => {
+                      {templates[formData.type]?.sections.map((section) => {
                         const value = formData.content[section.key];
-                        console.log(`📄 Sezione ${section.key}:`, { section, value });
                         if (!value) return null;
-                        return (
-                          <div key={section.key} style={{ marginBottom: '20px', pageBreakInside: 'avoid' }}>
-                            {renderPreviewSection(section, value)}
-                          </div>
-                        );
+                        return renderPreviewSection(section, value);
                       })}
                       
                       {(formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
-                        <div style={{ marginTop: '40px', pageBreakInside: 'avoid' }}>
-                          <div style={{ marginBottom: '15px' }}>
-                            <span style={{ fontWeight: 'bold' }}>
+                        <div className="mt-8 text-left">
+                          <div className="mb-4">
+                            <span className="font-medium">
                               {formData.defaultLocation || '[Luogo]'}, {new Date().toLocaleDateString('it-IT')}
                             </span>
                           </div>
                           
-                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '30px' }}>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Il Segretario</div>
+                          <div className="grid grid-cols-2 gap-8">
+                            <div>
+                              <div className="font-medium mb-2">Il Segretario</div>
                               <div>{formData.secretaryName || '[Nome Segretario]'}</div>
                             </div>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Il Presidente</div>
+                            <div>
+                              <div className="font-medium mb-2">Il Presidente</div>
                               <div>{formData.presidentName || '[Nome Presidente]'}</div>
                             </div>
                           </div>
                         </div>
                       )}
                       
-                      {(userTemplates[0]?.settings?.footer_text || formData.footerData) && (
-                        <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #ccc', textAlign: 'center', pageBreakInside: 'avoid' }}>
-                          <div style={{ fontSize: '10px', color: '#666', whiteSpace: 'pre-line' }}>
-                            {userTemplates[0]?.settings?.footer_text || formData.footerData}
+                      {formData.footerData && (
+                        <div className="mt-8 pt-6 border-t text-center">
+                          <div className="text-xs text-muted-foreground whitespace-pre-line">
+                            {formData.footerData}
                           </div>
                         </div>
                       )}
