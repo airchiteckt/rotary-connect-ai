@@ -1802,11 +1802,16 @@ export default function CreateDocument() {
                           );
                         }
                         
-                        // Handle regular text fields
+                        // Handle regular text fields - check if value is object/array first
                         return (
                           <div key={section.key} className="space-y-2">
                             <h3 className="font-semibold text-lg">{section.label}</h3>
-                            <div className="text-sm whitespace-pre-wrap">{value}</div>
+                            <div className="text-sm whitespace-pre-wrap">
+                              {typeof value === 'object' 
+                                ? JSON.stringify(value, null, 2) 
+                                : value
+                              }
+                            </div>
                           </div>
                         );
                       })}
