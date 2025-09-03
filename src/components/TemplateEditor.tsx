@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Image, Eye, Save, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -227,34 +228,42 @@ export const TemplateEditor = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="logo-position">Posizione</Label>
-                    <select
-                      className="w-full mt-1 p-2 border rounded-md"
-                      value={template.logo_position}
-                      onChange={(e) => setTemplate(prev => ({ 
+                    <Select 
+                      value={template.logo_position} 
+                      onValueChange={(value) => setTemplate(prev => ({ 
                         ...prev, 
-                        logo_position: e.target.value as 'left' | 'center' | 'right' 
+                        logo_position: value as 'left' | 'center' | 'right' 
                       }))}
                     >
-                      <option value="left">Sinistra</option>
-                      <option value="center">Centro</option>
-                      <option value="right">Destra</option>
-                    </select>
+                      <SelectTrigger className="w-full mt-1">
+                        <SelectValue placeholder="Seleziona posizione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="left">Sinistra</SelectItem>
+                        <SelectItem value="center">Centro</SelectItem>
+                        <SelectItem value="right">Destra</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div>
                     <Label htmlFor="logo-size">Dimensione</Label>
-                    <select
-                      className="w-full mt-1 p-2 border rounded-md"
-                      value={template.logo_size}
-                      onChange={(e) => setTemplate(prev => ({ 
+                    <Select 
+                      value={template.logo_size} 
+                      onValueChange={(value) => setTemplate(prev => ({ 
                         ...prev, 
-                        logo_size: e.target.value as 'small' | 'medium' | 'large' 
+                        logo_size: value as 'small' | 'medium' | 'large' 
                       }))}
                     >
-                      <option value="small">Piccolo</option>
-                      <option value="medium">Medio</option>
-                      <option value="large">Grande</option>
-                    </select>
+                      <SelectTrigger className="w-full mt-1">
+                        <SelectValue placeholder="Seleziona dimensione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="small">Piccolo</SelectItem>
+                        <SelectItem value="medium">Medio</SelectItem>
+                        <SelectItem value="large">Grande</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </CardContent>
