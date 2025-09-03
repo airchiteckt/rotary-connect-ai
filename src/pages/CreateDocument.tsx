@@ -175,10 +175,16 @@ export default function CreateDocument() {
           content: data.content as Record<string, any>,
           status: data.status || 'draft',
           logoUrl: data.logo_url || '',
-          headerText: data.signature_url || '',
-          footerData: data.template_url || ''
+          headerText: '', // Will be loaded from template
+          footerData: data.template_url || '', // This contains footer data
+          defaultLocation: '', // Will be loaded from profile
+          secretaryName: '', // Will be loaded from profile  
+          presidentName: '' // Will be loaded from profile
         });
         setDocumentNumber(data.document_number || '');
+        
+        // Load profile data to fill location, secretary, president
+        await loadProfile();
       }
     } catch (error) {
       console.error('Error loading document:', error);
@@ -213,6 +219,14 @@ export default function CreateDocument() {
           ...prev,
           logoUrl: data.default_logo_url || prev.logoUrl,
           footerData: data.default_footer_data || prev.footerData,
+          defaultLocation: data.default_location || prev.defaultLocation,
+          secretaryName: data.secretary_name || prev.secretaryName,
+          presidentName: data.president_name || prev.presidentName
+        }));
+      } else if (documentId && data) {
+        // For existing documents, only load secretary, president and location from profile
+        setFormData(prev => ({
+          ...prev,
           defaultLocation: data.default_location || prev.defaultLocation,
           secretaryName: data.secretary_name || prev.secretaryName,
           presidentName: data.president_name || prev.presidentName
@@ -1636,15 +1650,22 @@ export default function CreateDocument() {
                       pageBreakInside: 'avoid'
                     }}
                   >
-                    {formData.logoUrl && (
+                    {/* Use template logo if available, otherwise form logo */}
+                    {(userTemplates[0]?.settings?.logo_url || formData.logoUrl) && (
                       <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-                        <img src={formData.logoUrl} alt="Logo Club" style={{ height: '50px', maxWidth: '100%' }} />
+                        <img 
+                          src={userTemplates[0]?.settings?.logo_url || formData.logoUrl} 
+                          alt="Logo Club" 
+                          style={{ height: '50px', maxWidth: '100%', display: 'block', margin: '0 auto' }} 
+                        />
                       </div>
                     )}
                     
-                    {formData.headerText && (
+                    {(userTemplates[0]?.settings?.header_text || formData.headerText) && (
                       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#000', margin: '0' }}>{formData.headerText}</h2>
+                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#000', margin: '0' }}>
+                          {userTemplates[0]?.settings?.header_text || formData.headerText}
+                        </h2>
                       </div>
                     )}
                     
@@ -1690,10 +1711,10 @@ export default function CreateDocument() {
                         </div>
                       )}
                       
-                      {formData.footerData && (
+                      {(userTemplates[0]?.settings?.footer_text || formData.footerData) && (
                         <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #ccc', textAlign: 'center', pageBreakInside: 'avoid' }}>
                           <div style={{ fontSize: '10px', color: '#666', whiteSpace: 'pre-line' }}>
-                            {formData.footerData}
+                            {userTemplates[0]?.settings?.footer_text || formData.footerData}
                           </div>
                         </div>
                       )}
