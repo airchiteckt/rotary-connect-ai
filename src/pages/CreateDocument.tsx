@@ -35,6 +35,7 @@ interface FormData {
   status: string;
   logoUrl?: string;
   headerText?: string;
+  footerData?: string;
 }
 
 export default function CreateDocument() {
@@ -50,7 +51,8 @@ export default function CreateDocument() {
     content: {},
     status: 'draft',
     logoUrl: '',
-    headerText: ''
+    headerText: '',
+    footerData: ''
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -160,7 +162,8 @@ export default function CreateDocument() {
           content: data.content as Record<string, any>,
           status: data.status || 'draft',
           logoUrl: data.logo_url || '',
-          headerText: data.signature_url || ''
+          headerText: data.signature_url || '',
+          footerData: data.template_url || ''
         });
         setDocumentNumber(data.document_number || '');
       }
@@ -189,6 +192,16 @@ export default function CreateDocument() {
       content: { ...prev.content, [key]: value }
     }));
   };
+
+  // Auto-set title when document type changes
+  useEffect(() => {
+    if (formData.type === 'programmi' && !documentId) {
+      setFormData(prev => ({
+        ...prev,
+        title: 'Programma del Mese'
+      }));
+    }
+  }, [formData.type, documentId]);
 
   const generateAI = async () => {
     if (!user) return;
@@ -252,7 +265,8 @@ export default function CreateDocument() {
         status: formData.status,
         user_id: user.id,
         logo_url: formData.logoUrl,
-        signature_url: formData.headerText
+        signature_url: formData.headerText,
+        template_url: formData.footerData
       };
 
       if (documentId) {
@@ -1378,6 +1392,17 @@ export default function CreateDocument() {
                     </div>
                     
                     <div>
+                      <Label>Dati Rotary a Piè di Pagina</Label>
+                      <Textarea
+                        value={formData.footerData || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, footerData: e.target.value }))}
+                        placeholder="Es. Rotary Club di [Nome] - Distretto [Numero]&#10;Via [Indirizzo], [Città]&#10;www.rotary[nome].it - info@rotary[nome].it"
+                        rows={4}
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
                       <Label>Autore</Label>
                       <div className="mt-1 p-2 bg-muted rounded-md flex items-center gap-2">
                         <User className="w-4 h-4" />
@@ -1406,11 +1431,19 @@ export default function CreateDocument() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="p-8 rounded-lg border bg-card text-card-foreground">{formData.logoUrl && (
+                  <div id="document-preview" className="p-8 rounded-lg border bg-card text-card-foreground">
+                    {formData.logoUrl && (
                       <div className="text-center mb-4">
                         <img src={formData.logoUrl} alt="Logo Club" className="h-16 mx-auto" />
                       </div>
                     )}
+                    
+                    {formData.headerText && (
+                      <div className="text-center mb-6">
+                        <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
+                      </div>
+                    )}
+                    
                     <div className="space-y-6">
                       <div className="text-center border-b pb-4">
                         <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
@@ -1425,6 +1458,14 @@ export default function CreateDocument() {
                         if (!value) return null;
                         return renderPreviewSection(section, value);
                       })}
+                      
+                      {formData.footerData && (
+                        <div className="mt-8 pt-6 border-t text-center">
+                          <div className="text-xs text-muted-foreground whitespace-pre-line">
+                            {formData.footerData}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
