@@ -1099,7 +1099,7 @@ export default function CreateDocument() {
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: 1,
+        margin: [0.2, 0.2, 0.2, 0.2], // margini minimi: top, right, bottom, left
         filename: `${formData.title || 'documento'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
