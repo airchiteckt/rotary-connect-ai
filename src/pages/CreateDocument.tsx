@@ -1312,9 +1312,9 @@ export default function CreateDocument() {
       // Build the PDF content with inline styles
       let pdfContent = '';
 
-      // Logo - Use profile default logo URL instead of form data blob URL
-      const logoUrl = profile?.default_logo_url || formData.logoUrl;
-      if (logoUrl && !logoUrl.startsWith('blob:')) {
+      // Logo - Use current form logo URL (it's already a public URL from Supabase Storage)
+      const logoUrl = formData.logoUrl || profile?.default_logo_url;
+      if (logoUrl && logoUrl.trim() !== '') {
         pdfContent += `
           <div style="text-align: center; margin-bottom: 16px;">
             <img src="${logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
