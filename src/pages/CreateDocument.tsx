@@ -1192,9 +1192,9 @@ export default function CreateDocument() {
     // Handle month-select display
     if (section.type === 'month-select') {
       return (
-        <div key={section.key} className="space-y-2">
-          <h3 className="font-semibold text-lg">{section.label}</h3>
-          <div className="text-sm capitalize font-medium">{value}</div>
+        <div key={section.key} style={{ marginBottom: '15px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
+          <div style={{ fontSize: '14px', fontWeight: '500', textTransform: 'capitalize' }}>{value}</div>
         </div>
       );
     }
@@ -1202,9 +1202,9 @@ export default function CreateDocument() {
     // Handle rotary-year display
     if (section.type === 'rotary-year') {
       return (
-        <div key={section.key} className="space-y-2">
-          <h3 className="font-semibold text-lg">{section.label}</h3>
-          <div className="text-sm font-medium text-blue-600">{value}</div>
+        <div key={section.key} style={{ marginBottom: '15px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
+          <div style={{ fontSize: '14px', fontWeight: '500', color: '#2563eb' }}>{value}</div>
         </div>
       );
     }
@@ -1212,29 +1212,27 @@ export default function CreateDocument() {
     // Handle club-meetings display
     if (section.type === 'club-meetings' && Array.isArray(value)) {
       return (
-        <div key={section.key} className="space-y-3">
-          <h3 className="font-semibold text-lg">{section.label}</h3>
-          <div className="space-y-3">
+        <div key={section.key} style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000' }}>{section.label}</h3>
+          <div>
             {value.map((meeting, index) => (
-              <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-medium text-base">{meeting.nome}</h4>
+              <div key={index} style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '6px', marginBottom: '12px', border: '1px solid #e5e7eb' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: '500', margin: '0' }}>{meeting.nome}</h4>
                   {meeting.data && (
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(meeting.data).toLocaleDateString('it-IT')}
+                    <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                      📅 {new Date(meeting.data).toLocaleDateString('it-IT')}
                       {meeting.orario && ` - ${meeting.orario}`}
                     </div>
                   )}
                 </div>
                 {meeting.luogo && (
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                    <MapPin className="w-4 h-4" />
-                    {meeting.luogo}
+                  <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+                    📍 {meeting.luogo}
                   </div>
                 )}
                 {meeting.descrizione && (
-                  <p className="text-sm text-gray-700">{meeting.descrizione}</p>
+                  <p style={{ fontSize: '12px', color: '#374151', margin: '0' }}>{meeting.descrizione}</p>
                 )}
               </div>
             ))}
@@ -1246,12 +1244,12 @@ export default function CreateDocument() {
     // Handle agenda_distrettuale display with new format
     if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
       return (
-        <div key={section.key} className="space-y-3">
-          <h3 className="font-semibold text-lg">{section.label}</h3>
-          <div className="space-y-2">
+        <div key={section.key} style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000' }}>{section.label}</h3>
+          <div>
             {value.map((item, index) => (
-              <div key={index} className="bg-gray-50 p-3 rounded-lg border">
-                <div className="text-sm">
+              <div key={index} style={{ backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', marginBottom: '8px' }}>
+                <div style={{ fontSize: '12px', lineHeight: '1.4' }}>
                   {item.testo && item.data && item.luogo 
                     ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
                     : item.testo && item.data
@@ -1262,7 +1260,7 @@ export default function CreateDocument() {
                   }
                 </div>
                 {item.descrizione && (
-                  <div className="text-xs text-gray-600 mt-1">
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
                     {item.descrizione}
                   </div>
                 )}
@@ -1279,18 +1277,18 @@ export default function CreateDocument() {
       if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
         // Default formatting for other sections
         return (
-          <div key={section.key} className="space-y-3">
-            <h3 className="font-semibold text-lg">{section.label}</h3>
-            <div className="space-y-2">
+          <div key={section.key} style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000' }}>{section.label}</h3>
+            <div>
               {value.map((item, index) => (
-                <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                <div key={index} style={{ backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb', marginBottom: '8px' }}>
                   {Object.entries(item).map(([key, val]) => (
                     val && (
-                      <div key={key} className="mb-1 last:mb-0">
-                        <span className="font-medium capitalize text-sm text-gray-600">
+                      <div key={key} style={{ marginBottom: '4px' }}>
+                        <span style={{ fontWeight: '500', fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
                           {key.replace(/_/g, ' ')}: 
                         </span>
-                        <span className="ml-2 text-sm">
+                        <span style={{ marginLeft: '8px', fontSize: '12px' }}>
                           {typeof val === 'string' && key === 'data' 
                             ? new Date(val).toLocaleDateString('it-IT')
                             : String(val)
@@ -1308,16 +1306,16 @@ export default function CreateDocument() {
       
       // For other objects, show as key-value pairs
       return (
-        <div key={section.key} className="space-y-2">
-          <h3 className="font-semibold text-lg">{section.label}</h3>
-          <div className="bg-gray-50 p-3 rounded-lg border">
+        <div key={section.key} style={{ marginBottom: '15px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
+          <div style={{ backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
             {Object.entries(value).map(([key, val]) => (
               val && (
-                <div key={key} className="mb-1 last:mb-0">
-                  <span className="font-medium capitalize text-sm text-gray-600">
+                <div key={key} style={{ marginBottom: '4px' }}>
+                  <span style={{ fontWeight: '500', fontSize: '12px', color: '#6b7280', textTransform: 'capitalize' }}>
                     {key.replace(/_/g, ' ')}: 
                   </span>
-                  <span className="ml-2 text-sm">{String(val)}</span>
+                  <span style={{ marginLeft: '8px', fontSize: '12px' }}>{String(val)}</span>
                 </div>
               )
             ))}
@@ -1328,9 +1326,9 @@ export default function CreateDocument() {
     
     // Handle regular text fields
     return (
-      <div key={section.key} className="space-y-2">
-        <h3 className="font-semibold text-lg">{section.label}</h3>
-        <div className="text-sm whitespace-pre-wrap">{value}</div>
+      <div key={section.key} style={{ marginBottom: '15px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>{section.label}</h3>
+        <div style={{ fontSize: '12px', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>{value}</div>
       </div>
     );
   };
