@@ -356,7 +356,7 @@ export default function CreateDocument() {
         throw new Error(response.error.message);
       }
 
-      const { suggestions } = response.data;
+      const { suggestions, summary } = response.data;
       
       if (suggestions) {
         setFormData(prev => ({
@@ -364,10 +364,19 @@ export default function CreateDocument() {
           content: { ...prev.content, ...suggestions }
         }));
         
-        toast({
-          title: "Contenuto generato",
-          description: "I contenuti sono stati generati con successo dall'AI",
-        });
+        // Mostra il summary generato dall'AI
+        if (summary) {
+          toast({
+            title: "Contenuto e Riassunto generati",
+            description: `${summary}`,
+            duration: 8000,
+          });
+        } else {
+          toast({
+            title: "Contenuto generato",
+            description: "I contenuti sono stati generati con successo dall'AI",
+          });
+        }
       }
     } catch (error) {
       console.error('Error generating AI content:', error);
