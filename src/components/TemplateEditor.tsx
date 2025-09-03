@@ -617,10 +617,10 @@ export const TemplateEditor = ({ onTemplateSaved }: TemplateEditorProps = {}) =>
                              size="sm"
                              onClick={() => {
                                setTemplate(savedTemplate.settings as any as TemplateSettings);
-                               setActiveTab('editor');
+                               setActiveTab('preview');
                                toast({
                                  title: "Template caricato",
-                                 description: "Template caricato nell'editor",
+                                 description: "Template caricato e anteprima aggiornata",
                                });
                              }}
                            >
