@@ -1372,15 +1372,11 @@ export default function CreateDocument() {
         }
       }
 
-      // Header text with rotary year
-      const rotaryYearValue = formData.content['anno_rotariano'];
-      if (formData.headerText || rotaryYearValue) {
+      // Header text only (no rotary year badge)
+      if (formData.headerText) {
         pdfContent += `
           <div style="text-align: center; margin-bottom: 24px;">
-            <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
-              ${formData.headerText ? `<h2 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0;">${formData.headerText}</h2>` : ''}
-              ${rotaryYearValue ? `<span style="font-size: 16px; font-weight: 500; color: #2563eb; background-color: #f0f9ff; padding: 4px 12px; border-radius: 20px; border: 1px solid #bfdbfe;">${rotaryYearValue}</span>` : ''}
-            </div>
+            <h2 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0;">${formData.headerText}</h2>
           </div>
         `;
       }
@@ -2051,20 +2047,11 @@ export default function CreateDocument() {
                       </div>
                     )}
                     
-                    {(formData.headerText || formData.content['anno_rotariano']) && (
-                      <div className="text-center mb-6">
-                        <div className="flex justify-center items-center gap-4 flex-wrap">
-                          {formData.headerText && (
-                            <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
-                          )}
-                          {formData.content['anno_rotariano'] && (
-                            <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                              {formData.content['anno_rotariano']}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                     {formData.headerText && (
+                       <div className="text-center mb-6">
+                         <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
+                       </div>
+                     )}
                     
                     <div className="space-y-6">
                         <div className="text-center border-b pb-4">
