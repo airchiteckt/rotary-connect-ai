@@ -1134,15 +1134,21 @@ export default function CreateDocument() {
   };
 
   const downloadPDF = async () => {
+    console.log('🔍 Inizio download PDF...');
     const element = document.getElementById('document-preview');
+    
     if (!element) {
+      console.error('❌ Elemento document-preview non trovato');
       toast({
         title: "Errore",
-        description: "Errore nella creazione del PDF",
+        description: "Errore nella creazione del PDF - elemento non trovato",
         variant: "destructive"
       });
       return;
     }
+
+    console.log('✅ Elemento trovato:', element);
+    console.log('📄 Contenuto HTML da convertire:', element.innerHTML.substring(0, 200) + '...');
 
     try {
       toast({
@@ -1150,8 +1156,10 @@ export default function CreateDocument() {
         description: "Generazione PDF in corso..."
       });
       
+      console.log('📦 Caricamento html2pdf...');
       // Dynamically import html2pdf
       const html2pdf = (await import('html2pdf.js')).default;
+      console.log('✅ html2pdf caricato');
       
       const opt = {
         margin: [10, 10, 10, 10], // margini in mm: top, right, bottom, left
@@ -1173,16 +1181,22 @@ export default function CreateDocument() {
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
+      console.log('⚙️ Configurazione PDF:', opt);
+      console.log('🔄 Generazione in corso...');
+      
       await html2pdf().set(opt).from(element).save();
+      
+      console.log('✅ PDF generato con successo!');
       toast({
         title: "Successo", 
         description: "PDF scaricato con successo!"
       });
     } catch (error) {
-      console.error('Errore nella generazione del PDF:', error);
+      console.error('❌ Errore nella generazione del PDF:', error);
+      console.error('📋 Stack trace:', error.stack);
       toast({
         title: "Errore",
-        description: "Errore nella generazione del PDF",
+        description: "Errore nella generazione del PDF: " + error.message,
         variant: "destructive"
       });
     }
@@ -1680,6 +1694,7 @@ export default function CreateDocument() {
                       
                       {templates[formData.type]?.sections.map((section, index) => {
                         const value = formData.content[section.key];
+                        console.log(`📄 Sezione ${section.key}:`, { section, value });
                         if (!value) return null;
                         return (
                           <div key={section.key} style={{ marginBottom: '20px', pageBreakInside: 'avoid' }}>
