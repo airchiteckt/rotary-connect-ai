@@ -83,7 +83,6 @@ export default function CreateDocument() {
     },
     programmi: {
       sections: [
-        { key: 'mese', label: 'Mese', type: 'month-select', required: true },
         { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: false },
         { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: false },
         { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
@@ -307,9 +306,14 @@ export default function CreateDocument() {
   // Auto-set title when document type changes
   useEffect(() => {
     if (formData.type === 'programmi' && !documentId) {
+      const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' }).toLowerCase();
       setFormData(prev => ({
         ...prev,
-        title: 'Programma mensile'
+        title: 'Programma mensile',
+        content: {
+          ...prev.content,
+          mese: currentMonth
+        }
       }));
     }
   }, [formData.type, documentId]);
@@ -1308,11 +1312,12 @@ export default function CreateDocument() {
       // Build the PDF content with inline styles
       let pdfContent = '';
 
-      // Logo
-      if (formData.logoUrl) {
+      // Logo - Use profile default logo URL instead of form data blob URL
+      const logoUrl = profile?.default_logo_url || formData.logoUrl;
+      if (logoUrl && !logoUrl.startsWith('blob:')) {
         pdfContent += `
           <div style="text-align: center; margin-bottom: 16px;">
-            <img src="${formData.logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
+            <img src="${logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
           </div>
         `;
       }
@@ -1330,23 +1335,38 @@ export default function CreateDocument() {
         `;
       }
 
-      // Title section
-      pdfContent += `
-        <div style="margin-bottom: 24px;">
-          <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
-            <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">${formData.title || 'Titolo Documento'}</h1>
-            ${formData.type !== 'programmi' ? `<p style="color: #6b7280; margin: 8px 0;">${currentDocType?.label}</p>` : ''}
-            <p style="font-size: 14px; color: #6b7280; margin: 0;">
-              ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
-            </p>
+      // Title section - Special handling for programmi type
+      if (formData.type === 'programmi') {
+        const mese = formData.content['mese'] || 'Mese';
+        const meseCapitalized = mese.charAt(0).toUpperCase() + mese.slice(1);
+        pdfContent += `
+          <div style="margin-bottom: 24px;">
+            <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
+              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized}</h1>
+              <p style="font-size: 14px; color: #6b7280; margin: 0;">
+                ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
+              </p>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+      } else {
+        pdfContent += `
+          <div style="margin-bottom: 24px;">
+            <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
+              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">${formData.title || 'Titolo Documento'}</h1>
+              <p style="color: #6b7280; margin: 8px 0;">${currentDocType?.label}</p>
+              <p style="font-size: 14px; color: #6b7280; margin: 0;">
+                ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
+              </p>
+            </div>
+          </div>
+        `;
+      }
 
       // Content sections
       for (const section of templates[formData.type]?.sections || []) {
         const value = formData.content[section.key];
-        if (value && section.key !== 'anno_rotariano') { // Skip rotary year as it's shown in header
+        if (value && section.key !== 'anno_rotariano' && section.key !== 'mese') { // Skip rotary year and month as they're shown in header
           const sectionElement = document.createElement('div');
           const renderedSection = renderPDFPreviewSection(section, value);
           if (renderedSection) {
@@ -1354,14 +1374,7 @@ export default function CreateDocument() {
             const tempDiv = document.createElement('div');
             const reactElement = renderedSection as React.ReactElement;
             
-            if (section.type === 'month-select') {
-              pdfContent += `
-                <div style="margin-bottom: 16px;">
-                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #1f2937;">${section.label}</h3>
-                  <div style="font-size: 14px; font-weight: 500; text-transform: capitalize;">${value}</div>
-                </div>
-              `;
-            } else if (section.type === 'rotary-year') {
+            if (section.type === 'rotary-year') {
               pdfContent += `
                 <div style="margin-bottom: 16px;">
                   <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #1f2937;">${section.label}</h3>
@@ -1505,16 +1518,6 @@ export default function CreateDocument() {
   };
 
   const renderPreviewSection = (section: any, value: any) => {
-    // Handle month-select display
-    if (section.type === 'month-select') {
-      return (
-        <div key={section.key} className="space-y-2">
-          <h3 className="font-semibold text-lg">{section.label}</h3>
-          <div className="text-sm capitalize font-medium">{value}</div>
-        </div>
-      );
-    }
-    
     // Handle rotary-year display
     if (section.type === 'rotary-year') {
       return (
@@ -2012,21 +2015,29 @@ export default function CreateDocument() {
                     )}
                     
                     <div className="space-y-6">
-                      <div className="text-center border-b pb-4">
-                        <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
-                        {formData.type !== 'programmi' && (
-                          <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                          {profile?.club_name} - {new Date().toLocaleDateString('it-IT')}
-                        </p>
-                      </div>
+                       <div className="text-center border-b pb-4">
+                         {formData.type === 'programmi' ? (
+                           <>
+                             <h1 className="text-2xl font-bold">
+                               Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Mese'}
+                             </h1>
+                           </>
+                         ) : (
+                           <>
+                             <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
+                             <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
+                           </>
+                         )}
+                         <p className="text-sm text-muted-foreground">
+                           {profile?.club_name} - {new Date().toLocaleDateString('it-IT')}
+                         </p>
+                       </div>
                       
-                      {templates[formData.type]?.sections.map((section) => {
-                        const value = formData.content[section.key];
-                        if (!value || section.key === 'anno_rotariano') return null; // Skip rotary year as it's shown in header
-                        return renderPreviewSection(section, value);
-                      })}
+                       {templates[formData.type]?.sections.map((section) => {
+                         const value = formData.content[section.key];
+                         if (!value || section.key === 'anno_rotariano' || section.key === 'mese') return null; // Skip rotary year and month as they're shown in header
+                         return renderPreviewSection(section, value);
+                       })}
                       
                       {(formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
                         <div className="mt-8 text-left">
