@@ -1099,11 +1099,23 @@ export default function CreateDocument() {
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: [0.2, 0.2, 0.2, 0.2], // margini minimi: top, right, bottom, left
+        margin: [10, 10, 10, 10], // margini in mm: top, right, bottom, left
         filename: `${formData.title || 'documento'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { 
+          scale: 1.5,
+          useCORS: true,
+          allowTaint: true,
+          width: 794, // larghezza A4 in pixel (210mm)
+          height: 1123 // altezza A4 in pixel (297mm)
+        },
+        jsPDF: { 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
       await html2pdf().set(opt).from(element).save();
@@ -1560,51 +1572,68 @@ export default function CreateDocument() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div id="document-preview" className="p-8 rounded-lg border bg-card text-card-foreground">
+                  <div 
+                    id="document-preview" 
+                    className="mx-auto bg-white text-black"
+                    style={{ 
+                      width: '210mm', 
+                      minHeight: '297mm', 
+                      padding: '20mm 15mm',
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '12px',
+                      lineHeight: '1.4',
+                      color: '#000',
+                      pageBreakInside: 'avoid'
+                    }}
+                  >
                     {formData.logoUrl && (
-                      <div className="text-center mb-4">
-                        <img src={formData.logoUrl} alt="Logo Club" className="h-16 mx-auto" />
+                      <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                        <img src={formData.logoUrl} alt="Logo Club" style={{ height: '50px', maxWidth: '100%' }} />
                       </div>
                     )}
                     
                     {formData.headerText && (
-                      <div className="text-center mb-6">
-                        <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
+                      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#000', margin: '0' }}>{formData.headerText}</h2>
                       </div>
                     )}
                     
-                    <div className="space-y-6">
-                      <div className="text-center border-b pb-4">
-                        <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
+                    <div style={{ marginBottom: '25px' }}>
+                      <div style={{ textAlign: 'center', borderBottom: '1px solid #ccc', paddingBottom: '15px', marginBottom: '20px' }}>
+                        <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{formData.title || 'Titolo Documento'}</h1>
                         {formData.type !== 'programmi' && (
-                          <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
+                          <p style={{ color: '#666', margin: '5px 0', fontSize: '14px' }}>{currentDocType?.label}</p>
                         )}
-                        <p className="text-sm text-muted-foreground">
+                        <p style={{ fontSize: '11px', color: '#666', margin: '5px 0' }}>
                           {profile?.club_name} - {new Date().toLocaleDateString('it-IT')}
                         </p>
                       </div>
                       
-                      {templates[formData.type]?.sections.map((section) => {
+                      {templates[formData.type]?.sections.map((section, index) => {
                         const value = formData.content[section.key];
                         if (!value) return null;
-                        return renderPreviewSection(section, value);
+                        return (
+                          <div key={section.key} style={{ marginBottom: '20px', pageBreakInside: 'avoid' }}>
+                            {renderPreviewSection(section, value)}
+                          </div>
+                        );
                       })}
                       
                       {(formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
-                        <div className="mt-8 text-left">
-                          <div className="mb-4">
-                            <span className="font-medium">
+                        <div style={{ marginTop: '40px', pageBreakInside: 'avoid' }}>
+                          <div style={{ marginBottom: '15px' }}>
+                            <span style={{ fontWeight: 'bold' }}>
                               {formData.defaultLocation || '[Luogo]'}, {new Date().toLocaleDateString('it-IT')}
                             </span>
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-8">
-                            <div>
-                              <div className="font-medium mb-2">Il Segretario</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '30px' }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Il Segretario</div>
                               <div>{formData.secretaryName || '[Nome Segretario]'}</div>
                             </div>
-                            <div>
-                              <div className="font-medium mb-2">Il Presidente</div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>Il Presidente</div>
                               <div>{formData.presidentName || '[Nome Presidente]'}</div>
                             </div>
                           </div>
@@ -1612,8 +1641,8 @@ export default function CreateDocument() {
                       )}
                       
                       {formData.footerData && (
-                        <div className="mt-8 pt-6 border-t text-center">
-                          <div className="text-xs text-muted-foreground whitespace-pre-line">
+                        <div style={{ marginTop: '30px', paddingTop: '15px', borderTop: '1px solid #ccc', textAlign: 'center', pageBreakInside: 'avoid' }}>
+                          <div style={{ fontSize: '10px', color: '#666', whiteSpace: 'pre-line' }}>
                             {formData.footerData}
                           </div>
                         </div>
