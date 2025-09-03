@@ -125,6 +125,7 @@ export type Database = {
       documents: {
         Row: {
           ai_summary: string | null
+          background_template: string | null
           content: Json
           created_at: string
           document_number: string | null
@@ -141,6 +142,7 @@ export type Database = {
         }
         Insert: {
           ai_summary?: string | null
+          background_template?: string | null
           content: Json
           created_at?: string
           document_number?: string | null
@@ -157,6 +159,7 @@ export type Database = {
         }
         Update: {
           ai_summary?: string | null
+          background_template?: string | null
           content?: Json
           created_at?: string
           document_number?: string | null

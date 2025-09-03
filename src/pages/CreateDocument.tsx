@@ -157,7 +157,7 @@ export default function CreateDocument() {
           type: data.type as FormData['type'],
           content: data.content as Record<string, any>,
           status: data.status || 'draft',
-          backgroundTemplate: (data as any).backgroundTemplate || 'classic'
+          backgroundTemplate: (data as any).background_template || 'classic'
         });
         setDocumentNumber(data.document_number || '');
       }
@@ -248,7 +248,7 @@ export default function CreateDocument() {
         content: formData.content,
         status: formData.status,
         user_id: user.id,
-        backgroundTemplate: formData.backgroundTemplate
+        background_template: formData.backgroundTemplate
       };
 
       if (documentId) {
