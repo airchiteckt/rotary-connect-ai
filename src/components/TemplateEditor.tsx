@@ -100,20 +100,37 @@ export const TemplateEditor = () => {
     
     setIsSaving(true);
     try {
+      // First, check if user already has a default template
+      const { data: existingTemplate } = await supabase
+        .from('document_templates')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .maybeSingle();
+
       const templateData = {
         user_id: user.id,
         settings: template as any,
         name: 'Default Template',
         is_default: true
       };
-      
-      const { error } = await supabase
-        .from('document_templates')
-        .upsert(templateData, {
-          onConflict: 'user_id,is_default'
-        });
 
-      if (error) throw error;
+      if (existingTemplate) {
+        // Update existing template
+        const { error } = await supabase
+          .from('document_templates')
+          .update(templateData)
+          .eq('id', existingTemplate.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new template
+        const { error } = await supabase
+          .from('document_templates')
+          .insert(templateData);
+
+        if (error) throw error;
+      }
       
       toast({
         title: "Successo",
