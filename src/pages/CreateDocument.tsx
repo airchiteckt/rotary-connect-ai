@@ -1078,35 +1078,371 @@ export default function CreateDocument() {
     }
   };
 
-  const downloadPDF = async () => {
-    const element = document.getElementById('document-preview');
-    if (!element) {
-      toast({
-        title: "Errore",
-        description: "Errore nella creazione del PDF",
-        variant: "destructive"
-      });
-      return;
+  const renderPDFPreviewSection = (section: any, value: any) => {
+    // Handle month-select display
+    if (section.type === 'month-select') {
+      return (
+        <div key={section.key} style={{ marginBottom: '16px' }}>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1f2937' }}>{section.label}</h3>
+          <div style={{ fontSize: '14px', fontWeight: '500', textTransform: 'capitalize' }}>{value}</div>
+        </div>
+      );
     }
+    
+    // Handle rotary-year display
+    if (section.type === 'rotary-year') {
+      return (
+        <div key={section.key} style={{ marginBottom: '16px' }}>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1f2937' }}>{section.label}</h3>
+          <div style={{ fontSize: '14px', fontWeight: '500', color: '#2563eb' }}>{value}</div>
+        </div>
+      );
+    }
+    
+    // Handle club-meetings display
+    if (section.type === 'club-meetings' && Array.isArray(value)) {
+      return (
+        <div key={section.key} style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '12px', color: '#1f2937' }}>{section.label}</h3>
+          <div>
+            {value.map((meeting, index) => (
+              <div key={index} style={{ 
+                backgroundColor: '#f9fafb', 
+                padding: '16px', 
+                marginBottom: '12px', 
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <h4 style={{ fontWeight: '500', fontSize: '16px', margin: '0' }}>{meeting.nome}</h4>
+                  {meeting.data && (
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      📅 {new Date(meeting.data).toLocaleDateString('it-IT')}
+                      {meeting.orario && ` - ${meeting.orario}`}
+                    </div>
+                  )}
+                </div>
+                {meeting.luogo && (
+                  <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
+                    📍 {meeting.luogo}
+                  </div>
+                )}
+                {meeting.descrizione && (
+                  <p style={{ fontSize: '14px', color: '#374151', margin: '0' }}>{meeting.descrizione}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle agenda_distrettuale display
+    if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
+      return (
+        <div key={section.key} style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '12px', color: '#1f2937' }}>{section.label}</h3>
+          <div>
+            {value.map((item, index) => (
+              <div key={index} style={{ 
+                backgroundColor: '#f9fafb', 
+                padding: '12px', 
+                marginBottom: '8px', 
+                borderRadius: '6px',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{ fontSize: '14px' }}>
+                  {item.testo && item.data && item.luogo 
+                    ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
+                    : item.testo && item.data
+                    ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')}`
+                    : item.testo && item.luogo
+                    ? `${item.testo} - ${item.luogo}`
+                    : item.testo || 'Evento senza titolo'
+                  }
+                </div>
+                {item.descrizione && (
+                  <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                    {item.descrizione}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle regular text fields - check if value is object/array first
+    if (typeof value === 'object' && value !== null) {
+      // If it's an array of objects, display them nicely
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+        return (
+          <div key={section.key} style={{ marginBottom: '20px' }}>
+            <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '12px', color: '#1f2937' }}>{section.label}</h3>
+            <div>
+              {value.map((item, index) => (
+                <div key={index} style={{ 
+                  backgroundColor: '#f9fafb', 
+                  padding: '12px', 
+                  marginBottom: '8px', 
+                  borderRadius: '6px',
+                  border: '1px solid #e5e7eb'
+                }}>
+                  {Object.entries(item).map(([key, val]) => (
+                    val && (
+                      <div key={key} style={{ marginBottom: '4px' }}>
+                        <span style={{ fontWeight: '500', fontSize: '14px', color: '#6b7280', textTransform: 'capitalize' }}>
+                          {key.replace(/_/g, ' ')}: 
+                        </span>
+                        <span style={{ marginLeft: '8px', fontSize: '14px' }}>
+                          {typeof val === 'string' && key === 'data' 
+                            ? new Date(val).toLocaleDateString('it-IT')
+                            : String(val)
+                          }
+                        </span>
+                      </div>
+                    )
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      
+      // For other objects, show as key-value pairs
+      return (
+        <div key={section.key} style={{ marginBottom: '16px' }}>
+          <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1f2937' }}>{section.label}</h3>
+          <div style={{ 
+            backgroundColor: '#f9fafb', 
+            padding: '12px', 
+            borderRadius: '6px',
+            border: '1px solid #e5e7eb'
+          }}>
+            {Object.entries(value).map(([key, val]) => (
+              val && (
+                <div key={key} style={{ marginBottom: '4px' }}>
+                  <span style={{ fontWeight: '500', fontSize: '14px', color: '#6b7280', textTransform: 'capitalize' }}>
+                    {key.replace(/_/g, ' ')}: 
+                  </span>
+                  <span style={{ marginLeft: '8px', fontSize: '14px' }}>{String(val)}</span>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle regular text fields
+    return (
+      <div key={section.key} style={{ marginBottom: '16px' }}>
+        <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1f2937' }}>{section.label}</h3>
+        <div style={{ fontSize: '14px', whiteSpace: 'pre-wrap' }}>{value}</div>
+      </div>
+    );
+  };
 
+  const downloadPDF = async () => {
     try {
       toast({
         title: "PDF",
         description: "Generazione PDF in corso..."
       });
       
+      // Create a temporary element for PDF generation with inline styles
+      const tempElement = document.createElement('div');
+      tempElement.style.cssText = `
+        padding: 32px;
+        background: white;
+        color: black;
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+      `;
+
+      // Build the PDF content with inline styles
+      let pdfContent = '';
+
+      // Logo
+      if (formData.logoUrl) {
+        pdfContent += `
+          <div style="text-align: center; margin-bottom: 16px;">
+            <img src="https://rotaryscafatiangirealvalle.it/wp-content/uploads/2024/12/logo-ROTARY-Scafati-Angri-Realvalle-png.png" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
+          </div>
+        `;
+      }
+
+      // Header text
+      if (formData.headerText) {
+        pdfContent += `
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h2 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0;">${formData.headerText}</h2>
+          </div>
+        `;
+      }
+
+      // Title section
+      pdfContent += `
+        <div style="margin-bottom: 24px;">
+          <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
+            <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">${formData.title || 'Titolo Documento'}</h1>
+            ${formData.type !== 'programmi' ? `<p style="color: #6b7280; margin: 8px 0;">${currentDocType?.label}</p>` : ''}
+            <p style="font-size: 14px; color: #6b7280; margin: 0;">
+              ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
+            </p>
+          </div>
+        </div>
+      `;
+
+      // Content sections
+      for (const section of templates[formData.type]?.sections || []) {
+        const value = formData.content[section.key];
+        if (value) {
+          const sectionElement = document.createElement('div');
+          const renderedSection = renderPDFPreviewSection(section, value);
+          if (renderedSection) {
+            // Convert React element to HTML string for inline styles
+            const tempDiv = document.createElement('div');
+            const reactElement = renderedSection as React.ReactElement;
+            
+            if (section.type === 'month-select') {
+              pdfContent += `
+                <div style="margin-bottom: 16px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #1f2937;">${section.label}</h3>
+                  <div style="font-size: 14px; font-weight: 500; text-transform: capitalize;">${value}</div>
+                </div>
+              `;
+            } else if (section.type === 'rotary-year') {
+              pdfContent += `
+                <div style="margin-bottom: 16px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #1f2937;">${section.label}</h3>
+                  <div style="font-size: 14px; font-weight: 500; color: #2563eb;">${value}</div>
+                </div>
+              `;
+            } else if (section.type === 'club-meetings' && Array.isArray(value)) {
+              pdfContent += `
+                <div style="margin-bottom: 20px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px; color: #1f2937;">${section.label}</h3>
+                  <div>
+                    ${value.map((meeting, index) => `
+                      <div style="background-color: #f9fafb; padding: 16px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                          <h4 style="font-weight: 500; font-size: 16px; margin: 0;">${meeting.nome}</h4>
+                          ${meeting.data ? `
+                            <div style="font-size: 14px; color: #6b7280;">
+                              📅 ${new Date(meeting.data).toLocaleDateString('it-IT')}${meeting.orario ? ` - ${meeting.orario}` : ''}
+                            </div>
+                          ` : ''}
+                        </div>
+                        ${meeting.luogo ? `
+                          <div style="font-size: 14px; color: #6b7280; margin-bottom: 8px;">
+                            📍 ${meeting.luogo}
+                          </div>
+                        ` : ''}
+                        ${meeting.descrizione ? `
+                          <p style="font-size: 14px; color: #374151; margin: 0;">${meeting.descrizione}</p>
+                        ` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            } else if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
+              pdfContent += `
+                <div style="margin-bottom: 20px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px; color: #1f2937;">${section.label}</h3>
+                  <div>
+                    ${value.map((item, index) => `
+                      <div style="background-color: #f9fafb; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
+                        <div style="font-size: 14px;">
+                          ${item.testo && item.data && item.luogo 
+                            ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
+                            : item.testo && item.data
+                            ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')}`
+                            : item.testo && item.luogo
+                            ? `${item.testo} - ${item.luogo}`
+                            : item.testo || 'Evento senza titolo'
+                          }
+                        </div>
+                        ${item.descrizione ? `
+                          <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                            ${item.descrizione}
+                          </div>
+                        ` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            } else {
+              // Handle regular text fields
+              pdfContent += `
+                <div style="margin-bottom: 16px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #1f2937;">${section.label}</h3>
+                  <div style="font-size: 14px; white-space: pre-wrap;">${value}</div>
+                </div>
+              `;
+            }
+          }
+        }
+      }
+
+      // Signatures section
+      if (formData.defaultLocation || formData.secretaryName || formData.presidentName) {
+        pdfContent += `
+          <div style="margin-top: 32px; text-align: left;">
+            <div style="margin-bottom: 16px;">
+              <span style="font-weight: 500;">
+                ${formData.defaultLocation || '[Luogo]'}, ${new Date().toLocaleDateString('it-IT')}
+              </span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between;">
+              <div style="flex: 1; margin-right: 32px;">
+                <div style="font-weight: 500; margin-bottom: 8px;">Il Segretario</div>
+                <div>${formData.secretaryName || '[Nome Segretario]'}</div>
+              </div>
+              <div style="flex: 1;">
+                <div style="font-weight: 500; margin-bottom: 8px;">Il Presidente</div>
+                <div>${formData.presidentName || '[Nome Presidente]'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Footer
+      if (formData.footerData) {
+        pdfContent += `
+          <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center;">
+            <div style="font-size: 12px; color: #6b7280; white-space: pre-line;">
+              ${formData.footerData}
+            </div>
+          </div>
+        `;
+      }
+
+      tempElement.innerHTML = pdfContent;
+      document.body.appendChild(tempElement);
+
       // Dynamically import html2pdf
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: [0.2, 0.2, 0.2, 0.2], // margini minimi: top, right, bottom, left
+        margin: [0.2, 0.2, 0.2, 0.2],
         filename: `${formData.title || 'documento'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
       };
 
-      await html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(tempElement).save();
+      
+      // Clean up
+      document.body.removeChild(tempElement);
+      
       toast({
         title: "Successo", 
         description: "PDF scaricato con successo!"
