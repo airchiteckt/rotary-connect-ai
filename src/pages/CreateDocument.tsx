@@ -1311,16 +1311,20 @@ export default function CreateDocument() {
       if (formData.logoUrl) {
         pdfContent += `
           <div style="text-align: center; margin-bottom: 16px;">
-            <img src="https://rotaryscafatiangirealvalle.it/wp-content/uploads/2024/12/logo-ROTARY-Scafati-Angri-Realvalle-png.png" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
+            <img src="${formData.logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
           </div>
         `;
       }
 
-      // Header text
-      if (formData.headerText) {
+      // Header text with rotary year
+      const rotaryYearValue = formData.content['anno_rotariano'];
+      if (formData.headerText || rotaryYearValue) {
         pdfContent += `
           <div style="text-align: center; margin-bottom: 24px;">
-            <h2 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0;">${formData.headerText}</h2>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+              ${formData.headerText ? `<h2 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0;">${formData.headerText}</h2>` : ''}
+              ${rotaryYearValue ? `<span style="font-size: 16px; font-weight: 500; color: #2563eb; background-color: #f0f9ff; padding: 4px 12px; border-radius: 20px; border: 1px solid #bfdbfe;">${rotaryYearValue}</span>` : ''}
+            </div>
           </div>
         `;
       }
@@ -1341,7 +1345,7 @@ export default function CreateDocument() {
       // Content sections
       for (const section of templates[formData.type]?.sections || []) {
         const value = formData.content[section.key];
-        if (value) {
+        if (value && section.key !== 'anno_rotariano') { // Skip rotary year as it's shown in header
           const sectionElement = document.createElement('div');
           const renderedSection = renderPDFPreviewSection(section, value);
           if (renderedSection) {
@@ -1991,9 +1995,18 @@ export default function CreateDocument() {
                       </div>
                     )}
                     
-                    {formData.headerText && (
+                    {(formData.headerText || formData.content['anno_rotariano']) && (
                       <div className="text-center mb-6">
-                        <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
+                        <div className="flex justify-center items-center gap-4 flex-wrap">
+                          {formData.headerText && (
+                            <h2 className="text-lg font-semibold text-primary">{formData.headerText}</h2>
+                          )}
+                          {formData.content['anno_rotariano'] && (
+                            <span className="text-sm font-medium text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                              {formData.content['anno_rotariano']}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
                     
@@ -2010,7 +2023,7 @@ export default function CreateDocument() {
                       
                       {templates[formData.type]?.sections.map((section) => {
                         const value = formData.content[section.key];
-                        if (!value) return null;
+                        if (!value || section.key === 'anno_rotariano') return null; // Skip rotary year as it's shown in header
                         return renderPreviewSection(section, value);
                       })}
                       
