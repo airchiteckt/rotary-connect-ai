@@ -198,7 +198,7 @@ export default function CreateDocument() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('default_logo_url, default_footer_data, default_location, secretary_name, president_name')
+        .select('default_logo_url, default_footer_data, default_location, secretary_name, president_name, header_text')
         .eq('user_id', user.id)
         .single();
 
@@ -207,15 +207,16 @@ export default function CreateDocument() {
         return;
       }
 
-      // Load default settings for new documents only
-      if (!documentId && data) {
+      // Load default settings for new documents or if existing document doesn't have these settings
+      if (data) {
         setFormData(prev => ({
           ...prev,
-          logoUrl: data.default_logo_url || prev.logoUrl,
-          footerData: data.default_footer_data || prev.footerData,
-          defaultLocation: data.default_location || prev.defaultLocation,
-          secretaryName: data.secretary_name || prev.secretaryName,
-          presidentName: data.president_name || prev.presidentName
+          logoUrl: !documentId ? (data.default_logo_url || prev.logoUrl) : (prev.logoUrl || data.default_logo_url || ''),
+          footerData: !documentId ? (data.default_footer_data || prev.footerData) : (prev.footerData || data.default_footer_data || ''),
+          defaultLocation: !documentId ? (data.default_location || prev.defaultLocation) : (prev.defaultLocation || data.default_location || ''),
+          secretaryName: !documentId ? (data.secretary_name || prev.secretaryName) : (prev.secretaryName || data.secretary_name || ''),
+          presidentName: !documentId ? (data.president_name || prev.presidentName) : (prev.presidentName || data.president_name || ''),
+          headerText: !documentId ? (data.header_text || prev.headerText) : (prev.headerText || data.header_text || '')
         }));
       }
     } catch (error) {
@@ -247,21 +248,28 @@ export default function CreateDocument() {
     }
   };
 
+  // Helper function to get the correct logo URL
+  const getLogoUrl = () => {
+    return formData.logoUrl || profile?.default_logo_url || '';
+  };
+
   const saveSettings = async () => {
     if (!user) return;
     
     setIsSavingSettings(true);
     try {
+      const updateData = {
+        default_logo_url: formData.logoUrl || null,
+        default_footer_data: formData.footerData || null,
+        default_location: formData.defaultLocation || null,
+        secretary_name: formData.secretaryName || null,
+        president_name: formData.presidentName || null,
+        header_text: formData.headerText || null
+      };
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          default_logo_url: formData.logoUrl || null,
-          default_footer_data: formData.footerData || null,
-          default_location: formData.defaultLocation || null,
-          secretary_name: formData.secretaryName || null,
-          president_name: formData.presidentName || null,
-          header_text: formData.headerText || null
-        })
+        .update(updateData)
         .eq('user_id', user.id);
 
       if (error) {
@@ -272,9 +280,21 @@ export default function CreateDocument() {
           variant: "destructive"
         });
       } else {
+        // Update profile state to reflect the changes immediately
+        if (profile) {
+          Object.assign(profile, {
+            default_logo_url: formData.logoUrl,
+            default_footer_data: formData.footerData,
+            default_location: formData.defaultLocation,
+            secretary_name: formData.secretaryName,
+            president_name: formData.presidentName,
+            header_text: formData.headerText
+          });
+        }
+        
         toast({
           title: "Successo",
-          description: "Impostazioni salvate correttamente"
+          description: "Impostazioni salvate e mantenute come predefinite"
         });
       }
     } catch (error) {
@@ -306,7 +326,7 @@ export default function CreateDocument() {
   // Auto-set title when document type changes
   useEffect(() => {
     if (formData.type === 'programmi' && !documentId) {
-      const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' }).toLowerCase();
+      const currentMonth = 'settembre'; // Default to September for Rotary year
       setFormData(prev => ({
         ...prev,
         title: 'Programma mensile',
@@ -1312,12 +1332,12 @@ export default function CreateDocument() {
       // Build the PDF content with inline styles
       let pdfContent = '';
 
-      // Logo - Use current form logo URL (it's already a public URL from Supabase Storage)
-      const logoUrl = formData.logoUrl || profile?.default_logo_url;
-      if (logoUrl && logoUrl.trim() !== '') {
+      // Logo - Prioritize current form logo, fallback to profile default
+      const logoUrl = getLogoUrl();
+      if (logoUrl) {
         pdfContent += `
           <div style="text-align: center; margin-bottom: 16px;">
-            <img src="${logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" />
+            <img src="${logoUrl}" alt="Logo Club" style="height: 64px; margin: 0 auto;" crossorigin="anonymous" />
           </div>
         `;
       }
@@ -1337,12 +1357,12 @@ export default function CreateDocument() {
 
       // Title section - Special handling for programmi type
       if (formData.type === 'programmi') {
-        const mese = formData.content['mese'] || 'Mese';
+        const mese = formData.content['mese'] || 'Settembre';
         const meseCapitalized = mese.charAt(0).toUpperCase() + mese.slice(1);
         pdfContent += `
           <div style="margin-bottom: 24px;">
             <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
-              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized}</h1>
+              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized} - A.R. 2025 - 2026</h1>
               <p style="font-size: 14px; color: #6b7280; margin: 0;">
                 ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
               </p>
@@ -1871,10 +1891,12 @@ export default function CreateDocument() {
                             }
                           }}
                         />
-                        {formData.logoUrl && (
+                        {getLogoUrl() && (
                           <div className="flex items-center gap-2">
-                            <div className="text-xs text-muted-foreground">Logo selezionato e salvato come predefinito</div>
-                            <img src={formData.logoUrl} alt="Logo preview" className="h-8 w-8 object-contain rounded" />
+                            <div className="text-xs text-muted-foreground">
+                              Logo {formData.logoUrl ? 'personalizzato' : 'predefinito'}
+                            </div>
+                            <img src={getLogoUrl()} alt="Logo preview" className="h-8 w-8 object-contain rounded" />
                           </div>
                         )}
                       </div>
@@ -1993,9 +2015,9 @@ export default function CreateDocument() {
                 </CardHeader>
                 <CardContent>
                   <div id="document-preview" className="p-8 rounded-lg border bg-card text-card-foreground">
-                    {formData.logoUrl && (
+                    {getLogoUrl() && (
                       <div className="text-center mb-4">
-                        <img src={formData.logoUrl} alt="Logo Club" className="h-16 mx-auto" />
+                        <img src={getLogoUrl()} alt="Logo Club" className="h-16 mx-auto" />
                       </div>
                     )}
                     
@@ -2015,14 +2037,14 @@ export default function CreateDocument() {
                     )}
                     
                     <div className="space-y-6">
-                       <div className="text-center border-b pb-4">
-                         {formData.type === 'programmi' ? (
-                           <>
-                             <h1 className="text-2xl font-bold">
-                               Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Mese'}
-                             </h1>
-                           </>
-                         ) : (
+                        <div className="text-center border-b pb-4">
+                          {formData.type === 'programmi' ? (
+                            <>
+                              <h1 className="text-2xl font-bold">
+                                Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Settembre'} - A.R. 2025 - 2026
+                              </h1>
+                            </>
+                          ) : (
                            <>
                              <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
                              <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
