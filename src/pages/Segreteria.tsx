@@ -26,11 +26,14 @@ export default function Segreteria() {
   const [activeTab, setActiveTab] = useState('documenti');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
       loadDocuments();
+      loadTemplates();
     }
   }, [user]);
 
@@ -62,6 +65,29 @@ export default function Segreteria() {
       });
     } finally {
       setIsLoadingDocuments(false);
+    }
+  };
+
+  const loadTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('document_templates')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setTemplates(data || []);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nel caricamento dei template",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingTemplates(false);
     }
   };
 
@@ -308,17 +334,87 @@ export default function Segreteria() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
-                  <h3 className="text-lg font-medium mb-2">Nessun template disponibile</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Crea il tuo primo template per personalizzare l'aspetto dei documenti
-                  </p>
-                  <Button onClick={() => setActiveTab('editor-template')}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crea il tuo primo template
-                  </Button>
-                </div>
+                {isLoadingTemplates ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Caricamento template...</p>
+                  </div>
+                ) : templates.length > 0 ? (
+                  <div className="grid gap-4">
+                    {templates.map((template) => (
+                      <div key={template.id} className="border rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="font-medium">{template.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Creato il {new Date(template.created_at).toLocaleDateString('it-IT')}
+                            </p>
+                            {template.is_default && (
+                              <Badge variant="secondary" className="mt-1">Default</Badge>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setActiveTab('editor-template')}
+                            >
+                              <Edit className="h-4 w-4 mr-1" />
+                              Modifica
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const { error } = await supabase
+                                    .from('document_templates')
+                                    .delete()
+                                    .eq('id', template.id);
+
+                                  if (error) throw error;
+
+                                  toast({
+                                    title: "Template eliminato",
+                                    description: "Template eliminato con successo",
+                                  });
+                                  
+                                  loadTemplates();
+                                } catch (error) {
+                                  toast({
+                                    title: "Errore",
+                                    description: "Errore nell'eliminazione del template",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                            >
+                              <FileText className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="text-sm text-muted-foreground">
+                          <div>Logo: {(template.settings as any)?.logo_position || 'Non impostato'}</div>
+                          <div>Header: {(template.settings as any)?.header_alignment || 'Non impostato'}</div>
+                          <div>Footer: {(template.settings as any)?.footer_alignment || 'Non impostato'}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+                    <h3 className="text-lg font-medium mb-2">Nessun template disponibile</h3>
+                    <p className="text-muted-foreground mb-6">
+                      Crea il tuo primo template per personalizzare l'aspetto dei documenti
+                    </p>
+                    <Button onClick={() => setActiveTab('editor-template')}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Crea il tuo primo template
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -330,7 +426,10 @@ export default function Segreteria() {
                 Torna ai Template
               </Button>
             </div>
-            <TemplateEditor />
+            <TemplateEditor onTemplateSaved={() => {
+              loadTemplates();
+              setActiveTab('templates');
+            }} />
           </TabsContent>
 
           <TabsContent value="archivio">

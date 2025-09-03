@@ -27,7 +27,11 @@ interface TemplateSettings {
   watermark_opacity: number;
 }
 
-export const TemplateEditor = () => {
+interface TemplateEditorProps {
+  onTemplateSaved?: () => void;
+}
+
+export const TemplateEditor = ({ onTemplateSaved }: TemplateEditorProps = {}) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -169,6 +173,11 @@ export const TemplateEditor = () => {
       
       // Reload templates to show the updated list
       loadSavedTemplates();
+      
+      // Call the callback if provided
+      if (onTemplateSaved) {
+        onTemplateSaved();
+      }
     } catch (error) {
       console.error('Error saving template:', error);
       toast({
