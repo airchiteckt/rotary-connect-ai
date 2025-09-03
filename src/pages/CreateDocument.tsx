@@ -1,31 +1,39 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useNavigate, useSearchParams, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { 
   FileText, 
-  ArrowLeft, 
   Save, 
-  Eye, 
   Wand2, 
-  Download, 
-  Settings,
-  Clock,
-  User,
-  Calendar,
-  Plus,
-  X,
-  MapPin
+  Eye, 
+  Settings, 
+  Calendar, 
+  MapPin, 
+  Plus, 
+  X, 
+  User, 
+  ArrowLeft,
+  Upload,
+  Loader2
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface FormData {
+  title: string;
+  type: 'verbali' | 'programmi' | 'comunicazioni' | 'circolari';
+  content: Record<string, any>;
+  status: string;
+  backgroundTemplate?: string;
+}
 
 export default function CreateDocument() {
   const { user, loading, profile } = useAuth();
@@ -34,12 +42,12 @@ export default function CreateDocument() {
   const { id: documentId } = useParams();
   const { toast } = useToast();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
-    type: searchParams.get('type') || 'verbali',
+    type: (searchParams.get('type') as FormData['type']) || 'verbali',
     content: {},
-    ai_summary: '',
-    status: 'draft'
+    status: 'draft',
+    backgroundTemplate: 'classic'
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -48,6 +56,49 @@ export default function CreateDocument() {
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'editor');
   const [documentNumber, setDocumentNumber] = useState<string>('');
   const [userTemplates, setUserTemplates] = useState<any[]>([]);
+
+  const templates = {
+    verbali: {
+      sections: [
+        { key: 'data_riunione', label: 'Data Riunione', type: 'date', required: true },
+        { key: 'luogo', label: 'Luogo', type: 'text', required: true },
+        { key: 'presenti', label: 'Presenti', type: 'richtext', required: true },
+        { key: 'assenti', label: 'Assenti Giustificati', type: 'richtext', required: false },
+        { key: 'ordine_giorno', label: 'Ordine del Giorno', type: 'richtext', required: true },
+        { key: 'delibere', label: 'Deliberazioni', type: 'richtext', required: true },
+        { key: 'prossima_riunione', label: 'Prossima Riunione', type: 'text', required: false }
+      ]
+    },
+    programmi: {
+      sections: [
+        { key: 'mese', label: 'Mese', type: 'month-select', required: true },
+        { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: false },
+        { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: false },
+        { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
+        { key: 'attivita_servizio', label: 'Attività di servizio', type: 'service-activities', required: false },
+        { key: 'comunicazioni_club', label: 'Comunicazioni di club', type: 'club-communications', required: false },
+        { key: 'agenda_distrettuale', label: 'Agenda distrettuale e internazionale', type: 'district-agenda', required: false },
+        { key: 'sezione_motivazionale', label: 'Sezione motivazionale o culturale', type: 'motivational-section', required: false }
+      ]
+    },
+    comunicazioni: {
+      sections: [
+        { key: 'destinatari', label: 'Destinatari', type: 'text', required: true },
+        { key: 'oggetto', label: 'Oggetto', type: 'text', required: true },
+        { key: 'corpo', label: 'Corpo della Comunicazione', type: 'richtext', required: true },
+        { key: 'scadenza', label: 'Data Scadenza', type: 'date', required: false },
+        { key: 'allegati', label: 'Allegati', type: 'text', required: false }
+      ]
+    },
+    circolari: {
+      sections: [
+        { key: 'numero_circolare', label: 'Numero Circolare', type: 'text', required: true },
+        { key: 'oggetto', label: 'Oggetto', type: 'text', required: true },
+        { key: 'contenuto', label: 'Contenuto', type: 'richtext', required: true },
+        { key: 'scadenza', label: 'Data Scadenza', type: 'date', required: false }
+      ]
+    }
+  };
 
   // Load existing document if documentId is provided
   useEffect(() => {
@@ -75,13 +126,12 @@ export default function CreateDocument() {
       
       setUserTemplates(data || []);
     } catch (error) {
-      console.error('Error loading user templates:', error);
+      console.error('Error loading templates:', error);
     }
   };
 
   const loadDocument = async (id: string) => {
     try {
-      setIsLoadingDocument(true);
       const { data, error } = await supabase
         .from('documents')
         .select('*')
@@ -103,10 +153,10 @@ export default function CreateDocument() {
       if (data) {
         setFormData({
           title: data.title,
-          type: data.type,
-          content: data.content || {},
-          ai_summary: data.ai_summary || '',
-          status: data.status || 'draft'
+          type: data.type as FormData['type'],
+          content: data.content as Record<string, any>,
+          status: data.status || 'draft',
+          backgroundTemplate: (data as any).backgroundTemplate || 'classic'
         });
         setDocumentNumber(data.document_number || '');
       }
@@ -114,255 +164,64 @@ export default function CreateDocument() {
       console.error('Error loading document:', error);
       toast({
         title: "Errore",
-        description: "Impossibile caricare il documento",
+        description: "Errore nel caricamento del documento",
         variant: "destructive",
       });
-      navigate('/segreteria');
     } finally {
       setIsLoadingDocument(false);
     }
   };
-  useEffect(() => {
-    generateAutoTitle();
-  }, [formData.type, formData.content]);
 
-  const generateAutoTitle = () => {
-    let autoTitle = '';
-    const clubName = profile?.club_name || 'Rotary Club';
-    const content = formData.content as any; // Type assertion for content access
-    
-    switch (formData.type) {
-      case 'verbali':
-        const data = content?.data;
-        if (data) {
-          const date = new Date(data);
-          const dateStr = date.toLocaleDateString('it-IT', { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          });
-          autoTitle = `Verbale di Riunione del ${dateStr} - ${clubName}`;
-        } else {
-          autoTitle = `Verbale di Riunione - ${clubName}`;
-        }
-        break;
-        
-      case 'programmi':
-        const mese = content?.mese;
-        if (mese) {
-          const meseCapitalized = mese.charAt(0).toUpperCase() + mese.slice(1);
-          autoTitle = `Programma del Mese di ${meseCapitalized} - ${clubName}`;
-        } else {
-          autoTitle = `Programma del Mese - ${clubName}`;
-        }
-        break;
-        
-      case 'comunicazioni':
-        const oggetto = content?.oggetto;
-        if (oggetto) {
-          autoTitle = `Comunicazione: ${oggetto} - ${clubName}`;
-        } else {
-          autoTitle = `Comunicazione Ufficiale - ${clubName}`;
-        }
-        break;
-        
-      case 'circolari':
-        const numero = content?.numero;
-        const oggettoCircolare = content?.oggetto;
-        if (numero && oggettoCircolare) {
-          autoTitle = `Circolare n.${numero}: ${oggettoCircolare} - ${clubName}`;
-        } else if (numero) {
-          autoTitle = `Circolare n.${numero} - ${clubName}`;
-        } else {
-          autoTitle = `Circolare - ${clubName}`;
-        }
-        break;
-        
-      default:
-        autoTitle = `Documento - ${clubName}`;
-    }
-    
-    // Only update if title is empty or was auto-generated (contains club name)
-    if (!formData.title || formData.title.includes(clubName)) {
-      setFormData(prev => ({ ...prev, title: autoTitle }));
-    }
+  const currentDocType = [
+    { value: 'verbali', label: 'Verbale Riunione', icon: FileText },
+    { value: 'programmi', label: 'Programma Mensile', icon: Calendar },
+    { value: 'comunicazioni', label: 'Comunicazione Ufficiale', icon: FileText },
+    { value: 'circolari', label: 'Circolare', icon: FileText }
+  ].find(type => type.value === formData.type);
+
+  const updateContent = (key: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      content: { ...prev.content, [key]: value }
+    }));
   };
 
-  if (loading || isLoadingDocument) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">
-            {isLoadingDocument ? 'Caricamento documento...' : 'Caricamento...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const generateAI = async () => {
+    if (!user) return;
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  const documentTypes = [
-    { value: 'verbali', label: 'Verbale Riunione', icon: '📝', color: 'bg-blue-100 text-blue-800' },
-    { value: 'programmi', label: 'Programma Mensile', icon: '📅', color: 'bg-green-100 text-green-800' },
-    { value: 'comunicazioni', label: 'Comunicazione Ufficiale', icon: '📢', color: 'bg-purple-100 text-purple-800' },
-    { value: 'circolari', label: 'Circolare', icon: '📬', color: 'bg-orange-100 text-orange-800' }
-  ];
-
-  const currentDocType = documentTypes.find(type => type.value === formData.type);
-
-  const templates = {
-    verbali: {
-      sections: [
-        { key: 'data', label: 'Data e Ora', type: 'datetime', required: true },
-        { key: 'luogo', label: 'Luogo', type: 'text', required: true },
-        { key: 'presenti', label: 'Presenti', type: 'textarea', required: true },
-        { key: 'assenti', label: 'Assenti Giustificati', type: 'textarea', required: false },
-        { key: 'odg', label: 'Ordine del Giorno', type: 'textarea', required: true },
-        { key: 'delibere', label: 'Delibere e Decisioni', type: 'richtext', required: true },
-        { key: 'varie', label: 'Varie ed Eventuali', type: 'richtext', required: false }
-      ]
-    },
-    programmi: {
-      sections: [
-        { key: 'mese', label: 'Mese', type: 'month-select', required: true },
-        { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: false },
-        { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: false },
-        { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
-        { key: 'attivita_servizio', label: 'Attività di servizio', type: 'service-activities', required: false },
-        { key: 'comunicazioni_club', label: 'Comunicazioni di club', type: 'club-communications', required: false },
-        { key: 'agenda_distrettuale', label: 'Agenda distrettuale e internazionale', type: 'district-agenda', required: false },
-        { key: 'sezione_motivazionale', label: 'Sezione motivazionale o culturale', type: 'motivational-section', required: false },
-        { key: 'background_template', label: 'Template di Sfondo', type: 'template-select', required: false }
-      ]
-    },
-    comunicazioni: {
-      sections: [
-        { key: 'destinatari', label: 'Destinatari', type: 'text', required: true },
-        { key: 'oggetto', label: 'Oggetto', type: 'text', required: true },
-        { key: 'corpo', label: 'Corpo della Comunicazione', type: 'richtext', required: true },
-        { key: 'scadenza', label: 'Data Scadenza', type: 'date', required: false },
-        { key: 'allegati', label: 'Allegati', type: 'text', required: false }
-      ]
-    },
-    circolari: {
-      sections: [
-        { key: 'numero', label: 'Numero Circolare', type: 'text', required: true },
-        { key: 'oggetto', label: 'Oggetto', type: 'text', required: true },
-        { key: 'contenuto', label: 'Contenuto', type: 'richtext', required: true },
-        { key: 'scadenza', label: 'Scadenza Risposta', type: 'date', required: false }
-      ]
-    }
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      if (documentId) {
-        // Update existing document
-        const { data, error } = await supabase
-          .from('documents')
-          .update({
-            title: formData.title,
-            type: formData.type,
-            content: formData.content,
-            ai_summary: formData.ai_summary,
-            status: formData.status
-          })
-          .eq('id', documentId)
-          .eq('user_id', user.id)
-          .select('document_number');
-
-        if (error) throw error;
-
-        toast({
-          title: "Documento aggiornato",
-          description: `Il documento ${documentNumber} è stato aggiornato con successo`,
-        });
-      } else {
-        // Create new document
-        const { data, error } = await supabase
-          .from('documents')
-          .insert({
-            title: formData.title,
-            type: formData.type,
-            content: formData.content,
-            ai_summary: formData.ai_summary,
-            status: formData.status,
-            user_id: user.id
-          })
-          .select('document_number');
-
-        if (error) throw error;
-
-        // Get the generated document number
-        if (data && data[0]?.document_number) {
-          setDocumentNumber(data[0].document_number);
-        }
-
-        toast({
-          title: "Documento salvato",
-          description: `Il documento ${data[0]?.document_number || ''} è stato salvato con successo`,
-        });
-      }
-
-      navigate('/segreteria');
-    } catch (error) {
-      console.error('Error saving document:', error);
-      toast({
-        title: "Errore",
-        description: documentId ? "Errore nell'aggiornamento del documento" : "Errore nel salvataggio del documento",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const generateWithAI = async () => {
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-document-ai', {
+      const response = await supabase.functions.invoke('generate-document-ai', {
         body: {
           type: formData.type,
           currentContent: formData.content,
           clubName: profile?.club_name || 'Rotary Club',
-          additionalContext: formData.title
+          additionalContext: ''
         }
       });
 
-      if (error) throw error;
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
 
-      if (data.success) {
-        // Apply AI suggestions to form content
-        const updatedContent = { ...formData.content };
-        Object.entries(data.suggestions).forEach(([key, value]) => {
-          if (!updatedContent[key] || updatedContent[key].trim() === '') {
-            updatedContent[key] = value;
-          }
-        });
-
+      const { suggestions } = response.data;
+      
+      if (suggestions) {
         setFormData(prev => ({
           ...prev,
-          content: updatedContent,
-          ai_summary: data.summary || prev.ai_summary
+          content: { ...prev.content, ...suggestions }
         }));
-
+        
         toast({
-          title: "Contenuto generato con AI",
-          description: "I campi sono stati compilati automaticamente",
+          title: "Contenuto generato",
+          description: "I contenuti sono stati generati con successo dall'AI",
         });
-      } else {
-        throw new Error(data.error || 'Errore nella generazione AI');
       }
     } catch (error) {
-      console.error('Error generating with AI:', error);
+      console.error('Error generating AI content:', error);
       toast({
         title: "Errore",
-        description: "Errore nella generazione AI. Riprova più tardi.",
+        description: "Errore nella generazione dei contenuti AI",
         variant: "destructive",
       });
     } finally {
@@ -370,36 +229,96 @@ export default function CreateDocument() {
     }
   };
 
-  const loadRecurringMeetings = async (sectionKey: string) => {
+  const saveDocument = async () => {
+    if (!user || !formData.title.trim()) {
+      toast({
+        title: "Errore",
+        description: "Inserisci un titolo per il documento",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
     try {
-      const [meetingsData, districtData] = await Promise.all([
-        supabase.rpc('calculate_next_meeting_dates', {
-          user_uuid: user?.id,
-          months_ahead: 1 // Load only current month
-        }),
-        supabase.rpc('get_district_events_for_month', {
-          user_uuid: user?.id,
-          target_month: new Date().getMonth() + 1 // JavaScript months are 0-based, SQL months are 1-based
-        })
-      ]);
+      const documentData = {
+        title: formData.title,
+        type: formData.type,
+        content: formData.content,
+        status: formData.status,
+        user_id: user.id,
+        backgroundTemplate: formData.backgroundTemplate
+      };
 
-      if (meetingsData.error) throw meetingsData.error;
-      if (districtData.error) throw districtData.error;
+      if (documentId) {
+        // Update existing document
+        const { error } = await supabase
+          .from('documents')
+          .update(documentData)
+          .eq('id', documentId)
+          .eq('user_id', user.id);
 
-      // Get current month and year
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
+        if (error) throw error;
 
-      // Filter meetings to include only those in the current month
-      const currentMonthMeetings = (meetingsData.data || []).filter(meeting => {
-        const meetingDate = new Date(meeting.meeting_date);
-        return meetingDate.getMonth() === currentMonth && 
-               meetingDate.getFullYear() === currentYear;
+        toast({
+          title: "Successo",
+          description: "Documento aggiornato correttamente",
+        });
+      } else {
+        // Create new document
+        const { data, error } = await supabase
+          .from('documents')
+          .insert(documentData)
+          .select('*')
+          .single();
+
+        if (error) throw error;
+
+        setDocumentNumber(data.document_number || '');
+        navigate(`/document/${data.id}/edit`, { replace: true });
+        
+        toast({
+          title: "Successo",
+          description: "Documento salvato correttamente",
+        });
+      }
+    } catch (error) {
+      console.error('Error saving document:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nel salvataggio del documento",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const loadFromPrevious = async () => {
+    if (!user) return;
+
+    try {
+      // Load club meetings for the current/next month  
+      const { data: meetingData, error: meetingError } = await supabase.rpc('calculate_next_meeting_dates', {
+        user_uuid: user?.id,
+        months_ahead: 1 // Load only current month
       });
 
-      // Convert the future meetings data to the meeting format expected by the form
-      const futureMeetings = currentMonthMeetings.map(meeting => ({
+      // Load district events for the current/next month
+      const { data: districtData, error: districtError } = await supabase.rpc('get_district_events_for_month', {
+        user_uuid: user?.id,
+        target_month: new Date().getMonth() + 1 // JavaScript months are 0-based, SQL months are 1-based
+      });
+
+      if (meetingError) {
+        console.error('Error loading meetings:', meetingError);
+      }
+      if (districtError) {
+        console.error('Error loading district events:', districtError);
+      }
+
+      // Convert club meetings to the format expected by the form
+      const futureMeetings = (meetingData || []).map(meeting => ({
         nome: meeting.meeting_type,
         data: meeting.meeting_date,
         orario: meeting.meeting_time,
@@ -408,8 +327,8 @@ export default function CreateDocument() {
       }));
 
       // Convert district events to the same format
-      const districtMeetings = (districtData.data || []).map(event => ({
-        nome: event.nome,
+      const districtMeetings = (districtData || []).map(event => ({
+        testo: event.nome,
         data: event.data_evento,
         orario: '', // District events don't have specific times
         luogo: event.luogo || '',
@@ -420,346 +339,75 @@ export default function CreateDocument() {
       const allMeetings = [...futureMeetings, ...districtMeetings];
 
       // Update the form content with the loaded meetings
-      setFormData(prev => ({
-        ...prev,
-        content: { ...prev.content, [sectionKey]: allMeetings }
-      }));
+      if (futureMeetings.length > 0) {
+        updateContent('calendario_incontri', futureMeetings);
+      }
+      
+      if (districtMeetings.length > 0) {
+        updateContent('agenda_distrettuale', districtMeetings);
+      }
 
       toast({
         title: "Eventi caricati",
         description: `Caricati ${futureMeetings.length} appuntamenti club e ${districtMeetings.length} eventi distrettuali del mese corrente`,
       });
     } catch (error) {
-      console.error('Error loading meetings:', error);
+      console.error('Error loading previous data:', error);
       toast({
         title: "Errore",
-        description: "Errore nel caricamento degli appuntamenti",
+        description: "Errore nel caricamento dei dati precedenti",
         variant: "destructive",
       });
     }
   };
 
-  const renderFormField = (section: any) => {
-    const value = formData.content[section.key] || '';
-    
-    const updateContent = (key: string, value: any) => {
-      setFormData(prev => ({
-        ...prev,
-        content: { ...prev.content, [key]: value }
-      }));
-    };
+  const renderFormSection = (section: any) => {
+    const value = formData.content[section.key];
 
     switch (section.type) {
       case 'text':
         return (
           <Input
-            value={value}
+            value={value || ''}
             onChange={(e) => updateContent(section.key, e.target.value)}
-            placeholder={`Inserisci ${section.label.toLowerCase()}`}
-          />
-        );
-      case 'datetime':
-        return (
-          <Input
-            type="datetime-local"
-            value={value}
-            onChange={(e) => updateContent(section.key, e.target.value)}
+            placeholder={`Inserisci ${section.label.toLowerCase()}...`}
           />
         );
       case 'date':
         return (
           <Input
             type="date"
-            value={value}
+            value={value || ''}
             onChange={(e) => updateContent(section.key, e.target.value)}
-          />
-        );
-      case 'textarea':
-        return (
-          <Textarea
-            value={value}
-            onChange={(e) => updateContent(section.key, e.target.value)}
-            placeholder={`Inserisci ${section.label.toLowerCase()}`}
-            rows={3}
           />
         );
       case 'richtext':
         return (
           <Textarea
-            value={value}
+            value={value || ''}
             onChange={(e) => updateContent(section.key, e.target.value)}
-            placeholder={`Inserisci ${section.label.toLowerCase()}`}
+            placeholder={`Inserisci ${section.label.toLowerCase()}...`}
             rows={6}
-            className="min-h-[150px]"
           />
         );
-      case 'events':
-        const events = Array.isArray(value) ? value : [];
-        return (
-          <div className="space-y-4">
-            {events.map((event, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <h4 className="font-medium text-sm">Evento {index + 1}</h4>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const updatedEvents = events.filter((_, i) => i !== index);
-                      updateContent(section.key, updatedEvents);
-                    }}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">Titolo *</Label>
-                    <Input
-                      value={event.title || ''}
-                      onChange={(e) => {
-                        const updatedEvents = [...events];
-                        updatedEvents[index] = { ...event, title: e.target.value };
-                        updateContent(section.key, updatedEvents);
-                      }}
-                      placeholder="Nome evento"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Data *</Label>
-                    <Input
-                      type="date"
-                      value={event.date || ''}
-                      onChange={(e) => {
-                        const updatedEvents = [...events];
-                        updatedEvents[index] = { ...event, date: e.target.value };
-                        updateContent(section.key, updatedEvents);
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Luogo</Label>
-                    <Input
-                      value={event.location || ''}
-                      onChange={(e) => {
-                        const updatedEvents = [...events];
-                        updatedEvents[index] = { ...event, location: e.target.value };
-                        updateContent(section.key, updatedEvents);
-                      }}
-                      placeholder="Luogo evento"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Orario</Label>
-                    <Input
-                      type="time"
-                      value={event.time || ''}
-                      onChange={(e) => {
-                        const updatedEvents = [...events];
-                        updatedEvents[index] = { ...event, time: e.target.value };
-                        updateContent(section.key, updatedEvents);
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Label className="text-xs">Descrizione</Label>
-                  <Textarea
-                    value={event.description || ''}
-                    onChange={(e) => {
-                      const updatedEvents = [...events];
-                      updatedEvents[index] = { ...event, description: e.target.value };
-                      updateContent(section.key, updatedEvents);
-                    }}
-                    placeholder="Descrizione dell'evento"
-                    rows={2}
-                    className="mt-1"
-                  />
-                </div>
-              </Card>
-            ))}
-            <Button
-              variant="outline"
-              onClick={() => {
-                const newEvent = {
-                  title: '',
-                  date: '',
-                  location: '',
-                  time: '',
-                  description: ''
-                };
-                updateContent(section.key, [...events, newEvent]);
-              }}
-              className="w-full"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Aggiungi Evento
-            </Button>
-          </div>
-        );
-      case 'meetings':
-        const meetings = Array.isArray(value) ? value : [];
-        const meetingTypes = [
-          { value: 'direttivo', label: 'Consiglio Direttivo', icon: '👥' },
-          { value: 'assemblea', label: 'Assemblea dei Soci', icon: '🏛️' },
-          { value: 'caminetto', label: 'Caminetto', icon: '🔥' }
-        ];
-        return (
-          <div className="space-y-4">
-            {meetings.map((meeting, index) => (
-              <Card key={index} className="p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <h4 className="font-medium text-sm">Riunione {index + 1}</h4>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const updatedMeetings = meetings.filter((_, i) => i !== index);
-                      updateContent(section.key, updatedMeetings);
-                    }}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs">Tipo Riunione *</Label>
-                    <Select
-                      value={meeting.type || ''}
-                      onValueChange={(selectedType) => {
-                        const updatedMeetings = [...meetings];
-                        updatedMeetings[index] = { ...meeting, type: selectedType };
-                        updateContent(section.key, updatedMeetings);
-                      }}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Seleziona tipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {meetingTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <span className="flex items-center gap-2">
-                              <span>{type.icon}</span>
-                              {type.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs">Data *</Label>
-                    <Input
-                      type="date"
-                      value={meeting.date || ''}
-                      onChange={(e) => {
-                        const updatedMeetings = [...meetings];
-                        updatedMeetings[index] = { ...meeting, date: e.target.value };
-                        updateContent(section.key, updatedMeetings);
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Orario</Label>
-                    <Input
-                      type="time"
-                      value={meeting.time || ''}
-                      onChange={(e) => {
-                        const updatedMeetings = [...meetings];
-                        updatedMeetings[index] = { ...meeting, time: e.target.value };
-                        updateContent(section.key, updatedMeetings);
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Luogo</Label>
-                    <Input
-                      value={meeting.location || ''}
-                      onChange={(e) => {
-                        const updatedMeetings = [...meetings];
-                        updatedMeetings[index] = { ...meeting, location: e.target.value };
-                        updateContent(section.key, updatedMeetings);
-                      }}
-                      placeholder="Luogo riunione"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </Card>
-            ))}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const newMeeting = {
-                    type: '',
-                    date: '',
-                    time: '',
-                    location: ''
-                  };
-                  updateContent(section.key, [...meetings, newMeeting]);
-                }}
-                className="flex-1"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Aggiungi Riunione
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => loadRecurringMeetings(section.key)}
-                size="sm"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Carica Ricorrenti
-              </Button>
-            </div>
-          </div>
-        );
       case 'month-select':
-        const months = [
-          { value: 'gennaio', label: 'Gennaio', short: 'Genn' },
-          { value: 'febbraio', label: 'Febbraio', short: 'Febb' },
-          { value: 'marzo', label: 'Marzo', short: 'Mar' },
-          { value: 'aprile', label: 'Aprile', short: 'Apr' },
-          { value: 'maggio', label: 'Maggio', short: 'Mag' },
-          { value: 'giugno', label: 'Giugno', short: 'Giu' },
-          { value: 'luglio', label: 'Luglio', short: 'Lug' },
-          { value: 'agosto', label: 'Agosto', short: 'Ago' },
-          { value: 'settembre', label: 'Settembre', short: 'Sett' },
-          { value: 'ottobre', label: 'Ottobre', short: 'Ott' },
-          { value: 'novembre', label: 'Novembre', short: 'Nov' },
-          { value: 'dicembre', label: 'Dicembre', short: 'Dic' }
-        ];
+        const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' });
+        if (!value) {
+          updateContent(section.key, currentMonth);
+        }
         return (
-          <Select
-            value={value}
-            onValueChange={(selectedValue) => updateContent(section.key, selectedValue)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleziona mese" />
-            </SelectTrigger>
-            <SelectContent>
-              {months.map((month) => (
-                <SelectItem key={month.value} value={month.value}>
-                  <span className="flex items-center gap-2">
-                    <span className="font-medium">{month.short}</span>
-                    <span className="text-muted-foreground">({month.label})</span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="bg-muted p-3 rounded-md flex items-center gap-2">
+            <Calendar className="w-4 h-4" />
+            <span className="font-medium capitalize">{currentMonth}</span>
+            <span className="text-xs text-muted-foreground ml-auto">Mese Corrente</span>
+          </div>
         );
       case 'rotary-year':
-        const currentYear = new Date().getFullYear();
-        const rotaryYear = `A.R. ${currentYear}-${currentYear + 1}`;
-        // Auto-populate if empty
+        const currentDate = new Date();
+        const rotaryYear = currentDate.getMonth() >= 6 ? 
+          `A.R. ${currentDate.getFullYear()}-${currentDate.getFullYear() + 1}` :
+          `A.R. ${currentDate.getFullYear() - 1}-${currentDate.getFullYear()}`;
+        
         if (!value) {
           updateContent(section.key, rotaryYear);
         }
@@ -769,41 +417,6 @@ export default function CreateDocument() {
             <span className="font-medium">{rotaryYear}</span>
             <span className="text-xs text-muted-foreground ml-auto">Anno Rotariano Corrente</span>
           </div>
-        );
-      case 'template-select':
-        const defaultTemplates = [
-          { value: 'classic', label: 'Template Classico', description: 'Design tradizionale con intestazione Rotary' },
-          { value: 'modern', label: 'Template Moderno', description: 'Design contemporaneo con elementi grafici' },
-          { value: 'elegant', label: 'Template Elegante', description: 'Stile raffinato con bordi decorativi' },
-          { value: 'minimal', label: 'Template Minimal', description: 'Design pulito e minimalista' }
-        ];
-
-        const userTemplateOptions = userTemplates.map(t => ({
-          value: `user_${t.id}`,
-          label: t.name,
-          description: 'Template personalizzato'
-        }));
-
-        const allTemplates = [...defaultTemplates, ...userTemplateOptions];
-        return (
-          <Select
-            value={value}
-            onValueChange={(selectedValue) => updateContent(section.key, selectedValue)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Seleziona template di sfondo" />
-            </SelectTrigger>
-            <SelectContent>
-              {allTemplates.map((template) => (
-                <SelectItem key={template.value} value={template.value}>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{template.label}</span>
-                    <span className="text-xs text-muted-foreground">{template.description}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         );
       case 'president-message':
         const presMessage = typeof value === 'object' ? value : {};
@@ -851,7 +464,7 @@ export default function CreateDocument() {
                 onChange={(e) => {
                   updateContent(section.key, { ...presMessage, ringraziamenti: e.target.value });
                 }}
-                placeholder="Ringraziamenti e parole di motivazione per i soci..."
+                placeholder="Ringraziamenti per le attività svolte e motivazione per quelle future..."
                 rows={3}
                 className="mt-1"
               />
@@ -861,22 +474,11 @@ export default function CreateDocument() {
       case 'club-meetings':
         const clubMeetings = Array.isArray(value) ? value : [];
         return (
-          <div className="space-y-4">
-            <div className="flex gap-2 mb-4">
-              <Button
-                variant="outline"
-                onClick={() => loadRecurringMeetings(section.key)}
-                className="flex-1"
-              >
-                <Clock className="w-4 h-4 mr-2" />
-                Carica Ricorrenti
-              </Button>
-            </div>
-            
+          <div className="space-y-4">            
             {clubMeetings.map((meeting, index) => (
               <Card key={index} className="p-4">
                 <div className="flex justify-between items-start mb-3">
-                  <h4 className="font-medium text-sm">Appuntamento {index + 1}</h4>
+                  <h4 className="font-medium text-sm">Incontro {index + 1}</h4>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -898,12 +500,12 @@ export default function CreateDocument() {
                         updatedMeetings[index] = { ...meeting, nome: e.target.value };
                         updateContent(section.key, updatedMeetings);
                       }}
-                      placeholder="Nome appuntamento"
+                      placeholder="Nome incontro"
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Data *</Label>
+                    <Label className="text-xs">Data</Label>
                     <Input
                       type="date"
                       value={meeting.data || ''}
@@ -937,7 +539,7 @@ export default function CreateDocument() {
                         updatedMeetings[index] = { ...meeting, luogo: e.target.value };
                         updateContent(section.key, updatedMeetings);
                       }}
-                      placeholder="Luogo appuntamento"
+                      placeholder="Luogo incontro"
                       className="mt-1"
                     />
                   </div>
@@ -951,7 +553,7 @@ export default function CreateDocument() {
                       updatedMeetings[index] = { ...meeting, descrizione: e.target.value };
                       updateContent(section.key, updatedMeetings);
                     }}
-                    placeholder="Descrizione dell'appuntamento"
+                    placeholder="Descrizione dell'incontro"
                     rows={2}
                     className="mt-1"
                   />
@@ -973,7 +575,15 @@ export default function CreateDocument() {
               className="w-full"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Aggiungi Appuntamento
+              Aggiungi Incontro
+            </Button>
+            <Button
+              variant="outline"
+              onClick={loadFromPrevious}
+              className="w-full"
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Carica Riunioni Pianificate
             </Button>
           </div>
         );
@@ -1104,73 +714,56 @@ export default function CreateDocument() {
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div>
-                    <Label className="text-xs">Testo *</Label>
-                    <Input
-                      value={communication.testo || ''}
-                      onChange={(e) => {
+                    <Label className="text-xs">Tipo *</Label>
+                    <Select
+                      value={communication.tipo || ''}
+                      onValueChange={(selectedValue) => {
                         const updatedCommunications = [...clubCommunications];
-                        updatedCommunications[index] = { ...communication, testo: e.target.value };
+                        updatedCommunications[index] = { ...communication, tipo: selectedValue };
                         updateContent(section.key, updatedCommunications);
                       }}
-                      placeholder="Titolo comunicazione"
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Seleziona tipo comunicazione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="compleanni">Compleanni Soci</SelectItem>
+                        <SelectItem value="anniversari">Anniversari</SelectItem>
+                        <SelectItem value="nuovi_ingressi">Nuovi Ingressi</SelectItem>
+                        <SelectItem value="comunicazioni_direttivo">Comunicazioni del Direttivo</SelectItem>
+                        <SelectItem value="scadenze">Scadenze Importanti</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Titolo *</Label>
+                    <Input
+                      value={communication.titolo || ''}
+                      onChange={(e) => {
+                        const updatedCommunications = [...clubCommunications];
+                        updatedCommunications[index] = { ...communication, titolo: e.target.value };
+                        updateContent(section.key, updatedCommunications);
+                      }}
+                      placeholder="Titolo della comunicazione"
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Data</Label>
-                    <Input
-                      type="date"
-                      value={communication.data || ''}
+                    <Label className="text-xs">Contenuto</Label>
+                    <Textarea
+                      value={communication.contenuto || ''}
                       onChange={(e) => {
                         const updatedCommunications = [...clubCommunications];
-                        updatedCommunications[index] = { ...communication, data: e.target.value };
+                        updatedCommunications[index] = { ...communication, contenuto: e.target.value };
                         updateContent(section.key, updatedCommunications);
                       }}
+                      placeholder="Contenuto della comunicazione"
+                      rows={3}
                       className="mt-1"
                     />
                   </div>
-                  <div>
-                    <Label className="text-xs">Orario</Label>
-                    <Input
-                      type="time"
-                      value={communication.orario || ''}
-                      onChange={(e) => {
-                        const updatedCommunications = [...clubCommunications];
-                        updatedCommunications[index] = { ...communication, orario: e.target.value };
-                        updateContent(section.key, updatedCommunications);
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Luogo</Label>
-                    <Input
-                      value={communication.luogo || ''}
-                      onChange={(e) => {
-                        const updatedCommunications = [...clubCommunications];
-                        updatedCommunications[index] = { ...communication, luogo: e.target.value };
-                        updateContent(section.key, updatedCommunications);
-                      }}
-                      placeholder="Luogo comunicazione"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Label className="text-xs">Descrizione</Label>
-                  <Textarea
-                    value={communication.descrizione || ''}
-                    onChange={(e) => {
-                      const updatedCommunications = [...clubCommunications];
-                      updatedCommunications[index] = { ...communication, descrizione: e.target.value };
-                      updateContent(section.key, updatedCommunications);
-                    }}
-                    placeholder="Descrizione della comunicazione"
-                    rows={2}
-                    className="mt-1"
-                  />
                 </div>
               </Card>
             ))}
@@ -1178,11 +771,9 @@ export default function CreateDocument() {
               variant="outline"
               onClick={() => {
                 const newCommunication = {
-                  testo: '',
-                  data: '',
-                  orario: '',
-                  luogo: '',
-                  descrizione: ''
+                  tipo: '',
+                  titolo: '',
+                  contenuto: ''
                 };
                 updateContent(section.key, [...clubCommunications, newCommunication]);
               }}
@@ -1308,85 +899,67 @@ export default function CreateDocument() {
             {motivationalSection.map((item, index) => (
               <Card key={index} className="p-4">
                 <div className="flex justify-between items-start mb-3">
-                  <h4 className="font-medium text-sm">Elemento Motivazionale {index + 1}</h4>
+                  <h4 className="font-medium text-sm">Elemento {index + 1}</h4>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => {
-                      const updatedItems = motivationalSection.filter((_, i) => i !== index);
-                      updateContent(section.key, updatedItems);
+                      const updatedSection = motivationalSection.filter((_, i) => i !== index);
+                      updateContent(section.key, updatedSection);
                     }}
                   >
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-3">
                   <div>
-                    <Label className="text-xs">Testo *</Label>
-                    <Input
-                      value={item.testo || ''}
-                      onChange={(e) => {
-                        const updatedItems = [...motivationalSection];
-                        updatedItems[index] = { ...item, testo: e.target.value };
-                        updateContent(section.key, updatedItems);
+                    <Label className="text-xs">Tipo *</Label>
+                    <Select
+                      value={item.tipo || ''}
+                      onValueChange={(selectedValue) => {
+                        const updatedSection = [...motivationalSection];
+                        updatedSection[index] = { ...item, tipo: selectedValue };
+                        updateContent(section.key, updatedSection);
                       }}
-                      placeholder="Titolo elemento"
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Seleziona tipo contenuto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="riflessione">Riflessione Rotary</SelectItem>
+                        <SelectItem value="progetto_internazionale">Progetto Internazionale</SelectItem>
+                        <SelectItem value="citazione">Citazione Motivazionale</SelectItem>
+                        <SelectItem value="articolo">Articolo Culturale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Titolo *</Label>
+                    <Input
+                      value={item.titolo || ''}
+                      onChange={(e) => {
+                        const updatedSection = [...motivationalSection];
+                        updatedSection[index] = { ...item, titolo: e.target.value };
+                        updateContent(section.key, updatedSection);
+                      }}
+                      placeholder="Titolo del contenuto"
                       className="mt-1"
                     />
                   </div>
                   <div>
-                    <Label className="text-xs">Data</Label>
-                    <Input
-                      type="date"
-                      value={item.data || ''}
+                    <Label className="text-xs">Contenuto</Label>
+                    <Textarea
+                      value={item.contenuto || ''}
                       onChange={(e) => {
-                        const updatedItems = [...motivationalSection];
-                        updatedItems[index] = { ...item, data: e.target.value };
-                        updateContent(section.key, updatedItems);
+                        const updatedSection = [...motivationalSection];
+                        updatedSection[index] = { ...item, contenuto: e.target.value };
+                        updateContent(section.key, updatedSection);
                       }}
+                      placeholder="Contenuto dettagliato"
+                      rows={4}
                       className="mt-1"
                     />
                   </div>
-                  <div>
-                    <Label className="text-xs">Orario</Label>
-                    <Input
-                      type="time"
-                      value={item.orario || ''}
-                      onChange={(e) => {
-                        const updatedItems = [...motivationalSection];
-                        updatedItems[index] = { ...item, orario: e.target.value };
-                        updateContent(section.key, updatedItems);
-                      }}
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs">Luogo</Label>
-                    <Input
-                      value={item.luogo || ''}
-                      onChange={(e) => {
-                        const updatedItems = [...motivationalSection];
-                        updatedItems[index] = { ...item, luogo: e.target.value };
-                        updateContent(section.key, updatedItems);
-                      }}
-                      placeholder="Luogo elemento"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Label className="text-xs">Descrizione</Label>
-                  <Textarea
-                    value={item.descrizione || ''}
-                    onChange={(e) => {
-                      const updatedItems = [...motivationalSection];
-                      updatedItems[index] = { ...item, descrizione: e.target.value };
-                      updateContent(section.key, updatedItems);
-                    }}
-                    placeholder="Descrizione dell'elemento"
-                    rows={2}
-                    className="mt-1"
-                  />
                 </div>
               </Card>
             ))}
@@ -1394,11 +967,9 @@ export default function CreateDocument() {
               variant="outline"
               onClick={() => {
                 const newItem = {
-                  testo: '',
-                  data: '',
-                  orario: '',
-                  luogo: '',
-                  descrizione: ''
+                  tipo: '',
+                  titolo: '',
+                  contenuto: ''
                 };
                 updateContent(section.key, [...motivationalSection, newItem]);
               }}
@@ -1412,13 +983,190 @@ export default function CreateDocument() {
       default:
         return (
           <Input
-            value={value}
+            value={value || ''}
             onChange={(e) => updateContent(section.key, e.target.value)}
-            placeholder={`Inserisci ${section.label.toLowerCase()}`}
+            placeholder={`Inserisci ${section.label.toLowerCase()}...`}
           />
         );
     }
   };
+
+  const getTemplateStyles = (template: string) => {
+    switch (template) {
+      case 'modern':
+        return 'bg-gradient-to-br from-blue-50 to-indigo-100 border-l-4 border-blue-500';
+      case 'elegant':
+        return 'bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 shadow-lg';
+      case 'minimal':
+        return 'bg-gray-50 border-0 shadow-none';
+      case 'classic':
+      default:
+        return 'bg-white border shadow-sm';
+    }
+  };
+
+  const renderPreviewSection = (section: any, value: any) => {
+    // Handle month-select display
+    if (section.type === 'month-select') {
+      return (
+        <div key={section.key} className="space-y-2">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="text-sm capitalize font-medium">{value}</div>
+        </div>
+      );
+    }
+    
+    // Handle rotary-year display
+    if (section.type === 'rotary-year') {
+      return (
+        <div key={section.key} className="space-y-2">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="text-sm font-medium text-blue-600">{value}</div>
+        </div>
+      );
+    }
+    
+    // Handle club-meetings display
+    if (section.type === 'club-meetings' && Array.isArray(value)) {
+      return (
+        <div key={section.key} className="space-y-3">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="space-y-3">
+            {value.map((meeting, index) => (
+              <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-medium text-base">{meeting.nome}</h4>
+                  {meeting.data && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Calendar className="w-4 h-4" />
+                      {new Date(meeting.data).toLocaleDateString('it-IT')}
+                      {meeting.orario && ` - ${meeting.orario}`}
+                    </div>
+                  )}
+                </div>
+                {meeting.luogo && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
+                    <MapPin className="w-4 h-4" />
+                    {meeting.luogo}
+                  </div>
+                )}
+                {meeting.descrizione && (
+                  <p className="text-sm text-gray-700">{meeting.descrizione}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle agenda_distrettuale display with new format
+    if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
+      return (
+        <div key={section.key} className="space-y-3">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="space-y-2">
+            {value.map((item, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                <div className="text-sm">
+                  {item.testo && item.data && item.luogo 
+                    ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
+                    : item.testo && item.data
+                    ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')}`
+                    : item.testo && item.luogo
+                    ? `${item.testo} - ${item.luogo}`
+                    : item.testo || 'Evento senza titolo'
+                  }
+                </div>
+                {item.descrizione && (
+                  <div className="text-xs text-gray-600 mt-1">
+                    {item.descrizione}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle regular text fields - check if value is object/array first
+    if (typeof value === 'object' && value !== null) {
+      // If it's an array of objects, display them nicely
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+        // Default formatting for other sections
+        return (
+          <div key={section.key} className="space-y-3">
+            <h3 className="font-semibold text-lg">{section.label}</h3>
+            <div className="space-y-2">
+              {value.map((item, index) => (
+                <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                  {Object.entries(item).map(([key, val]) => (
+                    val && (
+                      <div key={key} className="mb-1 last:mb-0">
+                        <span className="font-medium capitalize text-sm text-gray-600">
+                          {key.replace(/_/g, ' ')}: 
+                        </span>
+                        <span className="ml-2 text-sm">
+                          {typeof val === 'string' && key === 'data' 
+                            ? new Date(val).toLocaleDateString('it-IT')
+                            : String(val)
+                          }
+                        </span>
+                      </div>
+                    )
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      
+      // For other objects, show as key-value pairs
+      return (
+        <div key={section.key} className="space-y-2">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="bg-gray-50 p-3 rounded-lg border">
+            {Object.entries(value).map(([key, val]) => (
+              val && (
+                <div key={key} className="mb-1 last:mb-0">
+                  <span className="font-medium capitalize text-sm text-gray-600">
+                    {key.replace(/_/g, ' ')}: 
+                  </span>
+                  <span className="ml-2 text-sm">{String(val)}</span>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+      );
+    }
+    
+    // Handle regular text fields
+    return (
+      <div key={section.key} className="space-y-2">
+        <h3 className="font-semibold text-lg">{section.label}</h3>
+        <div className="text-sm whitespace-pre-wrap">{value}</div>
+      </div>
+    );
+  };
+
+  if (loading || isLoadingDocument) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -1431,44 +1179,36 @@ export default function CreateDocument() {
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
+                {currentDocType?.icon && <currentDocType.icon className="w-5 h-5 text-white" />}
               </div>
               <div>
-                <h1 className="text-xl font-bold">Crea Documento</h1>
-                <div className="flex items-center gap-2">
-                  <p className="text-sm text-muted-foreground">
-                    {currentDocType?.label} - {currentDocType?.icon}
-                  </p>
-                  {documentNumber && (
-                    <Badge variant="secondary" className="text-xs">
-                      {documentNumber}
-                    </Badge>
-                  )}
-                </div>
+                <h1 className="text-xl font-bold">
+                  {documentId ? 'Modifica' : 'Crea'} {currentDocType?.label}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {documentNumber && `${documentNumber} • `}
+                  {profile?.club_name}
+                </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">
-                <Eye className="w-4 h-4 mr-2" />
-                Anteprima
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={generateWithAI}
+              <Button
+                variant="outline"
+                onClick={generateAI}
                 disabled={isGenerating}
+                className="flex items-center gap-2"
               >
-                <Wand2 className="w-4 h-4 mr-2" />
-                {isGenerating ? 'Generando...' : 'AI Assist'}
+                {isGenerating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Wand2 className="w-4 h-4" />
+                )}
+                {isGenerating ? 'Generando...' : 'AI Assistant'}
               </Button>
-              <Button 
-                onClick={handleSave}
-                disabled={isSaving || !formData.title}
-                size="sm"
-              >
+              <Button onClick={saveDocument} disabled={isSaving}>
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Salvando...' : 'Salva'}
+                {isSaving ? 'Salvataggio...' : 'Salva'}
               </Button>
             </div>
           </div>
@@ -1477,7 +1217,7 @@ export default function CreateDocument() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="editor">Editor</TabsTrigger>
@@ -1486,100 +1226,62 @@ export default function CreateDocument() {
             </TabsList>
 
             <TabsContent value="editor" className="space-y-6">
-              {/* Document Header */}
+              {/* Document Info */}
               <Card>
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <span>{currentDocType?.icon}</span>
-                        {currentDocType?.label}
-                      </CardTitle>
-                      <CardDescription>
-                        Compila i campi richiesti per creare il documento
-                      </CardDescription>
-                    </div>
-                    <Badge className={currentDocType?.color}>
-                      {formData.status === 'draft' ? 'Bozza' : 'Completato'}
-                    </Badge>
-                  </div>
+                  <CardTitle>Informazioni Documento</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Titolo Documento *</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      placeholder="Inserisci il titolo del documento"
-                      className="mt-1"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="type">Tipo Documento</Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {documentTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            <span className="flex items-center gap-2">
-                              <span>{type.icon}</span>
-                              {type.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Titolo Documento *</Label>
+                      <Input
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                        placeholder="Inserisci il titolo del documento..."
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Tipo Documento</Label>
+                      <Select 
+                        value={formData.type} 
+                        onValueChange={(value: FormData['type']) => setFormData(prev => ({ ...prev, type: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="verbali">Verbale Riunione</SelectItem>
+                          <SelectItem value="programmi">Programma Mensile</SelectItem>
+                          <SelectItem value="comunicazioni">Comunicazione Ufficiale</SelectItem>
+                          <SelectItem value="circolari">Circolare</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Document Form */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contenuto Documento</CardTitle>
-                  <CardDescription>
-                    Compila i campi specifici per questo tipo di documento
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {templates[formData.type]?.sections.map((section) => (
-                      <div key={section.key} className="space-y-2">
-                        <Label htmlFor={section.key}>
+              {/* Dynamic Form Sections */}
+              <div className="grid grid-cols-1 gap-6">
+                {templates[formData.type]?.sections.map((section) => (
+                  <Card key={section.key}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">
                           {section.label}
                           {section.required && <span className="text-red-500 ml-1">*</span>}
-                        </Label>
-                        {renderFormField(section)}
+                        </CardTitle>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* AI Summary */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Riassunto AI</CardTitle>
-                  <CardDescription>
-                    Riassunto automatico del documento (opzionale)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    value={formData.ai_summary}
-                    onChange={(e) => setFormData(prev => ({ ...prev, ai_summary: e.target.value }))}
-                    placeholder="Il riassunto AI apparirà qui automaticamente..."
-                    rows={3}
-                  />
-                </CardContent>
-              </Card>
+                    </CardHeader>
+                    <CardContent>
+                      {renderFormSection(section)}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="settings">
@@ -1606,6 +1308,54 @@ export default function CreateDocument() {
                           <SelectItem value="review">In Revisione</SelectItem>
                           <SelectItem value="approved">Approvato</SelectItem>
                           <SelectItem value="published">Pubblicato</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label>Template di Sfondo</Label>
+                      <Select
+                        value={formData.backgroundTemplate || 'classic'}
+                        onValueChange={(selectedValue) => 
+                          setFormData(prev => ({ ...prev, backgroundTemplate: selectedValue }))
+                        }
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="classic">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Template Classico</span>
+                              <span className="text-xs text-muted-foreground">Design tradizionale con intestazione Rotary</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="modern">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Template Moderno</span>
+                              <span className="text-xs text-muted-foreground">Design contemporaneo con elementi grafici</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="elegant">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Template Elegante</span>
+                              <span className="text-xs text-muted-foreground">Stile raffinato con bordi decorativi</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="minimal">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Template Minimal</span>
+                              <span className="text-xs text-muted-foreground">Design pulito e minimalista</span>
+                            </div>
+                          </SelectItem>
+                          {userTemplates.map((template) => (
+                            <SelectItem key={`user_${template.id}`} value={`user_${template.id}`}>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{template.name}</span>
+                                <span className="text-xs text-muted-foreground">Template personalizzato</span>
+                              </div>
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -1639,7 +1389,7 @@ export default function CreateDocument() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-white p-8 rounded-lg border shadow-sm">
+                  <div className={`p-8 rounded-lg ${getTemplateStyles(formData.backgroundTemplate || 'classic')}`}>
                     <div className="space-y-6">
                       <div className="text-center border-b pb-4">
                         <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
@@ -1652,296 +1402,8 @@ export default function CreateDocument() {
                       {templates[formData.type]?.sections.map((section) => {
                         const value = formData.content[section.key];
                         if (!value) return null;
-                        
-                        // Handle month-select display
-                        if (section.type === 'month-select') {
-                          return (
-                            <div key={section.key} className="space-y-2">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="text-sm capitalize font-medium">{value}</div>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle rotary-year display
-                        if (section.type === 'rotary-year') {
-                          return (
-                            <div key={section.key} className="space-y-2">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="text-sm font-medium text-blue-600">{value}</div>
-                            </div>
-                          );
-                        }
-                        
-                         // Handle template-select display
-                         if (section.type === 'template-select') {
-                           const templateLabels = {
-                             'classic': 'Template Classico',
-                             'modern': 'Template Moderno', 
-                             'elegant': 'Template Elegante',
-                             'minimal': 'Template Minimal'
-                           };
-                           
-                           // Get user template name if it's a custom template
-                           let displayName = templateLabels[value] || value;
-                           if (value && value.startsWith('user_')) {
-                             const templateId = value.replace('user_', '');
-                             const userTemplate = userTemplates.find(t => t.id === templateId);
-                             displayName = userTemplate ? userTemplate.name : value;
-                           }
-                           
-                           return (
-                             <div key={section.key} className="space-y-2">
-                               <h3 className="font-semibold text-lg">{section.label}</h3>
-                               <div className="text-sm">{displayName}</div>
-                             </div>
-                           );
-                         }
-                        
-                        // Handle events display
-                        if (section.type === 'events' && Array.isArray(value)) {
-                          return (
-                            <div key={section.key} className="space-y-3">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="space-y-3">
-                                {value.map((event, index) => (
-                                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                    <div className="flex items-start justify-between mb-2">
-                                      <h4 className="font-medium text-base">{event.title}</h4>
-                                      {event.date && (
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                          <Calendar className="w-4 h-4" />
-                                          {new Date(event.date).toLocaleDateString('it-IT')}
-                                          {event.time && ` - ${event.time}`}
-                                        </div>
-                                      )}
-                                    </div>
-                                    {event.location && (
-                                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                                        <MapPin className="w-4 h-4" />
-                                        {event.location}
-                                      </div>
-                                    )}
-                                    {event.description && (
-                                      <p className="text-sm text-gray-700">{event.description}</p>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle meetings display
-                        if (section.type === 'meetings' && Array.isArray(value)) {
-                          const meetingTypeLabels = {
-                            'direttivo': { label: 'Consiglio Direttivo', icon: '👥' },
-                            'assemblea': { label: 'Assemblea dei Soci', icon: '🏛️' },
-                            'caminetto': { label: 'Caminetto', icon: '🔥' }
-                          };
-                          
-                          return (
-                            <div key={section.key} className="space-y-3">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="space-y-3">
-                                {value.map((meeting, index) => {
-                                  const meetingInfo = meetingTypeLabels[meeting.type];
-                                  return (
-                                    <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                      <div className="flex items-start justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                          <span>{meetingInfo?.icon}</span>
-                                          <h4 className="font-medium text-base">{meetingInfo?.label}</h4>
-                                        </div>
-                                        {meeting.date && (
-                                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                            <Calendar className="w-4 h-4" />
-                                            {new Date(meeting.date).toLocaleDateString('it-IT')}
-                                            {meeting.time && ` - ${meeting.time}`}
-                                          </div>
-                                        )}
-                                      </div>
-                                      {meeting.location && (
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                          <MapPin className="w-4 h-4" />
-                                          {meeting.location}
-                                        </div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle club-meetings display
-                        if (section.type === 'club-meetings' && Array.isArray(value)) {
-                          return (
-                            <div key={section.key} className="space-y-3">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="space-y-3">
-                                {value.map((meeting, index) => (
-                                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                                    <div className="flex items-start justify-between mb-2">
-                                      <h4 className="font-medium text-base">{meeting.nome}</h4>
-                                      {meeting.data && (
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                          <Calendar className="w-4 h-4" />
-                                          {new Date(meeting.data).toLocaleDateString('it-IT')}
-                                          {meeting.orario && ` - ${meeting.orario}`}
-                                        </div>
-                                      )}
-                                    </div>
-                                    {meeting.luogo && (
-                                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                                        <MapPin className="w-4 h-4" />
-                                        {meeting.luogo}
-                                      </div>
-                                    )}
-                                    {meeting.descrizione && (
-                                      <p className="text-sm text-gray-700">{meeting.descrizione}</p>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle agenda_distrettuale display
-                        if (section.type === 'agenda_distrettuale' && Array.isArray(value)) {
-                          return (
-                            <div key={section.key} className="space-y-3">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="space-y-3">
-                                {value.map((event, index) => (
-                                  <div key={index} className="bg-blue-50 p-4 rounded-lg">
-                                    <div className="flex items-start justify-between mb-2">
-                                      <h4 className="font-medium text-base">{event.testo}</h4>
-                                      {event.data && (
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                          <Calendar className="w-4 h-4" />
-                                          {new Date(event.data).toLocaleDateString('it-IT')}
-                                          {event.orario && ` - ${event.orario}`}
-                                        </div>
-                                      )}
-                                    </div>
-                                    {event.luogo && (
-                                      <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                                        <MapPin className="w-4 h-4" />
-                                        {event.luogo}
-                                      </div>
-                                    )}
-                                    {event.descrizione && (
-                                      <p className="text-sm text-gray-700">{event.descrizione}</p>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle regular text fields - check if value is object/array first
-                        if (typeof value === 'object' && value !== null) {
-                          // If it's an array of objects, display them nicely
-                          if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
-                            
-                            // Special formatting for agenda distrettuale
-                            if (section.key === 'agenda_distrettuale') {
-                              return (
-                                <div key={section.key} className="space-y-3">
-                                  <h3 className="font-semibold text-lg">{section.label}</h3>
-                                  <div className="space-y-2">
-                                    {value.map((item, index) => (
-                                      <div key={index} className="bg-gray-50 p-3 rounded-lg border">
-                                        <div className="text-sm">
-                                          {item.testo && item.data && item.luogo 
-                                            ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
-                                            : item.testo && item.data
-                                            ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')}`
-                                            : item.testo && item.luogo
-                                            ? `${item.testo} - ${item.luogo}`
-                                            : item.testo || 'Evento senza titolo'
-                                          }
-                                        </div>
-                                        {item.descrizione && (
-                                          <div className="text-xs text-gray-600 mt-1">
-                                            {item.descrizione}
-                                          </div>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              );
-                            }
-                            
-                            // Default formatting for other sections
-                            return (
-                              <div key={section.key} className="space-y-3">
-                                <h3 className="font-semibold text-lg">{section.label}</h3>
-                                <div className="space-y-2">
-                                  {value.map((item, index) => (
-                                    <div key={index} className="bg-gray-50 p-3 rounded-lg border">
-                                      {Object.entries(item).map(([key, val]) => (
-                                        val && (
-                                          <div key={key} className="mb-1 last:mb-0">
-                                            <span className="font-medium capitalize text-sm text-gray-600">
-                                              {key.replace(/_/g, ' ')}: 
-                                            </span>
-                                            <span className="ml-2 text-sm">
-                                              {typeof val === 'string' && key === 'data' 
-                                                ? new Date(val).toLocaleDateString('it-IT')
-                                                : String(val)
-                                              }
-                                            </span>
-                                          </div>
-                                        )
-                                      ))}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          }
-                          
-                          // For other objects, show as key-value pairs
-                          return (
-                            <div key={section.key} className="space-y-2">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="bg-gray-50 p-3 rounded-lg border">
-                                {Object.entries(value).map(([key, val]) => (
-                                  val && (
-                                    <div key={key} className="mb-1 last:mb-0">
-                                      <span className="font-medium capitalize text-sm text-gray-600">
-                                        {key.replace(/_/g, ' ')}: 
-                                      </span>
-                                      <span className="ml-2 text-sm">{String(val)}</span>
-                                    </div>
-                                  )
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        }
-                        
-                        // Handle regular text fields
-                        return (
-                          <div key={section.key} className="space-y-2">
-                            <h3 className="font-semibold text-lg">{section.label}</h3>
-                            <div className="text-sm whitespace-pre-wrap">{value}</div>
-                          </div>
-                        );
+                        return renderPreviewSection(section, value);
                       })}
-                      
-                      {formData.ai_summary && (
-                        <div className="border-t pt-4">
-                          <h3 className="font-semibold text-lg">Riassunto</h3>
-                          <p className="text-sm text-muted-foreground mt-2">{formData.ai_summary}</p>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </CardContent>
