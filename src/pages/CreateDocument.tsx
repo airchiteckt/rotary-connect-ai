@@ -1447,7 +1447,9 @@ export default function CreateDocument() {
                     <div className="space-y-6">
                       <div className="text-center border-b pb-4">
                         <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
-                        <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
+                        {formData.type !== 'programmi' && (
+                          <p className="text-muted-foreground mt-2">{currentDocType?.label}</p>
+                        )}
                         <p className="text-sm text-muted-foreground">
                           {profile?.club_name} - {new Date().toLocaleDateString('it-IT')}
                         </p>
