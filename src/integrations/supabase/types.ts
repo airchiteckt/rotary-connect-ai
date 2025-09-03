@@ -267,10 +267,13 @@ export type Database = {
           club_name: string | null
           created_at: string
           default_footer_data: string | null
+          default_location: string | null
           default_logo_url: string | null
           full_name: string
           id: string
+          president_name: string | null
           role: string | null
+          secretary_name: string | null
           subscription_type: string | null
           trial_start_date: string
           updated_at: string
@@ -280,10 +283,13 @@ export type Database = {
           club_name?: string | null
           created_at?: string
           default_footer_data?: string | null
+          default_location?: string | null
           default_logo_url?: string | null
           full_name: string
           id?: string
+          president_name?: string | null
           role?: string | null
+          secretary_name?: string | null
           subscription_type?: string | null
           trial_start_date?: string
           updated_at?: string
@@ -293,10 +299,13 @@ export type Database = {
           club_name?: string | null
           created_at?: string
           default_footer_data?: string | null
+          default_location?: string | null
           default_logo_url?: string | null
           full_name?: string
           id?: string
+          president_name?: string | null
           role?: string | null
+          secretary_name?: string | null
           subscription_type?: string | null
           trial_start_date?: string
           updated_at?: string

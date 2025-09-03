@@ -36,6 +36,9 @@ interface FormData {
   logoUrl?: string;
   headerText?: string;
   footerData?: string;
+  defaultLocation?: string;
+  secretaryName?: string;
+  presidentName?: string;
 }
 
 export default function CreateDocument() {
@@ -52,7 +55,10 @@ export default function CreateDocument() {
     status: 'draft',
     logoUrl: '',
     headerText: '',
-    footerData: ''
+    footerData: '',
+    defaultLocation: '',
+    secretaryName: '',
+    presidentName: ''
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -192,7 +198,7 @@ export default function CreateDocument() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('default_logo_url, default_footer_data')
+        .select('default_logo_url, default_footer_data, default_location, secretary_name, president_name')
         .eq('user_id', user.id)
         .single();
 
@@ -206,7 +212,10 @@ export default function CreateDocument() {
         setFormData(prev => ({
           ...prev,
           logoUrl: data.default_logo_url || prev.logoUrl,
-          footerData: data.default_footer_data || prev.footerData
+          footerData: data.default_footer_data || prev.footerData,
+          defaultLocation: data.default_location || prev.defaultLocation,
+          secretaryName: data.secretary_name || prev.secretaryName,
+          presidentName: data.president_name || prev.presidentName
         }));
       }
     } catch (error) {
@@ -214,13 +223,16 @@ export default function CreateDocument() {
     }
   };
 
-  const updateProfileDefaults = async (logoUrl?: string, footerData?: string) => {
+  const updateProfileDefaults = async (logoUrl?: string, footerData?: string, location?: string, secretary?: string, president?: string) => {
     if (!user) return;
     
     try {
       const updateData: any = {};
       if (logoUrl !== undefined) updateData.default_logo_url = logoUrl;
       if (footerData !== undefined) updateData.default_footer_data = footerData;
+      if (location !== undefined) updateData.default_location = location;
+      if (secretary !== undefined) updateData.secretary_name = secretary;
+      if (president !== undefined) updateData.president_name = president;
       
       const { error } = await supabase
         .from('profiles')
@@ -1471,6 +1483,51 @@ export default function CreateDocument() {
                     </div>
                     
                     <div>
+                      <Label>Luogo</Label>
+                      <Input
+                        value={formData.defaultLocation || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, defaultLocation: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, undefined, value);
+                        }}
+                        placeholder="Es. Hotel Villa Giulia, Valmontone"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Nome e Cognome Segretario</Label>
+                      <Input
+                        value={formData.secretaryName || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, secretaryName: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, undefined, undefined, value);
+                        }}
+                        placeholder="Es. Mario Rossi"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label>Nome e Cognome Presidente</Label>
+                      <Input
+                        value={formData.presidentName || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFormData(prev => ({ ...prev, presidentName: value }));
+                          // Save as default for future documents
+                          updateProfileDefaults(undefined, undefined, undefined, undefined, value);
+                        }}
+                        placeholder="Es. Giuseppe Bianchi"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
                       <Label>Autore</Label>
                       <div className="mt-1 p-2 bg-muted rounded-md flex items-center gap-2">
                         <User className="w-4 h-4" />
@@ -1529,11 +1586,28 @@ export default function CreateDocument() {
                         return renderPreviewSection(section, value);
                       })}
                       
-                      {formData.footerData && (
+                      {(formData.footerData || formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
                         <div className="mt-8 pt-6 border-t text-center">
-                          <div className="text-xs text-muted-foreground whitespace-pre-line">
-                            {formData.footerData}
-                          </div>
+                          {formData.footerData && (
+                            <div className="text-xs text-muted-foreground whitespace-pre-line mb-2">
+                              {formData.footerData}
+                            </div>
+                          )}
+                          {(formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
+                            <div className="text-xs text-muted-foreground">
+                              {formData.defaultLocation && (
+                                <div>Luogo: {formData.defaultLocation}</div>
+                              )}
+                              <div className="flex justify-between mt-2">
+                                {formData.secretaryName && (
+                                  <div>Il Segretario: {formData.secretaryName}</div>
+                                )}
+                                {formData.presidentName && (
+                                  <div>Il Presidente: {formData.presidentName}</div>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
