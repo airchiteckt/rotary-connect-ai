@@ -22,7 +22,8 @@ import {
   User, 
   ArrowLeft,
   Upload,
-  Loader2
+  Loader2,
+  Download
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
