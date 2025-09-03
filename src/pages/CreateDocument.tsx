@@ -1388,7 +1388,7 @@ export default function CreateDocument() {
         pdfContent += `
           <div style="margin-bottom: 24px;">
             <div style="text-align: center; border-bottom: 1px solid #e5e7eb; padding-bottom: 16px;">
-              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized} - l'anno rotariano</h1>
+              <h1 style="font-size: 24px; font-weight: bold; margin: 0 0 8px 0;">Programma Mensile - ${meseCapitalized} - A.R. 2025/2026</h1>
               <p style="font-size: 14px; color: #6b7280; margin: 0;">
                 ${profile?.club_name} - ${new Date().toLocaleDateString('it-IT')}
               </p>
@@ -2058,7 +2058,7 @@ export default function CreateDocument() {
                            {formData.type === 'programmi' ? (
                             <>
                                <h1 className="text-2xl font-bold">
-                                 Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Settembre'} - l'anno rotariano
+                                 Programma Mensile - {formData.content['mese'] ? formData.content['mese'].charAt(0).toUpperCase() + formData.content['mese'].slice(1) : 'Settembre'} - A.R. 2025/2026
                                </h1>
                             </>
                           ) : (
