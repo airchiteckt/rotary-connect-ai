@@ -1326,6 +1326,10 @@ export default function CreateDocument() {
                 <Save className="w-4 h-4 mr-2" />
                 {isSaving ? 'Salvataggio...' : 'Salva'}
               </Button>
+              <Button variant="outline" onClick={downloadPDF}>
+                <Download className="w-4 h-4 mr-2" />
+                Scarica PDF
+              </Button>
             </div>
           </div>
         </div>
