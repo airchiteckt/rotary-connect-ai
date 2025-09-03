@@ -33,7 +33,8 @@ interface FormData {
   type: 'verbali' | 'programmi' | 'comunicazioni' | 'circolari';
   content: Record<string, any>;
   status: string;
-  backgroundTemplate?: string;
+  logoUrl?: string;
+  headerText?: string;
 }
 
 export default function CreateDocument() {
