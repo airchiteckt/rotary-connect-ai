@@ -1774,19 +1774,58 @@ export default function CreateDocument() {
                         <Input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => {
-                            // TODO: Handle file upload
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
-                            if (file) {
-                              const url = URL.createObjectURL(file);
-                              setFormData(prev => ({ ...prev, logoUrl: url }));
-                              // Save as default for future documents
-                              updateProfileDefaults(url, undefined);
+                            if (file && user) {
+                              try {
+                                // Upload file to Supabase Storage
+                                const fileExt = file.name.split('.').pop();
+                                const fileName = `logo_${Date.now()}.${fileExt}`;
+                                const filePath = `${user.id}/${fileName}`;
+
+                                const { error: uploadError } = await supabase.storage
+                                  .from('document-assets')
+                                  .upload(filePath, file);
+
+                                if (uploadError) {
+                                  console.error('Error uploading file:', uploadError);
+                                  toast({
+                                    title: "Errore",
+                                    description: "Errore nel caricamento del logo",
+                                    variant: "destructive"
+                                  });
+                                  return;
+                                }
+
+                                // Get public URL
+                                const { data: { publicUrl } } = supabase.storage
+                                  .from('document-assets')
+                                  .getPublicUrl(filePath);
+
+                                // Update form data and save as default
+                                setFormData(prev => ({ ...prev, logoUrl: publicUrl }));
+                                await updateProfileDefaults(publicUrl, undefined, undefined, undefined, undefined);
+
+                                toast({
+                                  title: "Successo",
+                                  description: "Logo caricato e salvato come predefinito"
+                                });
+                              } catch (error) {
+                                console.error('Error uploading logo:', error);
+                                toast({
+                                  title: "Errore",
+                                  description: "Errore nel caricamento del logo",
+                                  variant: "destructive"
+                                });
+                              }
                             }
                           }}
                         />
                         {formData.logoUrl && (
-                          <div className="text-xs text-muted-foreground">Logo selezionato</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs text-muted-foreground">Logo selezionato e salvato come predefinito</div>
+                            <img src={formData.logoUrl} alt="Logo preview" className="h-8 w-8 object-contain rounded" />
+                          </div>
                         )}
                       </div>
                     </div>
