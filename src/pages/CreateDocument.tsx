@@ -1847,6 +1847,38 @@ export default function CreateDocument() {
                         if (typeof value === 'object' && value !== null) {
                           // If it's an array of objects, display them nicely
                           if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+                            
+                            // Special formatting for agenda distrettuale
+                            if (section.key === 'agenda_distrettuale') {
+                              return (
+                                <div key={section.key} className="space-y-3">
+                                  <h3 className="font-semibold text-lg">{section.label}</h3>
+                                  <div className="space-y-2">
+                                    {value.map((item, index) => (
+                                      <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                                        <div className="text-sm">
+                                          {item.testo && item.data && item.luogo 
+                                            ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')} - ${item.luogo}`
+                                            : item.testo && item.data
+                                            ? `${item.testo} - ${new Date(item.data).toLocaleDateString('it-IT')}`
+                                            : item.testo && item.luogo
+                                            ? `${item.testo} - ${item.luogo}`
+                                            : item.testo || 'Evento senza titolo'
+                                          }
+                                        </div>
+                                        {item.descrizione && (
+                                          <div className="text-xs text-gray-600 mt-1">
+                                            {item.descrizione}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            // Default formatting for other sections
                             return (
                               <div key={section.key} className="space-y-3">
                                 <h3 className="font-semibold text-lg">{section.label}</h3>
