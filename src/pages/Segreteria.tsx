@@ -9,6 +9,7 @@ import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Ey
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { TemplateEditor } from '@/components/TemplateEditor';
 
 interface Document {
   id: string;
@@ -293,21 +294,7 @@ export default function Segreteria() {
           </TabsContent>
 
           <TabsContent value="templates">
-            <Card>
-              <CardHeader>
-                <CardTitle>Template Documenti</CardTitle>
-                <CardDescription>
-                  Modelli predefiniti per velocizzare la creazione di documenti
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Template in arrivo</p>
-                  <p className="text-sm">Stiamo preparando i modelli per te</p>
-                </div>
-              </CardContent>
-            </Card>
+            <TemplateEditor />
           </TabsContent>
 
           <TabsContent value="archivio">
