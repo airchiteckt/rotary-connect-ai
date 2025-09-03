@@ -270,6 +270,7 @@ export type Database = {
           default_location: string | null
           default_logo_url: string | null
           full_name: string
+          header_text: string | null
           id: string
           president_name: string | null
           role: string | null
@@ -286,6 +287,7 @@ export type Database = {
           default_location?: string | null
           default_logo_url?: string | null
           full_name: string
+          header_text?: string | null
           id?: string
           president_name?: string | null
           role?: string | null
@@ -302,6 +304,7 @@ export type Database = {
           default_location?: string | null
           default_logo_url?: string | null
           full_name?: string
+          header_text?: string | null
           id?: string
           president_name?: string | null
           role?: string | null

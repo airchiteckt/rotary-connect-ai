@@ -260,7 +260,8 @@ export default function CreateDocument() {
           default_footer_data: formData.footerData || null,
           default_location: formData.defaultLocation || null,
           secretary_name: formData.secretaryName || null,
-          president_name: formData.presidentName || null
+          president_name: formData.presidentName || null,
+          header_text: formData.headerText || null
         })
         .eq('user_id', user.id);
 
