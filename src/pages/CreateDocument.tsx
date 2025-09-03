@@ -1005,6 +1005,49 @@ export default function CreateDocument() {
     }
   };
 
+  const downloadPDF = async () => {
+    const element = document.getElementById('document-preview');
+    if (!element) {
+      toast({
+        title: "Errore",
+        description: "Errore nella creazione del PDF",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      toast({
+        title: "PDF",
+        description: "Generazione PDF in corso..."
+      });
+      
+      // Dynamically import html2pdf
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      const opt = {
+        margin: 1,
+        filename: `${formData.title || 'documento'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      await html2pdf().set(opt).from(element).save();
+      toast({
+        title: "Successo", 
+        description: "PDF scaricato con successo!"
+      });
+    } catch (error) {
+      console.error('Errore nella generazione del PDF:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nella generazione del PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
   const renderPreviewSection = (section: any, value: any) => {
     // Handle month-select display
     if (section.type === 'month-select') {
