@@ -293,7 +293,43 @@ export default function Segreteria() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="templates">
+          <TabsContent value="templates" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Template Documenti</CardTitle>
+                    <CardDescription>Modelli predefiniti per velocizzare la creazione di documenti</CardDescription>
+                  </div>
+                  <Button onClick={() => setActiveTab('editor-template')}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crea Template
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-12">
+                  <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+                  <h3 className="text-lg font-medium mb-2">Nessun template disponibile</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Crea il tuo primo template per personalizzare l'aspetto dei documenti
+                  </p>
+                  <Button onClick={() => setActiveTab('editor-template')}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Crea il tuo primo template
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="editor-template">
+            <div className="mb-6">
+              <Button variant="outline" onClick={() => setActiveTab('templates')}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Torna ai Template
+              </Button>
+            </div>
             <TemplateEditor />
           </TabsContent>
 
