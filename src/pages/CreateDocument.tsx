@@ -47,6 +47,7 @@ export default function CreateDocument() {
   const [isLoadingDocument, setIsLoadingDocument] = useState(!!documentId);
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'editor');
   const [documentNumber, setDocumentNumber] = useState<string>('');
+  const [userTemplates, setUserTemplates] = useState<any[]>([]);
 
   // Load existing document if documentId is provided
   useEffect(() => {
@@ -54,6 +55,29 @@ export default function CreateDocument() {
       loadDocument(documentId);
     }
   }, [documentId, user]);
+
+  // Load user templates on component mount
+  useEffect(() => {
+    loadUserTemplates();
+  }, [user]);
+
+  const loadUserTemplates = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('document_templates')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setUserTemplates(data || []);
+    } catch (error) {
+      console.error('Error loading user templates:', error);
+    }
+  };
 
   const loadDocument = async (id: string) => {
     try {
@@ -747,12 +771,20 @@ export default function CreateDocument() {
           </div>
         );
       case 'template-select':
-        const templates = [
+        const defaultTemplates = [
           { value: 'classic', label: 'Template Classico', description: 'Design tradizionale con intestazione Rotary' },
           { value: 'modern', label: 'Template Moderno', description: 'Design contemporaneo con elementi grafici' },
           { value: 'elegant', label: 'Template Elegante', description: 'Stile raffinato con bordi decorativi' },
           { value: 'minimal', label: 'Template Minimal', description: 'Design pulito e minimalista' }
         ];
+
+        const userTemplateOptions = userTemplates.map(t => ({
+          value: `user_${t.id}`,
+          label: t.name,
+          description: 'Template personalizzato'
+        }));
+
+        const allTemplates = [...defaultTemplates, ...userTemplateOptions];
         return (
           <Select
             value={value}
@@ -762,7 +794,7 @@ export default function CreateDocument() {
               <SelectValue placeholder="Seleziona template di sfondo" />
             </SelectTrigger>
             <SelectContent>
-              {templates.map((template) => (
+              {allTemplates.map((template) => (
                 <SelectItem key={template.value} value={template.value}>
                   <div className="flex flex-col">
                     <span className="font-medium">{template.label}</span>
@@ -1641,21 +1673,30 @@ export default function CreateDocument() {
                           );
                         }
                         
-                        // Handle template-select display
-                        if (section.type === 'template-select') {
-                          const templateLabels = {
-                            'classic': 'Template Classico',
-                            'modern': 'Template Moderno', 
-                            'elegant': 'Template Elegante',
-                            'minimal': 'Template Minimal'
-                          };
-                          return (
-                            <div key={section.key} className="space-y-2">
-                              <h3 className="font-semibold text-lg">{section.label}</h3>
-                              <div className="text-sm">{templateLabels[value] || value}</div>
-                            </div>
-                          );
-                        }
+                         // Handle template-select display
+                         if (section.type === 'template-select') {
+                           const templateLabels = {
+                             'classic': 'Template Classico',
+                             'modern': 'Template Moderno', 
+                             'elegant': 'Template Elegante',
+                             'minimal': 'Template Minimal'
+                           };
+                           
+                           // Get user template name if it's a custom template
+                           let displayName = templateLabels[value] || value;
+                           if (value && value.startsWith('user_')) {
+                             const templateId = value.replace('user_', '');
+                             const userTemplate = userTemplates.find(t => t.id === templateId);
+                             displayName = userTemplate ? userTemplate.name : value;
+                           }
+                           
+                           return (
+                             <div key={section.key} className="space-y-2">
+                               <h3 className="font-semibold text-lg">{section.label}</h3>
+                               <div className="text-sm">{displayName}</div>
+                             </div>
+                           );
+                         }
                         
                         // Handle events display
                         if (section.type === 'events' && Array.isArray(value)) {

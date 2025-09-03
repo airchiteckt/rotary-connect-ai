@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -34,6 +34,7 @@ export const TemplateEditor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('editor');
+  const [savedTemplates, setSavedTemplates] = useState<any[]>([]);
   
   const [template, setTemplate] = useState<TemplateSettings>({
     logo_position: 'center',
@@ -47,6 +48,35 @@ export const TemplateEditor = () => {
     show_page_numbers: true,
     watermark_opacity: 0.1
   });
+
+  // Load saved templates on component mount
+  useEffect(() => {
+    loadSavedTemplates();
+  }, [user]);
+
+  const loadSavedTemplates = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('document_templates')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setSavedTemplates(data || []);
+      
+      // Load the default template if it exists
+      const defaultTemplate = data?.find(t => t.is_default);
+      if (defaultTemplate) {
+        setTemplate(defaultTemplate.settings as any as TemplateSettings);
+      }
+    } catch (error) {
+      console.error('Error loading templates:', error);
+    }
+  };
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -136,6 +166,9 @@ export const TemplateEditor = () => {
         title: "Successo",
         description: "Template salvato correttamente",
       });
+      
+      // Reload templates to show the updated list
+      loadSavedTemplates();
     } catch (error) {
       console.error('Error saving template:', error);
       toast({
@@ -198,8 +231,9 @@ export const TemplateEditor = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="templates">I Miei Template</TabsTrigger>
           <TabsTrigger value="preview">Anteprima</TabsTrigger>
         </TabsList>
 
@@ -541,6 +575,91 @@ export const TemplateEditor = () => {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Templates Tab */}
+        <TabsContent value="templates" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Template Salvati</CardTitle>
+              <CardDescription>I tuoi template personalizzati</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {savedTemplates.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Nessun template salvato. Crea il tuo primo template nella scheda Editor.
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {savedTemplates.map((savedTemplate) => (
+                    <div key={savedTemplate.id} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h3 className="font-medium">{savedTemplate.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Creato il {new Date(savedTemplate.created_at).toLocaleDateString('it-IT')}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                           <Button
+                             variant="outline"
+                             size="sm"
+                             onClick={() => {
+                               setTemplate(savedTemplate.settings as any as TemplateSettings);
+                               setActiveTab('editor');
+                               toast({
+                                 title: "Template caricato",
+                                 description: "Template caricato nell'editor",
+                               });
+                             }}
+                           >
+                            Carica
+                          </Button>
+                          {savedTemplates.length > 1 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  const { error } = await supabase
+                                    .from('document_templates')
+                                    .delete()
+                                    .eq('id', savedTemplate.id);
+
+                                  if (error) throw error;
+
+                                  toast({
+                                    title: "Template eliminato",
+                                    description: "Template eliminato con successo",
+                                  });
+                                  
+                                  loadSavedTemplates();
+                                } catch (error) {
+                                  toast({
+                                    title: "Errore",
+                                    description: "Errore nell'eliminazione del template",
+                                    variant: "destructive",
+                                  });
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                       <div className="text-sm text-muted-foreground">
+                         <div>Logo: {(savedTemplate.settings as any).logo_position}</div>
+                         <div>Header: {(savedTemplate.settings as any).header_alignment}</div>
+                         <div>Footer: {(savedTemplate.settings as any).footer_alignment}</div>
+                       </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
