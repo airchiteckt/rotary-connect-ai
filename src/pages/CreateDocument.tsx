@@ -49,7 +49,8 @@ export default function CreateDocument() {
     type: (searchParams.get('type') as FormData['type']) || 'verbali',
     content: {},
     status: 'draft',
-    backgroundTemplate: 'classic'
+    logoUrl: '',
+    headerText: ''
   });
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -158,7 +159,8 @@ export default function CreateDocument() {
           type: data.type as FormData['type'],
           content: data.content as Record<string, any>,
           status: data.status || 'draft',
-          backgroundTemplate: (data as any).background_template || 'classic'
+          logoUrl: data.logo_url || '',
+          headerText: data.signature_url || ''
         });
         setDocumentNumber(data.document_number || '');
       }
@@ -249,7 +251,8 @@ export default function CreateDocument() {
         content: formData.content,
         status: formData.status,
         user_id: user.id,
-        background_template: formData.backgroundTemplate
+        logo_url: formData.logoUrl,
+        signature_url: formData.headerText
       };
 
       if (documentId) {
@@ -993,20 +996,6 @@ export default function CreateDocument() {
     }
   };
 
-  const getTemplateStyles = (template: string) => {
-    switch (template) {
-      case 'modern':
-        return 'bg-gradient-to-br from-blue-50 to-indigo-100 border-l-4 border-blue-500';
-      case 'elegant':
-        return 'bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 shadow-lg';
-      case 'minimal':
-        return 'bg-gray-50 border-0 shadow-none';
-      case 'classic':
-      default:
-        return 'bg-white border shadow-sm';
-    }
-  };
-
   const downloadPDF = async () => {
     const element = document.getElementById('document-preview');
     if (!element) {
@@ -1358,51 +1347,34 @@ export default function CreateDocument() {
                     </div>
                     
                     <div>
-                      <Label>Template di Sfondo</Label>
-                      <Select
-                        value={formData.backgroundTemplate || 'classic'}
-                        onValueChange={(selectedValue) => 
-                          setFormData(prev => ({ ...prev, backgroundTemplate: selectedValue }))
-                        }
-                      >
-                        <SelectTrigger className="mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="classic">
-                            <div className="flex flex-col">
-                              <span className="font-medium">Template Classico</span>
-                              <span className="text-xs text-muted-foreground">Design tradizionale con intestazione Rotary</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="modern">
-                            <div className="flex flex-col">
-                              <span className="font-medium">Template Moderno</span>
-                              <span className="text-xs text-muted-foreground">Design contemporaneo con elementi grafici</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="elegant">
-                            <div className="flex flex-col">
-                              <span className="font-medium">Template Elegante</span>
-                              <span className="text-xs text-muted-foreground">Stile raffinato con bordi decorativi</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="minimal">
-                            <div className="flex flex-col">
-                              <span className="font-medium">Template Minimal</span>
-                              <span className="text-xs text-muted-foreground">Design pulito e minimalista</span>
-                            </div>
-                          </SelectItem>
-                          {userTemplates.map((template) => (
-                            <SelectItem key={`user_${template.id}`} value={`user_${template.id}`}>
-                              <div className="flex flex-col">
-                                <span className="font-medium">{template.name}</span>
-                                <span className="text-xs text-muted-foreground">Template personalizzato</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>Logo Club</Label>
+                      <div className="mt-1 space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            // TODO: Handle file upload
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = URL.createObjectURL(file);
+                              setFormData(prev => ({ ...prev, logoUrl: url }));
+                            }
+                          }}
+                        />
+                        {formData.logoUrl && (
+                          <div className="text-xs text-muted-foreground">Logo selezionato</div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label>Intestazione Personalizzata</Label>
+                      <Input
+                        value={formData.headerText || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, headerText: e.target.value }))}
+                        placeholder="Es. Rotary Club di..."
+                        className="mt-1"
+                      />
                     </div>
                     
                     <div>
@@ -1434,7 +1406,11 @@ export default function CreateDocument() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className={`p-8 rounded-lg ${getTemplateStyles(formData.backgroundTemplate || 'classic')}`}>
+                  <div className="p-8 rounded-lg border bg-card text-card-foreground">{formData.logoUrl && (
+                      <div className="text-center mb-4">
+                        <img src={formData.logoUrl} alt="Logo Club" className="h-16 mx-auto" />
+                      </div>
+                    )}
                     <div className="space-y-6">
                       <div className="text-center border-b pb-4">
                         <h1 className="text-2xl font-bold">{formData.title || 'Titolo Documento'}</h1>
