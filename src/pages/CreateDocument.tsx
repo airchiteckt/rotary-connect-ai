@@ -254,7 +254,7 @@ export default function CreateDocument() {
     if (formData.type === 'programmi' && !documentId) {
       setFormData(prev => ({
         ...prev,
-        title: 'Programma del Mese'
+        title: 'Programma mensile'
       }));
     }
   }, [formData.type, documentId]);
