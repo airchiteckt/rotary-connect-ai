@@ -64,7 +64,7 @@ export const TemplateEditor = () => {
     
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `logo_${user?.id}_${Date.now()}.${fileExt}`;
+      const fileName = `${user?.id}/logo_${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('document-assets')
