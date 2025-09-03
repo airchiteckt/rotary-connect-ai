@@ -1586,28 +1586,32 @@ export default function CreateDocument() {
                         return renderPreviewSection(section, value);
                       })}
                       
-                      {(formData.footerData || formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
+                      {(formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
+                        <div className="mt-8 text-left">
+                          <div className="mb-4">
+                            <span className="font-medium">
+                              {formData.defaultLocation || '[Luogo]'}, {new Date().toLocaleDateString('it-IT')}
+                            </span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-8">
+                            <div>
+                              <div className="font-medium mb-2">Il Segretario</div>
+                              <div>{formData.secretaryName || '[Nome Segretario]'}</div>
+                            </div>
+                            <div>
+                              <div className="font-medium mb-2">Il Presidente</div>
+                              <div>{formData.presidentName || '[Nome Presidente]'}</div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {formData.footerData && (
                         <div className="mt-8 pt-6 border-t text-center">
-                          {formData.footerData && (
-                            <div className="text-xs text-muted-foreground whitespace-pre-line mb-2">
-                              {formData.footerData}
-                            </div>
-                          )}
-                          {(formData.defaultLocation || formData.secretaryName || formData.presidentName) && (
-                            <div className="text-xs text-muted-foreground">
-                              {formData.defaultLocation && (
-                                <div>Luogo: {formData.defaultLocation}</div>
-                              )}
-                              <div className="flex justify-between mt-2">
-                                {formData.secretaryName && (
-                                  <div>Il Segretario: {formData.secretaryName}</div>
-                                )}
-                                {formData.presidentName && (
-                                  <div>Il Presidente: {formData.presidentName}</div>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                          <div className="text-xs text-muted-foreground whitespace-pre-line">
+                            {formData.footerData}
+                          </div>
                         </div>
                       )}
                     </div>
