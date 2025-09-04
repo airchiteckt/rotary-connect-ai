@@ -1596,43 +1596,35 @@ export default function CreateDocument() {
         for (let i = 1; i <= totalPages; i++) {
           pdf.setPage(i);
           
-          // Add logo to header of every page (except first page which already has it in content)
-          if (i > 1 && logoBase64) {
-            try {
-              // Header logo - posizione e dimensione fissa
-              pdf.addImage(logoBase64, 'PNG', 1.0, 0.3, 0.8, 0.4);
-            } catch (error) {
-              console.error('Error adding logo to header:', error);
-            }
-          }
-          
           // Add footer to all pages except first
           if (i > 1) {
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
             
-            // Footer area (bottom of page) - posizione fissa
-            const footerY = pageHeight - 0.8;
+            // Footer area (bottom of page)
+            const footerY = pageHeight - 1.0;
             
             // Add a separator line
             pdf.setDrawColor(200);
             pdf.setLineWidth(0.01);
-            pdf.line(0.5, footerY - 0.1, pageWidth - 0.5, footerY - 0.1);
+            pdf.line(0.5, footerY, pageWidth - 0.5, footerY);
             
-            // Add logo in footer - posizione e dimensione fissa
+            // Add logo in footer - posizione corretta a sinistra
             if (logoBase64) {
               try {
-                pdf.addImage(logoBase64, 'PNG', 0.7, footerY + 0.1, 0.4, 0.2);
+                pdf.addImage(logoBase64, 'PNG', 0.5, footerY + 0.1, 0.5, 0.25);
               } catch (error) {
                 console.error('Error adding logo to footer:', error);
               }
             }
             
-            // Add header text in footer - posizione fissa
+            // Add header text in footer - posizione corretta al centro
             if (formData.headerText) {
-              pdf.setFontSize(9);
+              pdf.setFontSize(8);
               pdf.setTextColor(100);
-              pdf.text(formData.headerText, 1.3, footerY + 0.25);
+              const textWidth = pdf.getTextWidth(formData.headerText);
+              const centerX = (pageWidth - textWidth) / 2;
+              pdf.text(formData.headerText, centerX, footerY + 0.2);
             }
             
             // Add page number
