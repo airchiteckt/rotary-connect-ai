@@ -1596,13 +1596,23 @@ export default function CreateDocument() {
         for (let i = 1; i <= totalPages; i++) {
           pdf.setPage(i);
           
-          // Add logo and header to footer if not first page
-          if (i > 1 && (logoBase64 || formData.headerText)) {
+          // Add logo to header of every page (except first page which already has it in content)
+          if (i > 1 && logoBase64) {
+            try {
+              // Header logo (top of page)
+              pdf.addImage(logoBase64, 'PNG', (pdf.internal.pageSize.getWidth() - 0.6) / 2, 0.2, 0.6, 0.3);
+            } catch (error) {
+              console.error('Error adding logo to header:', error);
+            }
+          }
+          
+          // Add footer to all pages except first
+          if (i > 1) {
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
             
             // Footer area (bottom of page)
-            const footerY = pageHeight - 0.5; // Position near bottom
+            const footerY = pageHeight - 0.5;
             
             // Add a separator line
             pdf.setDrawColor(200);
