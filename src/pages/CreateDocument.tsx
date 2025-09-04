@@ -1571,14 +1571,71 @@ export default function CreateDocument() {
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
-        margin: [0.2, 0.2, 0.2, 0.2],
+        margin: [0.6, 0.2, 0.8, 0.2], // Increased top and bottom margins for header/footer
         filename: `${formData.title || 'documento'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          letterRendering: true
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'a4', 
+          orientation: 'portrait',
+          putOnlyUsedFonts: true,
+          compress: true
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
 
-      await html2pdf().set(opt).from(tempElement).save();
+      await html2pdf().set(opt).from(tempElement).toPdf().get('pdf').then((pdf) => {
+        // Add header and footer to each page
+        const totalPages = pdf.internal.getNumberOfPages();
+        
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i);
+          
+          // Add logo and header to footer if not first page
+          if (i > 1 && (logoBase64 || formData.headerText)) {
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            
+            // Footer area (bottom of page)
+            const footerY = pageHeight - 0.5; // Position near bottom
+            
+            // Add a separator line
+            pdf.setDrawColor(200);
+            pdf.setLineWidth(0.01);
+            pdf.line(0.5, footerY - 0.2, pageWidth - 0.5, footerY - 0.2);
+            
+            // Add logo in footer if available
+            if (logoBase64) {
+              try {
+                pdf.addImage(logoBase64, 'PNG', 0.5, footerY - 0.15, 0.3, 0.15);
+              } catch (error) {
+                console.error('Error adding logo to footer:', error);
+              }
+            }
+            
+            // Add header text in footer
+            if (formData.headerText) {
+              pdf.setFontSize(8);
+              pdf.setTextColor(100);
+              const headerTextWidth = pdf.getTextWidth(formData.headerText);
+              const headerX = logoBase64 ? 1.0 : (pageWidth - headerTextWidth) / 2;
+              pdf.text(formData.headerText, headerX, footerY - 0.05);
+            }
+            
+            // Add page number
+            pdf.setFontSize(8);
+            pdf.setTextColor(100);
+            const pageText = `Pagina ${i} di ${totalPages}`;
+            const pageTextWidth = pdf.getTextWidth(pageText);
+            pdf.text(pageText, pageWidth - pageTextWidth - 0.5, footerY - 0.05);
+          }
+        }
+      }).save();
       
       // Clean up
       document.body.removeChild(tempElement);
