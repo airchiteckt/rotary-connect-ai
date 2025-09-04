@@ -1464,6 +1464,31 @@ export default function CreateDocument() {
                   </div>
                 </div>
               `;
+            } else if (section.type === 'service-activities' && Array.isArray(value)) {
+              pdfContent += `
+                <div style="margin-bottom: 20px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px; color: #1f2937;">${section.label}</h3>
+                  <div>
+                    ${value.map((activity, index) => `
+                      <div style="background-color: #f9fafb; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
+                        <div style="font-size: 14px; font-weight: 500;">
+                          ${activity.testo || `Attività ${index + 1}`}
+                        </div>
+                        ${activity.data ? `
+                          <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                            📅 ${new Date(activity.data).toLocaleDateString('it-IT')}${activity.orario ? ` - ${activity.orario}` : ''}
+                          </div>
+                        ` : ''}
+                        ${activity.descrizione ? `
+                          <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                            ${activity.descrizione}
+                          </div>
+                        ` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
             } else if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
               pdfContent += `
                 <div style="margin-bottom: 20px;">
@@ -1617,6 +1642,35 @@ export default function CreateDocument() {
       );
     }
     
+    // Handle service-activities display with essential data only
+    if (section.type === 'service-activities' && Array.isArray(value)) {
+      return (
+        <div key={section.key} className="space-y-3">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="space-y-2">
+            {value.map((activity, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                <div className="text-sm font-medium">
+                  {activity.testo || `Attività ${index + 1}`}
+                </div>
+                {activity.data && (
+                  <div className="text-sm text-gray-600 mt-1">
+                    📅 {new Date(activity.data).toLocaleDateString('it-IT')}
+                    {activity.orario && ` - ${activity.orario}`}
+                  </div>
+                )}
+                {activity.descrizione && (
+                  <div className="text-xs text-gray-600 mt-1">
+                    {activity.descrizione}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     // Handle agenda_distrettuale display with new format
     if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
       return (
