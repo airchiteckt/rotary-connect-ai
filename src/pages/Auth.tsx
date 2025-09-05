@@ -38,7 +38,7 @@ export default function Auth() {
     } else {
       toast({
         title: "Accesso effettuato",
-        description: "Benvenuto nel gestionale Rotary!",
+        description: "Benvenuto in FastClub!",
       });
     }
     
@@ -78,9 +78,9 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary-foreground">R</span>
+            <span className="text-2xl font-bold text-primary-foreground">F</span>
           </div>
-          <CardTitle className="text-2xl font-bold">Gestionale Rotary</CardTitle>
+          <CardTitle className="text-2xl font-bold">FastClub</CardTitle>
           <CardDescription>
             Accedi o registrati per iniziare la tua prova gratuita di 30 giorni
           </CardDescription>
@@ -137,12 +137,12 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="club_name">Nome Club Rotary</Label>
+                  <Label htmlFor="club_name">Nome Club/Associazione</Label>
                   <Input
                     id="club_name"
                     name="club_name"
                     type="text"
-                    placeholder="Rotary Club Milano"
+                    placeholder="Il tuo Club o Associazione"
                     required
                   />
                 </div>

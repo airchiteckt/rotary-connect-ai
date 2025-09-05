@@ -83,7 +83,7 @@ export default function CreateDocument() {
     },
     programmi: {
       sections: [
-        { key: 'anno_rotariano', label: 'Anno Rotariano', type: 'rotary-year', required: false },
+        { key: 'anno_sociale', label: 'Anno Sociale', type: 'social-year', required: false },
         { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: false },
         { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
         { key: 'attivita_servizio', label: 'Attività di servizio', type: 'service-activities', required: false },
@@ -326,7 +326,7 @@ export default function CreateDocument() {
   // Auto-set title when document type changes
   useEffect(() => {
     if (formData.type === 'programmi' && !documentId) {
-      const currentMonth = 'settembre'; // Default to September for Rotary year
+      const currentMonth = 'settembre'; // Default to September for social year
       setFormData(prev => ({
         ...prev,
         title: 'Programma mensile',
@@ -347,7 +347,7 @@ export default function CreateDocument() {
         body: {
           type: formData.type,
           currentContent: formData.content,
-          clubName: profile?.club_name || 'Rotary Club',
+          clubName: profile?.club_name || 'Il tuo Club',
           additionalContext: ''
         }
       });
@@ -604,13 +604,13 @@ export default function CreateDocument() {
                 onChange={(e) => {
                   updateContent(section.key, { ...presMessage, riflessione_mese: e.target.value });
                 }}
-                placeholder="Riflessione collegata al tema Rotary internazionale del mese..."
+                placeholder="Riflessione collegata al tema del mese o all'attività principale..."
                 rows={4}
                 className="mt-1"
               />
             </div>
             <div>
-              <Label className="text-sm font-semibold">Tema Rotary Internazionale</Label>
+              <Label className="text-sm font-semibold">Tema del Mese</Label>
               <Input
                 value={presMessage.tema_rotary || ''}
                 onChange={(e) => {
@@ -1089,7 +1089,7 @@ export default function CreateDocument() {
                         <SelectValue placeholder="Seleziona tipo contenuto" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="riflessione">Riflessione Rotary</SelectItem>
+                        <SelectItem value="riflessione">Riflessione Tematica</SelectItem>
                         <SelectItem value="progetto_internazionale">Progetto Internazionale</SelectItem>
                         <SelectItem value="citazione">Citazione Motivazionale</SelectItem>
                         <SelectItem value="articolo">Articolo Culturale</SelectItem>
@@ -1165,8 +1165,8 @@ export default function CreateDocument() {
       );
     }
     
-    // Handle rotary-year display
-    if (section.type === 'rotary-year') {
+    // Handle social-year display
+    if (section.type === 'social-year') {
       return (
         <div key={section.key} style={{ marginBottom: '16px' }}>
           <h3 style={{ fontWeight: '600', fontSize: '18px', marginBottom: '8px', color: '#1f2937' }}>{section.label}</h3>
@@ -1421,7 +1421,7 @@ export default function CreateDocument() {
       // Content sections
       for (const section of templates[formData.type]?.sections || []) {
         const value = formData.content[section.key];
-        if (value && section.key !== 'anno_rotariano' && section.key !== 'mese') { // Skip rotary year and month as they're shown in header
+        if (value && section.key !== 'anno_sociale' && section.key !== 'mese') { // Skip social year and month as they're shown in header
           const sectionElement = document.createElement('div');
           const renderedSection = renderPDFPreviewSection(section, value);
           if (renderedSection) {
@@ -1429,7 +1429,7 @@ export default function CreateDocument() {
             const tempDiv = document.createElement('div');
             const reactElement = renderedSection as React.ReactElement;
             
-            if (section.type === 'rotary-year') {
+            if (section.type === 'social-year') {
               pdfContent += `
                 <div style="margin-bottom: 16px;">
                   <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 8px; color: #1f2937;">${section.label}</h3>
@@ -1655,8 +1655,8 @@ export default function CreateDocument() {
   };
 
   const renderPreviewSection = (section: any, value: any) => {
-    // Handle rotary-year display
-    if (section.type === 'rotary-year') {
+    // Handle social-year display
+    if (section.type === 'social-year') {
       return (
         <div key={section.key} className="space-y-2">
           <h3 className="font-semibold text-lg">{section.label}</h3>
@@ -2080,7 +2080,7 @@ export default function CreateDocument() {
                           const value = e.target.value;
                           setFormData(prev => ({ ...prev, headerText: value }));
                         }}
-                        placeholder="Es. Rotary Club di..."
+                        placeholder="Es. Nome del Club o Associazione..."
                         className="mt-1"
                       />
                     </div>
@@ -2218,7 +2218,7 @@ export default function CreateDocument() {
                       
                        {templates[formData.type]?.sections.map((section) => {
                          const value = formData.content[section.key];
-                         if (!value || section.key === 'anno_rotariano' || section.key === 'mese') return null; // Skip rotary year and month as they're shown in header
+                         if (!value || section.key === 'anno_sociale' || section.key === 'mese') return null; // Skip social year and month as they're shown in header
                          return renderPreviewSection(section, value);
                        })}
                       

@@ -43,10 +43,10 @@ export const TemplateEditor = ({ onTemplateSaved }: TemplateEditorProps = {}) =>
   const [template, setTemplate] = useState<TemplateSettings>({
     logo_position: 'center',
     logo_size: 'medium',
-    header_text: 'ROTARY CLUB [NOME CLUB]\nDistretto 2080',
+    header_text: '[NOME CLUB O ASSOCIAZIONE]',
     header_font_size: 'large',
     header_alignment: 'center',
-    footer_text: 'Via [Indirizzo], [Città] - Tel. [Telefono] - Email: [email]\nwww.rotary[nomeclub].it',
+    footer_text: 'Via [Indirizzo], [Città] - Tel. [Telefono] - Email: [email]\nwww.[nomeclub].it',
     footer_font_size: 'small',
     footer_alignment: 'center',
     show_page_numbers: true,

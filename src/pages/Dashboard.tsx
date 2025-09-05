@@ -47,7 +47,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <p className="mb-4 text-sm text-muted-foreground">
-              Per continuare ad utilizzare il gestionale Rotary, contatta il nostro team per attivare l'abbonamento.
+              Per continuare ad utilizzare FastClub, contatta il nostro team per attivare l'abbonamento.
             </p>
             <div className="space-y-2">
               <Button className="w-full">Contatta il Team</Button>
@@ -131,11 +131,11 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-sm sm:text-lg font-bold text-primary-foreground">R</span>
+                <span className="text-sm sm:text-lg font-bold text-primary-foreground">F</span>
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold truncate">Gestionale Rotary</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.club_name || 'Club Rotary'}</p>
+                <h1 className="text-lg sm:text-xl font-bold truncate">FastClub</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.club_name || 'Il tuo Club'}</p>
               </div>
             </div>
             
@@ -167,9 +167,9 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Benvenuto, {profile?.full_name?.split(' ')[0] || 'Rotariano'}!</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Benvenuto, {profile?.full_name?.split(' ')[0] || 'Amico'}!</h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Gestisci le attività del tuo club Rotary con strumenti professionali e intelligenza artificiale.
+            Automatizza e ottimizza la gestione del tuo club con AI avanzata e automazioni intelligenti.
           </p>
         </div>
 

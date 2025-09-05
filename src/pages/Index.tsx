@@ -26,14 +26,14 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 sm:mb-8">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <span className="text-2xl sm:text-3xl font-bold text-primary-foreground">R</span>
+              <span className="text-2xl sm:text-3xl font-bold text-primary-foreground">F</span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent px-2">
-              Gestionale Rotary
+              FastClub
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 px-4">
-              La piattaforma completa per la gestione digitale del tuo Club Rotary. 
-              Crea documenti professionali, gestisci comunicazioni e genera locandine con l'intelligenza artificiale.
+              La piattaforma intelligente per automatizzare la gestione del tuo club o associazione. 
+              Documenti AI, comunicazioni smart e automazioni avanzate per semplificare ogni processo.
             </p>
           </div>
           
@@ -62,9 +62,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Documenti Intelligenti</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Documenti AI</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Crea programmi mensili, verbali e comunicazioni con template professionali e AI summary automatico
+                  Genera automaticamente programmi, verbali e comunicazioni con AI. Template intelligenti e content generation avanzato
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -74,9 +74,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Email Marketing</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Automazioni Smart</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Gestisci anagrafiche per categorie e invia comunicazioni di massa con configurazione avanzata
+                  Automatizza comunicazioni e notifiche. Gestione intelligente di membri e categorie con workflow avanzati
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -86,9 +86,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Image className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Locandine AI</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Design AI</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Genera flyer professionali per eventi in diversi formati con intelligenza artificiale
+                  Crea locandine e materiali grafici professionali per eventi con AI generativa. Ogni design unico e su misura
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -98,9 +98,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Gestione Contatti</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Gestione Intelligente</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Organizza membri per categorie: soci club, direttivo, distrettuale e molto altro
+                  CRM avanzato per membri e contatti. Analytics automatico e insights per ottimizzare le attività del club
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -138,7 +138,7 @@ const Index = () => {
           <CardHeader className="pb-4 sm:pb-6">
             <CardTitle className="text-xl sm:text-2xl px-4">Pronto per iniziare?</CardTitle>
             <CardDescription className="text-base sm:text-lg px-4">
-              Trasforma la gestione del tuo Club Rotary con tecnologie all'avanguardia
+              Rivoluziona la gestione del tuo club con AI e automazioni intelligenti
             </CardDescription>
           </CardHeader>
           <CardContent>
