@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight } from 'lucide-react';
 import WaitingListForm from '@/components/WaitingListForm';
+import VideoTour from '@/components/VideoTour';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -137,20 +138,11 @@ const Index = () => {
       <section className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Scopri FastClub in 20 Secondi</h2>
-          <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl p-6 sm:p-8 mx-4">
-            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-4">
-              <div className="text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
-                <p className="text-muted-foreground text-sm sm:text-base">Video Tour in Arrivo</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Un tour interattivo per scoprire tutte le funzionalità
-                </p>
-              </div>
-            </div>
+          <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
+            Un tour rapido delle principali funzionalità per la gestione intelligente del tuo club
+          </p>
+          <div className="mx-4">
+            <VideoTour />
           </div>
         </div>
       </section>
