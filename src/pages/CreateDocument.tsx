@@ -1840,47 +1840,70 @@ export default function CreateDocument() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/segreteria')}>
+        <div className="container mx-auto px-4 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <Button variant="ghost" size="sm" onClick={() => navigate('/segreteria')} className="flex-shrink-0">
                 <ArrowLeft className="w-4 h-4" />
+                <span className="sr-only">Torna indietro</span>
               </Button>
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
-                {currentDocType?.icon && <currentDocType.icon className="w-5 h-5 text-white" />}
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                {currentDocType?.icon && <currentDocType.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />}
               </div>
-              <div>
-                <h1 className="text-xl font-bold">
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold truncate">
                   {documentId ? 'Modifica' : 'Crea'} {currentDocType?.label}
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">
                   {documentNumber && `${documentNumber} • `}
                   {profile?.club_name}
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={generateAI}
                 disabled={isGenerating}
-                className="flex items-center gap-2"
+                className="hidden sm:flex items-center gap-2"
               >
                 {isGenerating ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Wand2 className="w-4 h-4" />
                 )}
-                {isGenerating ? 'Generando...' : 'AI Assistant'}
+                <span className="hidden md:inline">
+                  {isGenerating ? 'Generando...' : 'AI Assistant'}
+                </span>
               </Button>
-              <Button onClick={saveDocument} disabled={isSaving}>
-                <Save className="w-4 h-4 mr-2" />
-                {isSaving ? 'Salvataggio...' : 'Salva'}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={generateAI}
+                disabled={isGenerating}
+                className="sm:hidden p-2"
+              >
+                {isGenerating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Wand2 className="w-4 h-4" />
+                )}
               </Button>
-              <Button variant="outline" onClick={downloadPDF}>
+              <Button onClick={saveDocument} disabled={isSaving} size="sm" className="hidden sm:flex">
+                <Save className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{isSaving ? 'Salvataggio...' : 'Salva'}</span>
+              </Button>
+              <Button onClick={saveDocument} disabled={isSaving} size="sm" className="sm:hidden p-2">
+                <Save className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" onClick={downloadPDF} size="sm" className="hidden md:flex">
                 <Download className="w-4 h-4 mr-2" />
                 Scarica PDF
+              </Button>
+              <Button variant="outline" onClick={downloadPDF} size="sm" className="md:hidden p-2">
+                <Download className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -1888,40 +1911,41 @@ export default function CreateDocument() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="editor">Editor</TabsTrigger>
-              <TabsTrigger value="settings">Impostazioni</TabsTrigger>
-              <TabsTrigger value="preview">Anteprima</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+            <TabsList className="grid w-full grid-cols-3 h-10 sm:h-11">
+              <TabsTrigger value="editor" className="text-xs sm:text-sm">Editor</TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs sm:text-sm">Impostazioni</TabsTrigger>
+              <TabsTrigger value="preview" className="text-xs sm:text-sm">Anteprima</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="editor" className="space-y-6">
+            <TabsContent value="editor" className="space-y-4 sm:space-y-6">
               {/* Document Info */}
               <Card>
-                <CardHeader>
-                  <CardTitle>Informazioni Documento</CardTitle>
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="text-lg sm:text-xl">Informazioni Documento</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="title">Titolo Documento *</Label>
+                      <Label htmlFor="title" className="text-sm font-medium">Titolo Documento *</Label>
                       <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                         placeholder="Inserisci il titolo del documento..."
+                        className="text-sm"
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <Label>Tipo Documento</Label>
+                      <Label className="text-sm font-medium">Tipo Documento</Label>
                       <Select 
                         value={formData.type} 
                         onValueChange={(value: FormData['type']) => setFormData(prev => ({ ...prev, type: value }))}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="text-sm">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1937,7 +1961,7 @@ export default function CreateDocument() {
               </Card>
 
               {/* Dynamic Form Sections */}
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 {templates[formData.type]?.sections.map((section) => (
                   <Card key={section.key}>
                     <CardHeader>

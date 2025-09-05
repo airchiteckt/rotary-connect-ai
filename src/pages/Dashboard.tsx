@@ -127,25 +127,26 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-primary-foreground">R</span>
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <span className="text-sm sm:text-lg font-bold text-primary-foreground">R</span>
               </div>
-              <div>
-                <h1 className="text-xl font-bold">Gestionale Rotary</h1>
-                <p className="text-sm text-muted-foreground">{profile?.club_name || 'Club Rotary'}</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold truncate">Gestionale Rotary</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.club_name || 'Club Rotary'}</p>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Badge variant={daysRemaining > 7 ? "default" : "destructive"}>
-                {daysRemaining} giorni rimasti
+            <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
+              <Badge variant={daysRemaining > 7 ? "default" : "destructive"} className="text-xs sm:text-sm">
+                <span className="hidden sm:inline">{daysRemaining} giorni rimasti</span>
+                <span className="sm:hidden">{daysRemaining}g</span>
               </Badge>
-              <div className="text-right">
-                <p className="font-medium">{profile?.full_name}</p>
-                <p className="text-sm text-muted-foreground capitalize">{profile?.role}</p>
+              <div className="text-right hidden md:block">
+                <p className="font-medium text-sm truncate max-w-[120px]">{profile?.full_name}</p>
+                <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
               </div>
               <Button variant="ghost" size="sm" onClick={() => {
                 signOut();
@@ -153,8 +154,9 @@ export default function Dashboard() {
                   title: "Logout effettuato",
                   description: "A presto!",
                 });
-              }}>
+              }} className="p-2">
                 <LogOut className="w-4 h-4" />
+                <span className="sr-only">Logout</span>
               </Button>
             </div>
           </div>
@@ -162,90 +164,90 @@ export default function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Benvenuto, {profile?.full_name?.split(' ')[0] || 'Rotariano'}!</h2>
-          <p className="text-muted-foreground">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Benvenuto, {profile?.full_name?.split(' ')[0] || 'Rotariano'}!</h2>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Gestisci le attività del tuo club Rotary con strumenti professionali e intelligenza artificiale.
           </p>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-4 mb-6 sm:mb-8">
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <FileText className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Documenti</p>
-                <p className="text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <DollarSign className="w-6 h-6 text-emerald-600 mx-auto mb-1" />
+                <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Budget</p>
-                <p className="text-lg font-bold">€0</p>
+                <p className="text-sm sm:text-lg font-bold">€0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <Crown className="w-6 h-6 text-amber-600 mx-auto mb-1" />
+                <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Progetti</p>
-                <p className="text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <Shield className="w-6 h-6 text-red-600 mx-auto mb-1" />
+                <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-red-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Eventi</p>
-                <p className="text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <Building className="w-6 h-6 text-indigo-600 mx-auto mb-1" />
+                <Building className="w-4 h-4 sm:w-6 sm:h-6 text-indigo-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Commissioni</p>
-                <p className="text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <Megaphone className="w-6 h-6 text-purple-600 mx-auto mb-1" />
+                <Megaphone className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Campagne</p>
-                <p className="text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <Users className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                <Users className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Soci Attivi</p>
-                <p className="text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Menu */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {menuItems.map((item) => (
             <Card key={item.title} className="cursor-pointer hover:shadow-lg transition-all duration-200 group">
               <CardHeader>
@@ -273,13 +275,13 @@ export default function Dashboard() {
         </div>
 
         {/* Trial Notice */}
-        <Card className="mt-8 border-amber-200 bg-amber-50/50">
-          <CardContent className="pt-6">
-            <div className="flex items-center space-x-3">
-              <Calendar className="w-5 h-5 text-amber-600" />
-              <div>
-                <p className="font-medium text-amber-800">Periodo di Prova Attivo</p>
-                <p className="text-sm text-amber-700">
+        <Card className="mt-6 sm:mt-8 border-amber-200 bg-amber-50/50">
+          <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
+            <div className="flex items-start sm:items-center space-x-3">
+              <Calendar className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-amber-800 text-sm sm:text-base">Periodo di Prova Attivo</p>
+                <p className="text-xs sm:text-sm text-amber-700 mt-1">
                   Hai ancora {daysRemaining} giorni per testare tutte le funzionalità del gestionale.
                 </p>
               </div>

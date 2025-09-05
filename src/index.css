@@ -102,4 +102,31 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Mobile-first responsive improvements */
+  @media (max-width: 640px) {
+    .container {
+      @apply px-4;
+    }
+    
+    /* Ensure touch targets are at least 44px */
+    button {
+      @apply min-h-[44px];
+    }
+    
+    /* Better mobile typography */
+    h1 {
+      @apply leading-tight;
+    }
+    
+    /* Mobile-friendly card padding */
+    .card {
+      @apply p-4;
+    }
+  }
+  
+  /* Improved focus states for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
 }
