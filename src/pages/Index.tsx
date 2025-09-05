@@ -22,7 +22,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16 text-center">
         <div className="max-w-4xl mx-auto">
@@ -30,7 +30,7 @@ const Index = () => {
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <span className="text-2xl sm:text-3xl font-bold text-primary-foreground">F</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent px-2">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-primary px-2">
               FastClub
             </h1>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 px-4">
@@ -61,7 +61,7 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-2">
             <Card className="text-center hover:shadow-lg transition-all">
               <CardHeader className="pb-4 sm:pb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Documenti AI</CardTitle>
@@ -73,7 +73,7 @@ const Index = () => {
 
             <Card className="text-center hover:shadow-lg transition-all">
               <CardHeader className="pb-4 sm:pb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-accent rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Automazioni Smart</CardTitle>
@@ -85,7 +85,7 @@ const Index = () => {
 
             <Card className="text-center hover:shadow-lg transition-all">
               <CardHeader className="pb-4 sm:pb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-secondary rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Image className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Design AI</CardTitle>
@@ -97,7 +97,7 @@ const Index = () => {
 
             <Card className="text-center hover:shadow-lg transition-all">
               <CardHeader className="pb-4 sm:pb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-chart-4 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Gestione Intelligente</CardTitle>
@@ -109,7 +109,7 @@ const Index = () => {
 
             <Card className="text-center hover:shadow-lg transition-all">
               <CardHeader className="pb-4 sm:pb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-chart-5 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">GDPR Compliant</CardTitle>
@@ -121,7 +121,7 @@ const Index = () => {
 
             <Card className="text-center hover:shadow-lg transition-all">
               <CardHeader className="pb-4 sm:pb-6">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-chart-3 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <CardTitle className="text-lg sm:text-xl">Prova Gratuita</CardTitle>
@@ -166,7 +166,7 @@ const Index = () => {
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
-        <Card className="max-w-2xl mx-auto text-center bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 mx-4">
+        <Card className="max-w-2xl mx-auto text-center bg-card border mx-4">
           <CardHeader className="pb-4 sm:pb-6">
             <CardTitle className="text-xl sm:text-2xl px-4">Hai già un account?</CardTitle>
             <CardDescription className="text-base sm:text-lg px-4">

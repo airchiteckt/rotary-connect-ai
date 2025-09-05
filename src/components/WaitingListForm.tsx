@@ -81,7 +81,7 @@ const WaitingListForm = () => {
 
   if (isSubmitted) {
     return (
-      <Card className="max-w-md mx-auto bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+      <Card className="max-w-md mx-auto bg-card border">
         <CardContent className="text-center py-8 px-6">
           <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Mail className="w-6 h-6 text-white" />

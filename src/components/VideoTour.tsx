@@ -98,7 +98,7 @@ const VideoTour = () => {
                      (progress / 100) * tourSlides[currentSlide].duration;
 
   return (
-    <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl overflow-hidden">
+    <div className="relative bg-card border rounded-xl overflow-hidden shadow-lg">
       {/* Video Container */}
       <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
         {/* Slide Image */}
