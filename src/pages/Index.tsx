@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight } from 'lucide-react';
+import WaitingListForm from '@/components/WaitingListForm';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -132,24 +133,63 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Video Tour Section */}
+      <section className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Scopri FastClub in 20 Secondi</h2>
+          <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl p-6 sm:p-8 mx-4">
+            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-4">
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+                <p className="text-muted-foreground text-sm sm:text-base">Video Tour in Arrivo</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Un tour interattivo per scoprire tutte le funzionalità
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Waiting List Section */}
+      <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 px-4">Entra in Lista d'Attesa</h2>
+            <p className="text-base sm:text-lg text-muted-foreground px-4 max-w-2xl mx-auto">
+              FastClub è attualmente in fase di sviluppo. Registrati per essere tra i primi 
+              a ricevere l'accesso quando sarà disponibile.
+            </p>
+          </div>
+          
+          <div className="flex justify-center px-4">
+            <WaitingListForm />
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <Card className="max-w-2xl mx-auto text-center bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 mx-4">
           <CardHeader className="pb-4 sm:pb-6">
-            <CardTitle className="text-xl sm:text-2xl px-4">Pronto per iniziare?</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl px-4">Hai già un account?</CardTitle>
             <CardDescription className="text-base sm:text-lg px-4">
-              Rivoluziona la gestione del tuo club con AI e automazioni intelligenti
+              Accedi per iniziare subito con FastClub
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
               <a href="/auth">
-                Inizia la Tua Prova Gratuita
+                Accedi alla Piattaforma
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </Button>
             <p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4 px-4">
-              Nessun impegno • 30 giorni gratuiti • Supporto completo
+              Accesso sicuro • Dati protetti • Supporto 24/7
             </p>
           </CardContent>
         </Card>
