@@ -77,8 +77,12 @@ export default function Auth() {
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary-foreground">F</span>
+          <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
+            <img 
+              src="/lovable-uploads/f25ef6da-1527-4477-beea-2337b33ff7c2.png" 
+              alt="FastClub Logo" 
+              className="w-16 h-16"
+            />
           </div>
           <CardTitle className="text-2xl font-bold flex items-center justify-center">
             <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8" />
