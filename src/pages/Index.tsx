@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight } from 'lucide-react';
 import WaitingListForm from '@/components/WaitingListForm';
 import VideoTour from '@/components/VideoTour';
+import Footer from '@/components/Footer';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -27,12 +28,13 @@ const Index = () => {
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16 text-center">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
-              <span className="text-2xl sm:text-3xl font-bold text-primary-foreground">F</span>
+            <div className="mb-4 sm:mb-6">
+              <img 
+                src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" 
+                alt="FastClub Logo" 
+                className="h-16 sm:h-20 mx-auto"
+              />
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-primary px-2">
-              FastClub
-            </h1>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 px-4">
               La piattaforma intelligente per automatizzare la gestione del tuo club o associazione. 
               Documenti AI, comunicazioni smart e automazioni avanzate per semplificare ogni processo.
@@ -186,6 +188,9 @@ const Index = () => {
           </CardContent>
         </Card>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
