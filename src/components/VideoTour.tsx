@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, RotateCcw } from 'lucide-react';
-import tourDashboard from '@/assets/tour-dashboard.jpg';
-import tourDocuments from '@/assets/tour-documents.jpg';
-import tourContacts from '@/assets/tour-contacts.jpg';
-import tourAutomation from '@/assets/tour-automation.jpg';
+// Using real screenshots from the application
 
 interface TourSlide {
   image: string;
@@ -15,28 +12,40 @@ interface TourSlide {
 
 const tourSlides: TourSlide[] = [
   {
-    image: tourDashboard,
-    title: "Dashboard Intelligente",
-    description: "Una panoramica completa del tuo club con statistiche, attività recenti e azioni rapide",
-    duration: 5
+    image: "/lovable-uploads/21141ed3-f3c7-46ee-b485-29732d785157.png",
+    title: "Dashboard del Club",
+    description: "Panoramica completa con statistiche in tempo reale, navigazione intuitiva tra le sezioni del club",
+    duration: 6
   },
   {
-    image: tourDocuments,
-    title: "Documenti AI",
-    description: "Crea verbali, programmi e comunicazioni automaticamente con l'intelligenza artificiale",
-    duration: 5
+    image: "/lovable-uploads/61b06b21-be3d-45b9-b1e7-178c96ace648.png",
+    title: "Segreteria Digitale",
+    description: "Gestione documenti, verbali riunioni, programmi mensili e comunicazioni ufficiali",
+    duration: 6
   },
   {
-    image: tourContacts,
-    title: "Gestione Contatti",
-    description: "Organizza membri e contatti con categorie intelligenti e filtri avanzati",
-    duration: 5
+    image: "/lovable-uploads/1081b2ef-38ca-48bd-b0ef-d77f614cd588.png",
+    title: "Comunicazione AI",
+    description: "Generatore intelligente di locandine, gestione social media e strumenti di marketing",
+    duration: 6
   },
   {
-    image: tourAutomation,
-    title: "Automazioni Smart",
-    description: "Automatizza comunicazioni e notifiche per risparmiare tempo prezioso",
-    duration: 5
+    image: "/lovable-uploads/3817cd51-9797-4dfd-862d-bfadd56c912f.png",
+    title: "Tesoreria Avanzata",
+    description: "Bilanci, transazioni, report finanziari e gestione budget del club",
+    duration: 6
+  },
+  {
+    image: "/lovable-uploads/851999c0-2bdc-48b1-8902-2c162b5c63bf.png",
+    title: "Area Presidenza",
+    description: "Coordinamento progetti, governance del club e strumenti di leadership",
+    duration: 6
+  },
+  {
+    image: "/lovable-uploads/df8f940f-a641-42e6-8691-e88d7428dea6.png",
+    title: "Gestione Soci",
+    description: "Anagrafica completa, presenze, quote sociali e riconoscimenti membri",
+    duration: 6
   }
 ];
 
