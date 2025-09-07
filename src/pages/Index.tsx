@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight } from 'lucide-react';
 import WaitingListForm from '@/components/WaitingListForm';
-import VideoTour from '@/components/VideoTour';
 import Footer from '@/components/Footer';
 
 // Fixed logo import issue
@@ -138,17 +137,114 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Video Tour Section */}
+      {/* Screenshots Gallery Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12">
-        <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
-            Scopri <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> in 20 Secondi
-          </h2>
-          <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
-            Un tour rapido delle principali funzionalità per la gestione intelligente del tuo club
-          </p>
-          <div className="mx-4">
-            <VideoTour />
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
+              Esplora <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> in Dettaglio
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
+              Scopri tutte le sezioni e funzionalità per la gestione completa del tuo club
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <Card className="overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src="/lovable-uploads/21141ed3-f3c7-46ee-b485-29732d785157.png" 
+                  alt="Dashboard del Club" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Dashboard del Club</CardTitle>
+                <CardDescription className="text-sm">
+                  Panoramica completa con statistiche in tempo reale, navigazione intuitiva tra le sezioni del club
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src="/lovable-uploads/61b06b21-be3d-45b9-b1e7-178c96ace648.png" 
+                  alt="Segreteria Digitale" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Segreteria Digitale</CardTitle>
+                <CardDescription className="text-sm">
+                  Gestione documenti, verbali riunioni, programmi mensili e comunicazioni ufficiali
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src="/lovable-uploads/1081b2ef-38ca-48bd-b0ef-d77f614cd588.png" 
+                  alt="Comunicazione AI" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Comunicazione AI</CardTitle>
+                <CardDescription className="text-sm">
+                  Generatore intelligente di locandine, gestione social media e strumenti di marketing
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src="/lovable-uploads/3817cd51-9797-4dfd-862d-bfadd56c912f.png" 
+                  alt="Tesoreria Avanzata" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Tesoreria Avanzata</CardTitle>
+                <CardDescription className="text-sm">
+                  Bilanci, transazioni, report finanziari e gestione budget del club
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src="/lovable-uploads/851999c0-2bdc-48b1-8902-2c162b5c63bf.png" 
+                  alt="Area Presidenza" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Area Presidenza</CardTitle>
+                <CardDescription className="text-sm">
+                  Coordinamento progetti, governance del club e strumenti di leadership
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="overflow-hidden hover:shadow-lg transition-all">
+              <div className="aspect-video overflow-hidden">
+                <img 
+                  src="/lovable-uploads/df8f940f-a641-42e6-8691-e88d7428dea6.png" 
+                  alt="Gestione Soci" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <CardHeader>
+                <CardTitle className="text-lg">Gestione Soci</CardTitle>
+                <CardDescription className="text-sm">
+                  Anagrafica completa, presenze, quote sociali e riconoscimenti membri
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </section>
