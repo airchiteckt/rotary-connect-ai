@@ -87,8 +87,8 @@ const WaitingListForm = () => {
             <Mail className="w-6 h-6 text-white" />
           </div>
           <h3 className="text-lg font-semibold mb-2">Registrazione Completata!</h3>
-          <p className="text-muted-foreground">
-            Grazie per il tuo interesse. Ti contatteremo presto con tutti i dettagli di FastClub.
+          <p className="text-muted-foreground flex items-center gap-2">
+            Grazie per il tuo interesse. Ti contatteremo presto con tutti i dettagli di <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />.
           </p>
         </CardContent>
       </Card>
@@ -99,8 +99,8 @@ const WaitingListForm = () => {
     <Card className="max-w-md mx-auto">
       <CardHeader className="text-center pb-4">
         <CardTitle className="text-xl sm:text-2xl">Entra in Lista d'Attesa</CardTitle>
-        <CardDescription className="text-sm sm:text-base">
-          Sii tra i primi a scoprire FastClub quando sarà disponibile
+        <CardDescription className="text-sm sm:text-base flex items-center justify-center gap-2">
+          Sii tra i primi a scoprire <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" /> quando sarà disponibile
         </CardDescription>
       </CardHeader>
       <CardContent>

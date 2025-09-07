@@ -24,8 +24,8 @@ const Footer = () => {
                   info@fastclub.it
                 </a>
               </div>
-              <div className="text-xs sm:text-sm">
-                © 2024 FastClub. Tutti i diritti riservati.
+              <div className="text-xs sm:text-sm flex items-center gap-2">
+                © 2024 <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />. Tutti i diritti riservati.
               </div>
             </div>
           </div>

@@ -46,8 +46,8 @@ export default function Dashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="mb-4 text-sm text-muted-foreground">
-              Per continuare ad utilizzare FastClub, contatta il nostro team per attivare l'abbonamento.
+            <p className="mb-4 text-sm text-muted-foreground flex items-center gap-1">
+              Per continuare ad utilizzare <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />, contatta il nostro team per attivare l'abbonamento.
             </p>
             <div className="space-y-2">
               <Button className="w-full">Contatta il Team</Button>
@@ -134,7 +134,9 @@ export default function Dashboard() {
                 <span className="text-sm sm:text-lg font-bold text-primary-foreground">F</span>
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold truncate">FastClub</h1>
+                <h1 className="text-lg sm:text-xl font-bold truncate flex items-center">
+                  <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5 sm:h-6" />
+                </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.club_name || 'Il tuo Club'}</p>
               </div>
             </div>

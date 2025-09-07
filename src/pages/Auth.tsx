@@ -38,7 +38,7 @@ export default function Auth() {
     } else {
       toast({
         title: "Accesso effettuato",
-        description: "Benvenuto in FastClub!",
+        description: "Benvenuto!",
       });
     }
     
@@ -80,7 +80,9 @@ export default function Auth() {
           <div className="mx-auto mb-4 w-16 h-16 bg-primary rounded-full flex items-center justify-center">
             <span className="text-2xl font-bold text-primary-foreground">F</span>
           </div>
-          <CardTitle className="text-2xl font-bold">FastClub</CardTitle>
+          <CardTitle className="text-2xl font-bold flex items-center justify-center">
+            <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8" />
+          </CardTitle>
           <CardDescription>
             Accedi o registrati per iniziare la tua prova gratuita di 30 giorni
           </CardDescription>

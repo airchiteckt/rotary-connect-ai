@@ -141,7 +141,9 @@ const Index = () => {
       {/* Video Tour Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto text-center mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Scopri FastClub in 20 Secondi</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
+            Scopri <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> in 20 Secondi
+          </h2>
           <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
             Un tour rapido delle principali funzionalità per la gestione intelligente del tuo club
           </p>
@@ -156,8 +158,8 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 px-4">Entra in Lista d'Attesa</h2>
-            <p className="text-base sm:text-lg text-muted-foreground px-4 max-w-2xl mx-auto">
-              FastClub è attualmente in fase di sviluppo. Registrati per essere tra i primi 
+            <p className="text-base sm:text-lg text-muted-foreground px-4 max-w-2xl mx-auto flex items-center justify-center gap-2 flex-wrap">
+              <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5" /> è attualmente in fase di sviluppo. Registrati per essere tra i primi 
               a ricevere l'accesso quando sarà disponibile.
             </p>
           </div>
@@ -173,8 +175,8 @@ const Index = () => {
         <Card className="max-w-2xl mx-auto text-center bg-card border mx-4">
           <CardHeader className="pb-4 sm:pb-6">
             <CardTitle className="text-xl sm:text-2xl px-4">Hai già un account?</CardTitle>
-            <CardDescription className="text-base sm:text-lg px-4">
-              Accedi per iniziare subito con FastClub
+            <CardDescription className="text-base sm:text-lg px-4 flex items-center justify-center gap-2">
+              Accedi per iniziare subito con <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5" />
             </CardDescription>
           </CardHeader>
           <CardContent>
