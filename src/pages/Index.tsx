@@ -7,6 +7,8 @@ import WaitingListForm from '@/components/WaitingListForm';
 import VideoTour from '@/components/VideoTour';
 import Footer from '@/components/Footer';
 
+// Fixed logo import issue
+
 const Index = () => {
   const { user, loading } = useAuth();
 
