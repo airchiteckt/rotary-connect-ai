@@ -2,14 +2,50 @@ import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight, Maximize2 } from 'lucide-react';
 import WaitingListForm from '@/components/WaitingListForm';
 import Footer from '@/components/Footer';
+import { useState } from 'react';
 
 // Fixed logo import issue
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const [selectedImage, setSelectedImage] = useState<{src: string, title: string, description: string} | null>(null);
+
+  const screenshots = [
+    {
+      src: "/lovable-uploads/21141ed3-f3c7-46ee-b485-29732d785157.png",
+      title: "Dashboard del Club",
+      description: "Panoramica completa con statistiche in tempo reale, navigazione intuitiva tra le sezioni del club"
+    },
+    {
+      src: "/lovable-uploads/61b06b21-be3d-45b9-b1e7-178c96ace648.png",
+      title: "Segreteria Digitale",
+      description: "Gestione documenti, verbali riunioni, programmi mensili e comunicazioni ufficiali"
+    },
+    {
+      src: "/lovable-uploads/1081b2ef-38ca-48bd-b0ef-d77f614cd588.png",
+      title: "Comunicazione AI",
+      description: "Generatore intelligente di locandine, gestione social media e strumenti di marketing"
+    },
+    {
+      src: "/lovable-uploads/3817cd51-9797-4dfd-862d-bfadd56c912f.png",
+      title: "Tesoreria Avanzata",
+      description: "Bilanci, transazioni, report finanziari e gestione budget del club"
+    },
+    {
+      src: "/lovable-uploads/851999c0-2bdc-48b1-8902-2c162b5c63bf.png",
+      title: "Area Presidenza",
+      description: "Coordinamento progetti, governance del club e strumenti di leadership"
+    },
+    {
+      src: "/lovable-uploads/df8f940f-a641-42e6-8691-e88d7428dea6.png",
+      title: "Gestione Soci",
+      description: "Anagrafica completa, presenze, quote sociali e riconoscimenti membri"
+    }
+  ];
 
   if (loading) {
     return (
@@ -150,102 +186,61 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            <Card className="overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src="/lovable-uploads/21141ed3-f3c7-46ee-b485-29732d785157.png" 
-                  alt="Dashboard del Club" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-lg">Dashboard del Club</CardTitle>
-                <CardDescription className="text-sm">
-                  Panoramica completa con statistiche in tempo reale, navigazione intuitiva tra le sezioni del club
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src="/lovable-uploads/61b06b21-be3d-45b9-b1e7-178c96ace648.png" 
-                  alt="Segreteria Digitale" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-lg">Segreteria Digitale</CardTitle>
-                <CardDescription className="text-sm">
-                  Gestione documenti, verbali riunioni, programmi mensili e comunicazioni ufficiali
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src="/lovable-uploads/1081b2ef-38ca-48bd-b0ef-d77f614cd588.png" 
-                  alt="Comunicazione AI" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-lg">Comunicazione AI</CardTitle>
-                <CardDescription className="text-sm">
-                  Generatore intelligente di locandine, gestione social media e strumenti di marketing
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src="/lovable-uploads/3817cd51-9797-4dfd-862d-bfadd56c912f.png" 
-                  alt="Tesoreria Avanzata" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-lg">Tesoreria Avanzata</CardTitle>
-                <CardDescription className="text-sm">
-                  Bilanci, transazioni, report finanziari e gestione budget del club
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src="/lovable-uploads/851999c0-2bdc-48b1-8902-2c162b5c63bf.png" 
-                  alt="Area Presidenza" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-lg">Area Presidenza</CardTitle>
-                <CardDescription className="text-sm">
-                  Coordinamento progetti, governance del club e strumenti di leadership
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="overflow-hidden hover:shadow-lg transition-all">
-              <div className="aspect-video overflow-hidden">
-                <img 
-                  src="/lovable-uploads/df8f940f-a641-42e6-8691-e88d7428dea6.png" 
-                  alt="Gestione Soci" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-lg">Gestione Soci</CardTitle>
-                <CardDescription className="text-sm">
-                  Anagrafica completa, presenze, quote sociali e riconoscimenti membri
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            {screenshots.map((screenshot, index) => (
+              <Card key={index} className="overflow-hidden hover:shadow-xl transition-all duration-300 hover-scale group cursor-pointer">
+                <div className="relative aspect-video overflow-hidden bg-muted">
+                  <img 
+                    src={screenshot.src} 
+                    alt={screenshot.title} 
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3">
+                      <Maximize2 className="w-6 h-6 text-primary" />
+                    </div>
+                  </div>
+                </div>
+                <CardHeader 
+                  className="cursor-pointer" 
+                  onClick={() => setSelectedImage(screenshot)}
+                >
+                  <CardTitle className="text-lg group-hover:text-primary transition-colors duration-200">
+                    {screenshot.title}
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    {screenshot.description}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
           </div>
+
+          {/* Expanded Image Modal */}
+          <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+            <DialogContent className="max-w-5xl w-full max-h-[90vh]">
+              {selectedImage && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle className="text-xl font-bold">
+                      {selectedImage.title}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="mt-4">
+                    <div className="aspect-video overflow-hidden rounded-lg bg-muted mb-4">
+                      <img 
+                        src={selectedImage.src} 
+                        alt={selectedImage.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <p className="text-muted-foreground text-lg leading-relaxed">
+                      {selectedImage.description}
+                    </p>
+                  </div>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 
