@@ -192,13 +192,17 @@ const Index = () => {
                 className="overflow-hidden hover:shadow-xl transition-all duration-300 hover-scale group cursor-pointer"
                 onClick={() => setSelectedImage(screenshot)}
               >
-                <div className="relative aspect-video overflow-hidden bg-muted">
+                <div 
+                  className="relative aspect-video overflow-hidden bg-muted cursor-pointer"
+                  onClick={() => setSelectedImage(screenshot)}
+                >
                   <img 
                     src={screenshot.src} 
                     alt={screenshot.title} 
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110 cursor-pointer"
+                    onClick={() => setSelectedImage(screenshot)}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center pointer-events-none">
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3">
                       <Maximize2 className="w-6 h-6 text-primary" />
                     </div>
