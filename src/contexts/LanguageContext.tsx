@@ -38,6 +38,7 @@ const translations = {
     
     // Screenshots
     'screenshots.title': 'Scopri FastClub in Azione',
+    'screenshots.subtitle': 'Scopri tutte le sezioni e funzionalità per la gestione completa del tuo club',
     
     // Waiting List
     'waitingList.title': 'Lista d\'Attesa',
@@ -92,6 +93,7 @@ const translations = {
     
     // Screenshots
     'screenshots.title': 'Discover FastClub in Action',
+    'screenshots.subtitle': 'Discover all sections and features for complete club management',
     
     // Waiting List
     'waitingList.title': 'Waiting List',
@@ -146,6 +148,7 @@ const translations = {
     
     // Screenshots
     'screenshots.title': 'Descubre FastClub en Acción',
+    'screenshots.subtitle': 'Descubre todas las secciones y funcionalidades para la gestión completa del club',
     
     // Waiting List
     'waitingList.title': 'Lista de Espera',

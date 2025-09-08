@@ -200,10 +200,10 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
-              {t('screenshots.title')} <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" />
+              Esplora <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> in Dettaglio
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
-              {t('screenshots.title')}
+              {t('screenshots.subtitle')}
             </p>
           </div>
           
