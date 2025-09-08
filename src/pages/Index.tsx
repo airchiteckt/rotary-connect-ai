@@ -7,11 +7,14 @@ import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight, Maximize2 }
 import WaitingListForm from '@/components/WaitingListForm';
 import Footer from '@/components/Footer';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 // Fixed logo import issue
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<{src: string, title: string, description: string} | null>(null);
 
   const screenshots = [
@@ -61,6 +64,21 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="container mx-auto px-4 py-4 flex justify-between items-center">
+        <img 
+          src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" 
+          alt="FastClub Logo" 
+          className="h-10"
+        />
+        <div className="flex items-center gap-4">
+          <LanguageSelector />
+          <Button asChild variant="outline">
+            <a href="/auth">{t('nav.login')}</a>
+          </Button>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16 text-center">
         <div className="max-w-4xl mx-auto">
@@ -73,15 +91,14 @@ const Index = () => {
               />
             </div>
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8 px-4">
-              La piattaforma intelligente per automatizzare la gestione del tuo club o associazione. 
-              Documenti AI, comunicazioni smart e automazioni avanzate per semplificare ogni processo.
+              {t('hero.subtitle')}
             </p>
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
               <a href="#waiting-list">
-                Entra in Lista d'Attesa
+                {t('nav.waitingList')}
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </Button>
@@ -91,7 +108,7 @@ const Index = () => {
               className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto"
               onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Scopri di Più
+              {t('nav.learnMore')}
             </Button>
           </div>
         </div>
@@ -100,7 +117,7 @@ const Index = () => {
       {/* Features Section */}
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 px-4">Funzionalità Principali</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 px-4">{t('features.title')}</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 px-2">
             <Card className="text-center hover:shadow-lg transition-all">
@@ -108,9 +125,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Documenti AI</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t('features.documents.title')}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Genera automaticamente programmi, verbali e comunicazioni con AI. Template intelligenti e content generation avanzato
+                  {t('features.documents.desc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -120,9 +137,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Automazioni Smart</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t('features.automation.title')}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Automatizza comunicazioni e notifiche. Gestione intelligente di membri e categorie con workflow avanzati
+                  {t('features.automation.desc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -132,9 +149,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Image className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Design AI</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t('features.design.title')}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Crea locandine e materiali grafici professionali per eventi con AI generativa. Ogni design unico e su misura
+                  {t('features.design.desc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -144,9 +161,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Users className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Gestione Intelligente</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t('features.management.title')}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  CRM avanzato per membri e contatti. Analytics automatico e insights per ottimizzare le attività del club
+                  {t('features.management.desc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -156,9 +173,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">GDPR Compliant</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t('features.gdpr.title')}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  Conforme alle normative GDPR per la protezione e sicurezza dei dati dei tuoi membri
+                  {t('features.gdpr.desc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -168,9 +185,9 @@ const Index = () => {
                 <div className="w-10 h-10 sm:w-12 sm:h-12 bg-rose-500 rounded-lg flex items-center justify-center mx-auto mb-3 sm:mb-4">
                   <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <CardTitle className="text-lg sm:text-xl">Prova Gratuita</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t('features.trial.title')}</CardTitle>
                 <CardDescription className="text-sm sm:text-base px-2">
-                  30 giorni di prova gratuita per testare tutte le funzionalità senza impegno
+                  {t('features.trial.desc')}
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -183,10 +200,10 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
-              Esplora <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> in Dettaglio
+              {t('screenshots.title')} <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" />
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
-              Scopri tutte le sezioni e funzionalità per la gestione completa del tuo club
+              {t('screenshots.title')}
             </p>
           </div>
           
@@ -258,10 +275,9 @@ const Index = () => {
       <section id="waiting-list" className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 px-4">Entra in Lista d'Attesa</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 px-4">{t('waitingList.title')}</h2>
             <p className="text-base sm:text-lg text-muted-foreground px-4 max-w-2xl mx-auto flex items-center justify-center gap-2 flex-wrap">
-              <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5" /> è attualmente in fase di sviluppo. Registrati per essere tra i primi 
-              a ricevere l'accesso quando sarà disponibile.
+              <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5" /> {t('waitingList.subtitle')}
             </p>
           </div>
           
@@ -275,15 +291,15 @@ const Index = () => {
       <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <Card className="max-w-2xl mx-auto text-center bg-card border mx-4">
           <CardHeader className="pb-4 sm:pb-6">
-            <CardTitle className="text-xl sm:text-2xl px-4">Hai già un account?</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl px-4">{t('cta.title')}</CardTitle>
             <CardDescription className="text-base sm:text-lg px-4 flex items-center justify-center gap-2">
-              Accedi per iniziare subito con <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5" />
+              {t('cta.button')} <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5" />
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
               <a href="/auth?tab=signin">
-                Accedi alla Piattaforma
+                {t('nav.login')}
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </Button>

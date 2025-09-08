@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
@@ -85,58 +87,60 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSelector />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold flex items-center justify-center">
-            <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8" />
+            <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt={t('auth.title')} className="h-8" />
           </CardTitle>
           <CardDescription>
-            Siamo attualmente in fase di testing con accesso limitato. 
-            Se hai già un account puoi accedere, altrimenti iscriviti alla lista d'attesa.
+            {t('auth.description')}
           </CardDescription>
         </CardHeader>
         
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-1">
-              <TabsTrigger value="signin" className="w-full">Accedi</TabsTrigger>
+              <TabsTrigger value="signin" className="w-full">{t('auth.login')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="nome@esempio.it"
+                    placeholder={t('auth.emailPlaceholder')}
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t('auth.password')}</Label>
                   <Input
                     id="password"
                     name="password"
                     type="password"
-                    placeholder="••••••••"
+                    placeholder={t('auth.passwordPlaceholder')}
                     required
                   />
                 </div>
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Accesso in corso..." : "Accedi"}
+                  {isLoading ? t('auth.loggingIn') : t('auth.login')}
                 </Button>
                 
                 <div className="text-center pt-4">
                   <p className="text-sm text-muted-foreground mb-3">
-                    Non hai ancora un account?
+                    {t('auth.noAccount')}
                   </p>
                   <Button variant="outline" asChild className="w-full">
                     <a href="/#waiting-list">
-                      Iscriviti alla Lista d'Attesa
+                      {t('auth.joinWaitingList')}
                     </a>
                   </Button>
                 </div>
