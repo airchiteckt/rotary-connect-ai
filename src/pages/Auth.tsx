@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,17 @@ import { useToast } from '@/hooks/use-toast';
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('signin');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'signin') {
+      setActiveTab('signin');
+    }
+  }, [location]);
 
   // Redirect if already logged in
   if (user) {
@@ -86,10 +96,9 @@ export default function Auth() {
         </CardHeader>
         
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Accedi</TabsTrigger>
-              <TabsTrigger value="signup">Registrati</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-1">
+              <TabsTrigger value="signin" className="w-full">Accedi</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -122,64 +131,6 @@ export default function Auth() {
               </form>
             </TabsContent>
             
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="full_name">Nome Completo</Label>
-                  <Input
-                    id="full_name"
-                    name="full_name"
-                    type="text"
-                    placeholder="Mario Rossi"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="club_name">Nome Club/Associazione</Label>
-                  <Input
-                    id="club_name"
-                    name="club_name"
-                    type="text"
-                    placeholder="Il tuo Club o Associazione"
-                    required
-                  />
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signup_email">Email</Label>
-                  <Input
-                    id="signup_email"
-                    name="email"
-                    type="email"
-                    placeholder="nome@esempio.it"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signup_password">Password</Label>
-                  <Input
-                    id="signup_password"
-                    name="password"
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    minLength={6}
-                  />
-                </div>
-                
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Registrazione in corso..." : "Inizia Prova Gratuita"}
-                </Button>
-                
-                <p className="text-xs text-muted-foreground text-center">
-                  Registrandoti accetti i nostri termini di servizio e la policy GDPR
-                </p>
-              </form>
-            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

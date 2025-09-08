@@ -79,13 +79,18 @@ const Index = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
-            <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
-              <a href="/auth">
-                Inizia Prova Gratuita
+            <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
+              <a href="#waiting-list">
+                Entra in Lista d'Attesa
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </a>
             </Button>
-            <Button variant="outline" size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto"
+              onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               Scopri di Più
             </Button>
           </div>
@@ -174,7 +179,7 @@ const Index = () => {
       </section>
 
       {/* Screenshots Gallery Section */}
-      <section className="container mx-auto px-4 py-8 sm:py-12">
+      <section id="screenshots" className="container mx-auto px-4 py-8 sm:py-12">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
@@ -250,7 +255,7 @@ const Index = () => {
       </section>
 
       {/* Waiting List Section */}
-      <section className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
+      <section id="waiting-list" className="container mx-auto px-4 py-8 sm:py-12 lg:py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 px-4">Entra in Lista d'Attesa</h2>
@@ -277,7 +282,7 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
-              <a href="/auth">
+              <a href="/auth?tab=signin">
                 Accedi alla Piattaforma
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
               </a>
