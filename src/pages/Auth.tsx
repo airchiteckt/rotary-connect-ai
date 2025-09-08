@@ -91,7 +91,8 @@ export default function Auth() {
             <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8" />
           </CardTitle>
           <CardDescription>
-            Accedi o registrati per iniziare la tua prova gratuita di 30 giorni
+            Siamo attualmente in fase di testing con accesso limitato. 
+            Se hai già un account puoi accedere, altrimenti iscriviti alla lista d'attesa.
           </CardDescription>
         </CardHeader>
         
@@ -128,6 +129,17 @@ export default function Auth() {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Accesso in corso..." : "Accedi"}
                 </Button>
+                
+                <div className="text-center pt-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Non hai ancora un account?
+                  </p>
+                  <Button variant="outline" asChild className="w-full">
+                    <a href="/#waiting-list">
+                      Iscriviti alla Lista d'Attesa
+                    </a>
+                  </Button>
+                </div>
               </form>
             </TabsContent>
             
