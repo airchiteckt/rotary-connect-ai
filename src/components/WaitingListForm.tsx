@@ -60,8 +60,28 @@ const WaitingListForm = () => {
         return;
       }
 
+      // Send welcome email
+      try {
+        await supabase.functions.invoke('send-email', {
+          body: {
+            type: 'welcome',
+            to: formData.email,
+            data: {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              clubName: formData.clubName,
+              city: formData.city
+            }
+          }
+        });
+        console.log('Welcome email sent successfully');
+      } catch (emailError) {
+        console.error('Error sending welcome email:', emailError);
+        // Don't fail the registration if email fails
+      }
+
       setIsSubmitted(true);
-      toast.success('Registrazione completata! Ti contatteremo presto.');
+      toast.success('Registrazione completata! Controlla la tua email per il messaggio di benvenuto.');
       
       // Reset form
       setFormData({
