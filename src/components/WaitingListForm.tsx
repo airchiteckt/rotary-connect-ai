@@ -62,7 +62,8 @@ const WaitingListForm = () => {
 
       // Send welcome email
       try {
-        await supabase.functions.invoke('send-email', {
+        console.log('Attempting to send welcome email to:', formData.email);
+        const welcomeResponse = await supabase.functions.invoke('send-email', {
           body: {
             type: 'welcome',
             to: formData.email,
@@ -74,7 +75,12 @@ const WaitingListForm = () => {
             }
           }
         });
-        console.log('Welcome email sent successfully');
+        console.log('Welcome email response:', welcomeResponse);
+        if (welcomeResponse.error) {
+          console.error('Welcome email error:', welcomeResponse.error);
+        } else {
+          console.log('Welcome email sent successfully');
+        }
       } catch (emailError) {
         console.error('Error sending welcome email:', emailError);
         // Don't fail the registration if email fails
@@ -82,7 +88,8 @@ const WaitingListForm = () => {
 
       // Send notification email to admin
       try {
-        await supabase.functions.invoke('send-email', {
+        console.log('Attempting to send notification email to: stanislaoelefante@gmail.com');
+        const notificationResponse = await supabase.functions.invoke('send-email', {
           body: {
             type: 'notification',
             to: 'stanislaoelefante@gmail.com',
@@ -103,7 +110,12 @@ const WaitingListForm = () => {
             }
           }
         });
-        console.log('Admin notification email sent successfully');
+        console.log('Notification email response:', notificationResponse);
+        if (notificationResponse.error) {
+          console.error('Notification email error:', notificationResponse.error);
+        } else {
+          console.log('Admin notification email sent successfully');
+        }
       } catch (emailError) {
         console.error('Error sending admin notification email:', emailError);
         // Don't fail the registration if email fails
