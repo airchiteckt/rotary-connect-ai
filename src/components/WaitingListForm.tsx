@@ -62,31 +62,6 @@ const WaitingListForm = () => {
         return;
       }
 
-      // Send welcome email
-      try {
-        console.log('Attempting to send welcome email to:', formData.email);
-        const welcomeResponse = await supabase.functions.invoke('send-email', {
-          body: {
-            type: 'welcome',
-            to: formData.email,
-            data: {
-              firstName: formData.firstName,
-              lastName: formData.lastName,
-              clubName: formData.clubName,
-              city: formData.city
-            }
-          }
-        });
-        console.log('Welcome email response:', welcomeResponse);
-        if (welcomeResponse.error) {
-          console.error('Welcome email error:', welcomeResponse.error);
-        } else {
-          console.log('Welcome email sent successfully');
-        }
-      } catch (emailError) {
-        console.error('Error sending welcome email:', emailError);
-        // Don't fail the registration if email fails
-      }
 
       // Send notification email to admin
       try {
