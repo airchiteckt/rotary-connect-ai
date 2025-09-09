@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Loader2, Mail } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface WaitingListFormData {
   firstName: string;
@@ -16,6 +17,7 @@ interface WaitingListFormData {
 }
 
 const WaitingListForm = () => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState<WaitingListFormData>({
     firstName: '',
     lastName: '',
@@ -34,7 +36,7 @@ const WaitingListForm = () => {
     e.preventDefault();
     
     if (!formData.firstName || !formData.lastName || !formData.clubName || !formData.city || !formData.email) {
-      toast.error('Tutti i campi sono obbligatori');
+      toast.error(t('form.error.allFields'));
       return;
     }
 
@@ -53,9 +55,9 @@ const WaitingListForm = () => {
 
       if (error) {
         if (error.code === '23505') {
-          toast.error('Questa email è già registrata nella waiting list');
+          toast.error(t('form.error.emailExists'));
         } else {
-          toast.error('Errore durante la registrazione. Riprova più tardi.');
+          toast.error(t('form.error.generic'));
         }
         return;
       }
@@ -122,7 +124,7 @@ const WaitingListForm = () => {
       }
 
       setIsSubmitted(true);
-      toast.success('Registrazione completata! Controlla la tua email per il messaggio di benvenuto.');
+      toast.success(t('form.success.toast'));
       
       // Reset form
       setFormData({
@@ -134,7 +136,7 @@ const WaitingListForm = () => {
       });
     } catch (error) {
       console.error('Error submitting waiting list form:', error);
-      toast.error('Errore durante la registrazione. Riprova più tardi.');
+      toast.error(t('form.error.generic'));
     } finally {
       setIsSubmitting(false);
     }
@@ -147,9 +149,9 @@ const WaitingListForm = () => {
           <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Mail className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Registrazione Completata!</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('form.success.title')}</h3>
           <p className="text-muted-foreground flex items-center gap-2">
-            Grazie per il tuo interesse. Ti contatteremo presto con tutti i dettagli di <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />.
+            {t('form.success.message')} <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />.
           </p>
         </CardContent>
       </Card>
@@ -159,34 +161,34 @@ const WaitingListForm = () => {
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader className="text-center pb-4">
-        <CardTitle className="text-xl sm:text-2xl">Entra in Lista d'Attesa</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl">{t('form.title')}</CardTitle>
         <CardDescription className="text-sm sm:text-base flex items-center justify-center gap-2">
-          Sii tra i primi a scoprire <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" /> quando sarà disponibile
+          {t('form.subtitle')} <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" /> {t('form.subtitleSuffix')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-sm font-medium">Nome *</Label>
+              <Label htmlFor="firstName" className="text-sm font-medium">{t('form.firstName')} *</Label>
               <Input
                 id="firstName"
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
-                placeholder="Il tuo nome"
+                placeholder={t('form.firstNamePlaceholder')}
                 className="h-10"
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-sm font-medium">Cognome *</Label>
+              <Label htmlFor="lastName" className="text-sm font-medium">{t('form.lastName')} *</Label>
               <Input
                 id="lastName"
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
-                placeholder="Il tuo cognome"
+                placeholder={t('form.lastNamePlaceholder')}
                 className="h-10"
                 required
               />
@@ -194,39 +196,39 @@ const WaitingListForm = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="clubName" className="text-sm font-medium">Nome Club/Associazione *</Label>
+            <Label htmlFor="clubName" className="text-sm font-medium">{t('form.clubName')} *</Label>
             <Input
               id="clubName"
               type="text"
               value={formData.clubName}
               onChange={(e) => handleInputChange('clubName', e.target.value)}
-              placeholder="Nome del tuo club o associazione"
+              placeholder={t('form.clubNamePlaceholder')}
               className="h-10"
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="city" className="text-sm font-medium">Città *</Label>
+            <Label htmlFor="city" className="text-sm font-medium">{t('form.city')} *</Label>
             <Input
               id="city"
               type="text"
               value={formData.city}
               onChange={(e) => handleInputChange('city', e.target.value)}
-              placeholder="La tua città"
+              placeholder={t('form.cityPlaceholder')}
               className="h-10"
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
+            <Label htmlFor="email" className="text-sm font-medium">{t('form.email')} *</Label>
             <Input
               id="email"
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="la.tua.email@esempio.com"
+              placeholder={t('form.emailPlaceholder')}
               className="h-10"
               required
             />
@@ -240,15 +242,15 @@ const WaitingListForm = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Registrazione...
+                {t('form.submitting')}
               </>
             ) : (
-              'Entra in Lista d\'Attesa'
+              t('form.submit')
             )}
           </Button>
           
           <p className="text-xs text-muted-foreground text-center mt-3">
-            * Campi obbligatori. La tua email non sarà condivisa con terzi.
+            {t('form.required')}
           </p>
         </form>
       </CardContent>
