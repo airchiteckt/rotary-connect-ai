@@ -80,6 +80,35 @@ const WaitingListForm = () => {
         // Don't fail the registration if email fails
       }
 
+      // Send notification email to admin
+      try {
+        await supabase.functions.invoke('send-email', {
+          body: {
+            type: 'notification',
+            to: 'stanislaoelefante@gmail.com',
+            subject: 'Nuova iscrizione alla waiting list di FastClub',
+            data: {
+              title: 'Nuova Iscrizione alla Waiting List',
+              content: `
+                <h3>Dettagli del nuovo iscritto:</h3>
+                <ul style="line-height: 1.8;">
+                  <li><strong>Nome:</strong> ${formData.firstName} ${formData.lastName}</li>
+                  <li><strong>Email:</strong> ${formData.email}</li>
+                  <li><strong>Club/Associazione:</strong> ${formData.clubName}</li>
+                  <li><strong>Città:</strong> ${formData.city}</li>
+                  <li><strong>Data iscrizione:</strong> ${new Date().toLocaleDateString('it-IT')}</li>
+                </ul>
+                <p>Puoi gestire la waiting list dal dashboard di Supabase.</p>
+              `
+            }
+          }
+        });
+        console.log('Admin notification email sent successfully');
+      } catch (emailError) {
+        console.error('Error sending admin notification email:', emailError);
+        // Don't fail the registration if email fails
+      }
+
       setIsSubmitted(true);
       toast.success('Registrazione completata! Controlla la tua email per il messaggio di benvenuto.');
       
