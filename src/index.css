@@ -97,36 +97,86 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Prevent horizontal scrolling and ensure stable layout */
+  .container {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Mobile-first responsive improvements */
   @media (max-width: 640px) {
+    body {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
     .container {
       @apply px-4;
+      width: 100%;
+      overflow-x: hidden;
     }
     
     /* Ensure touch targets are at least 44px */
     button {
       @apply min-h-[44px];
+      touch-action: manipulation; /* Prevent double-tap zoom */
     }
     
     /* Better mobile typography */
-    h1 {
+    h1, h2, h3 {
       @apply leading-tight;
+      word-wrap: break-word;
+      hyphens: auto;
     }
     
     /* Mobile-friendly card padding */
     .card {
       @apply p-4;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    /* Prevent images from overflowing */
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Fix flex layouts on mobile */
+    .flex {
+      flex-wrap: wrap;
     }
   }
   
   /* Improved focus states for accessibility */
   *:focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  /* Prevent layout shift */
+  .hover-scale {
+    transform-origin: center;
+    will-change: transform;
+  }
+
+  /* Smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
   }
 }
