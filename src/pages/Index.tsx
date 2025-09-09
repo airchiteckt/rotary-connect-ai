@@ -20,33 +20,33 @@ const Index = () => {
   const screenshots = [
     {
       src: "/lovable-uploads/21141ed3-f3c7-46ee-b485-29732d785157.png",
-      title: "Dashboard del Club",
-      description: "Panoramica completa con statistiche in tempo reale, navigazione intuitiva tra le sezioni del club"
+      title: t('screenshots.dashboard.title'),
+      description: t('screenshots.dashboard.desc')
     },
     {
       src: "/lovable-uploads/61b06b21-be3d-45b9-b1e7-178c96ace648.png",
-      title: "Segreteria Digitale",
-      description: "Gestione documenti, verbali riunioni, programmi mensili e comunicazioni ufficiali"
+      title: t('screenshots.secretariat.title'),
+      description: t('screenshots.secretariat.desc')
     },
     {
       src: "/lovable-uploads/1081b2ef-38ca-48bd-b0ef-d77f614cd588.png",
-      title: "Comunicazione AI",
-      description: "Generatore intelligente di locandine, gestione social media e strumenti di marketing"
+      title: t('screenshots.communication.title'),
+      description: t('screenshots.communication.desc')
     },
     {
       src: "/lovable-uploads/3817cd51-9797-4dfd-862d-bfadd56c912f.png",
-      title: "Tesoreria Avanzata",
-      description: "Bilanci, transazioni, report finanziari e gestione budget del club"
+      title: t('screenshots.treasury.title'),
+      description: t('screenshots.treasury.desc')
     },
     {
       src: "/lovable-uploads/851999c0-2bdc-48b1-8902-2c162b5c63bf.png",
-      title: "Area Presidenza",
-      description: "Coordinamento progetti, governance del club e strumenti di leadership"
+      title: t('screenshots.presidency.title'),
+      description: t('screenshots.presidency.desc')
     },
     {
       src: "/lovable-uploads/df8f940f-a641-42e6-8691-e88d7428dea6.png",
-      title: "Gestione Soci",
-      description: "Anagrafica completa, presenze, quote sociali e riconoscimenti membri"
+      title: t('screenshots.members.title'),
+      description: t('screenshots.members.desc')
     }
   ];
 
@@ -200,7 +200,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center justify-center gap-2">
-              Esplora <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> in Dettaglio
+              {t('screenshots.title')} <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8 sm:h-10" /> {t('screenshots.titleSuffix')}
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 px-4">
               {t('screenshots.subtitle')}
@@ -304,7 +304,7 @@ const Index = () => {
               </Link>
             </Button>
             <p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4 px-4">
-              Accesso sicuro • Dati protetti • Supporto 24/7
+              {t('cta.security')}
             </p>
           </CardContent>
         </Card>

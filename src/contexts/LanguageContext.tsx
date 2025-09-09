@@ -37,8 +37,21 @@ const translations = {
     'features.trial.desc': 'Inizia subito con 30 giorni di prova gratuita, senza impegni',
     
     // Screenshots
-    'screenshots.title': 'Scopri FastClub in Azione',
-    'screenshots.subtitle': 'Scopri tutte le sezioni e funzionalità per la gestione completa del tuo club',
+    'screenshots.title': 'Esplora',
+    'screenshots.titleSuffix': 'in Dettaglio',
+    'screenshots.subtitle': 'Una panoramica completa delle funzionalità avanzate della piattaforma',
+    'screenshots.dashboard.title': 'Dashboard del Club',
+    'screenshots.dashboard.desc': 'Panoramica completa con statistiche in tempo reale, navigazione intuitiva tra le sezioni del club',
+    'screenshots.secretariat.title': 'Segreteria Digitale',
+    'screenshots.secretariat.desc': 'Gestione documenti, verbali riunioni, programmi mensili e comunicazioni ufficiali',
+    'screenshots.communication.title': 'Comunicazione AI',
+    'screenshots.communication.desc': 'Generatore intelligente di locandine, gestione social media e strumenti di marketing',
+    'screenshots.treasury.title': 'Tesoreria Avanzata',
+    'screenshots.treasury.desc': 'Bilanci, transazioni, report finanziari e gestione budget del club',
+    'screenshots.presidency.title': 'Area Presidenza',
+    'screenshots.presidency.desc': 'Coordinamento progetti, governance del club e strumenti di leadership',
+    'screenshots.members.title': 'Gestione Soci',
+    'screenshots.members.desc': 'Anagrafica completa, presenze, quote sociali e riconoscimenti membri',
     
     // Waiting List
     'waitingList.title': 'Lista d\'Attesa',
@@ -47,6 +60,7 @@ const translations = {
     // CTA Section
     'cta.title': 'Hai già un account?',
     'cta.button': 'Accedi Ora',
+    'cta.security': 'Accesso sicuro • Dati protetti • Supporto 24/7',
     
     // Auth Page
     'auth.title': 'FastClub',
@@ -92,8 +106,21 @@ const translations = {
     'features.trial.desc': 'Start now with 30 days free trial, no commitment',
     
     // Screenshots
-    'screenshots.title': 'Discover FastClub in Action',
-    'screenshots.subtitle': 'Discover all sections and features for complete club management',
+    'screenshots.title': 'Explore',
+    'screenshots.titleSuffix': 'in Detail',
+    'screenshots.subtitle': 'A comprehensive overview of the platform\'s advanced features',
+    'screenshots.dashboard.title': 'Club Dashboard',
+    'screenshots.dashboard.desc': 'Complete overview with real-time statistics, intuitive navigation between club sections',
+    'screenshots.secretariat.title': 'Digital Secretariat',
+    'screenshots.secretariat.desc': 'Document management, meeting minutes, monthly programs and official communications',
+    'screenshots.communication.title': 'AI Communication',
+    'screenshots.communication.desc': 'Intelligent poster generator, social media management and marketing tools',
+    'screenshots.treasury.title': 'Advanced Treasury',
+    'screenshots.treasury.desc': 'Budgets, transactions, financial reports and club budget management',
+    'screenshots.presidency.title': 'Presidency Area',
+    'screenshots.presidency.desc': 'Project coordination, club governance and leadership tools',
+    'screenshots.members.title': 'Member Management',
+    'screenshots.members.desc': 'Complete registry, attendance, membership fees and member recognition',
     
     // Waiting List
     'waitingList.title': 'Waiting List',
@@ -102,6 +129,7 @@ const translations = {
     // CTA Section
     'cta.title': 'Already have an account?',
     'cta.button': 'Login Now',
+    'cta.security': 'Secure access • Protected data • 24/7 support',
     
     // Auth Page
     'auth.title': 'FastClub',
@@ -147,8 +175,21 @@ const translations = {
     'features.trial.desc': 'Comienza ahora con 30 días de prueba gratuita, sin compromisos',
     
     // Screenshots
-    'screenshots.title': 'Descubre FastClub en Acción',
-    'screenshots.subtitle': 'Descubre todas las secciones y funcionalidades para la gestión completa del club',
+    'screenshots.title': 'Explora',
+    'screenshots.titleSuffix': 'en Detalle',
+    'screenshots.subtitle': 'Una visión completa de las características avanzadas de la plataforma',
+    'screenshots.dashboard.title': 'Dashboard del Club',
+    'screenshots.dashboard.desc': 'Vista completa con estadísticas en tiempo real, navegación intuitiva entre secciones del club',
+    'screenshots.secretariat.title': 'Secretaría Digital',
+    'screenshots.secretariat.desc': 'Gestión de documentos, actas de reuniones, programas mensuales y comunicaciones oficiales',
+    'screenshots.communication.title': 'Comunicación AI',
+    'screenshots.communication.desc': 'Generador inteligente de carteles, gestión de redes sociales y herramientas de marketing',
+    'screenshots.treasury.title': 'Tesorería Avanzada',
+    'screenshots.treasury.desc': 'Presupuestos, transacciones, informes financieros y gestión del presupuesto del club',
+    'screenshots.presidency.title': 'Área Presidencia',
+    'screenshots.presidency.desc': 'Coordinación de proyectos, gobernanza del club y herramientas de liderazgo',
+    'screenshots.members.title': 'Gestión de Socios',
+    'screenshots.members.desc': 'Registro completo, asistencia, cuotas de membresía y reconocimiento de miembros',
     
     // Waiting List
     'waitingList.title': 'Lista de Espera',
@@ -157,6 +198,7 @@ const translations = {
     // CTA Section
     'cta.title': '¿Ya tienes una cuenta?',
     'cta.button': 'Acceder Ahora',
+    'cta.security': 'Acceso seguro • Datos protegidos • Soporte 24/7',
     
     // Auth Page
     'auth.title': 'FastClub',
@@ -178,7 +220,14 @@ const translations = {
 };
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('it');
+  // Auto-detect browser language
+  const getInitialLanguage = (): Language => {
+    const browserLang = navigator.language.split('-')[0];
+    const supportedLanguages = ['it', 'en', 'es'];
+    return supportedLanguages.includes(browserLang as Language) ? browserLang as Language : 'en';
+  };
+
+  const [language, setLanguage] = useState<Language>(getInitialLanguage());
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations[typeof language]] || key;
