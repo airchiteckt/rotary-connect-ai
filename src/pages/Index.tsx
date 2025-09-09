@@ -1,5 +1,5 @@
 import { useAuth } from '@/hooks/useAuth';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -74,7 +74,7 @@ const Index = () => {
         <div className="flex items-center gap-4">
           <LanguageSelector />
           <Button asChild variant="outline">
-            <a href="/auth">{t('nav.login')}</a>
+            <Link to="/auth">{t('nav.login')}</Link>
           </Button>
         </div>
       </header>
@@ -298,10 +298,10 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto">
-              <a href="/auth?tab=signin">
+              <Link to="/auth?tab=signin">
                 {t('nav.login')}
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
-              </a>
+              </Link>
             </Button>
             <p className="text-xs sm:text-sm text-muted-foreground mt-3 sm:mt-4 px-4">
               Accesso sicuro • Dati protetti • Supporto 24/7
