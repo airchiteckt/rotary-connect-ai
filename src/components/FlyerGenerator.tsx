@@ -450,11 +450,11 @@ export const FlyerGenerator = () => {
           <CardContent>
             {generatedImages.post || generatedImages.story ? (
               <div className="space-y-6">
-                {/* Post Format 1:1 */}
+                {/* Post Format 1:1 - Correct Instagram dimensions */}
                 {generatedImages.post && (
                   <div>
-                    <h4 className="font-semibold mb-3 text-center">Post Instagram/Facebook (1:1)</h4>
-                    <div className="mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 aspect-square max-w-sm">
+                    <h4 className="font-semibold mb-3 text-center">Post Instagram/Facebook (1080×1080)</h4>
+                    <div className="mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 aspect-square w-80">
                       <img
                         src={generatedImages.post}
                         alt="Locandina Post 1:1"
@@ -477,11 +477,11 @@ export const FlyerGenerator = () => {
                   </div>
                 )}
 
-                {/* Story Format 9:16 */}
+                {/* Story Format 9:16 - Correct Instagram dimensions */}
                 {generatedImages.story && (
                   <div>
-                    <h4 className="font-semibold mb-3 text-center">Story Instagram (9:16)</h4>
-                    <div className="mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 aspect-[9/16] max-w-xs">
+                    <h4 className="font-semibold mb-3 text-center">Story Instagram (1080×1920)</h4>
+                    <div className="mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 aspect-[9/16] w-48">
                       <img
                         src={generatedImages.story}
                         alt="Locandina Story 9:16"
@@ -526,15 +526,21 @@ export const FlyerGenerator = () => {
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <div className="flex justify-center space-x-8 mb-4">
-                  <div className="aspect-square w-20 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                    <ImageIcon className="w-8 h-8 opacity-50" />
+                  <div className="w-20 h-20 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <div className="text-center">
+                      <ImageIcon className="w-8 h-8 mx-auto opacity-50" />
+                      <div className="text-xs mt-1">1080×1080</div>
+                    </div>
                   </div>
-                  <div className="aspect-[9/16] w-12 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-                    <ImageIcon className="w-6 h-6 opacity-50" />
+                  <div className="w-12 h-20 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <div className="text-center">
+                      <ImageIcon className="w-6 h-6 mx-auto opacity-50" />
+                      <div className="text-xs mt-1">1080×1920</div>
+                    </div>
                   </div>
                 </div>
                 <p className="text-sm">Le locandine appariranno qui</p>
-                <p className="text-xs text-muted-foreground">Formato Post (1:1) e Story (9:16)</p>
+                <p className="text-xs text-muted-foreground">Post (1080×1080) e Story (1080×1920)</p>
               </div>
             )}
           </CardContent>
@@ -559,10 +565,11 @@ export const FlyerGenerator = () => {
               )}
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>• Genera automaticamente entrambi i formati</p>
-              <p>• Post 1:1: perfetto per Instagram e Facebook</p>
-              <p>• Story 9:16: ideale per Instagram Stories</p>
-              <p>• I loghi vengono integrati automaticamente</p>
+              <p>• Genera automaticamente entrambi i formati Instagram</p>
+              <p>• Post 1080×1080: perfetto per feed Instagram/Facebook</p>
+              <p>• Story 1080×1920: ideale per Instagram Stories</p>
+              <p>• Include tutti i dati: titolo, sottotitolo, luogo, data, info</p>
+              <p>• Loghi integrati automaticamente nel design</p>
               <p>• Scarica singolarmente o entrambi insieme</p>
             </div>
           </CardContent>

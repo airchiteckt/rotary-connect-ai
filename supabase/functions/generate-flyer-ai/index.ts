@@ -123,26 +123,29 @@ serve(async (req) => {
 
 function createFlyerPrompt(data: FlyerRequest): string {
   const styleDescriptions = {
-    professionale: 'minimalist corporate design with clean lines, professional typography, and elegant color scheme using blues and grays',
-    festa: 'vibrant festive design with bright colors, celebratory elements, and playful typography',
-    club: 'sophisticated club design with modern fonts, premium layout, and refined aesthetics',
-    service: 'community-focused design with warm colors, inclusive imagery, and approachable typography',
-    elegante: 'elegant refined design with premium aesthetics, gold accents, and luxury typography',
-    moderno: 'contemporary minimalist design with geometric shapes, modern fonts, and clean composition'
+    professionale: 'minimalist corporate design with clean lines, professional sans-serif typography, elegant blue and gray color scheme',
+    festa: 'vibrant festive design with bright celebratory colors, playful typography, confetti and party elements',
+    club: 'sophisticated club design with modern bold fonts, premium dark tones, refined layout and elegant accents',
+    service: 'community-focused design with warm welcoming colors, inclusive imagery, approachable typography and humanitarian elements',
+    elegante: 'elegant refined design with premium gold and silver accents, luxury serif typography, sophisticated composition',
+    moderno: 'contemporary minimalist design with geometric shapes, ultra-modern sans-serif fonts, clean white space and bold contrasts'
   };
 
-  const formatInfo = data.format === '1:1' 
-    ? 'square social media post format (1080x1080 pixels)'
-    : 'vertical Instagram story format (1080x1920 pixels)';
+  // Exact Instagram specifications
+  const formatSpecs = data.format === '1:1' 
+    ? 'Instagram/Facebook post format (1080x1080 pixels, perfect square ratio)'
+    : 'Instagram Story format (1080x1920 pixels, vertical 9:16 aspect ratio)';
 
-  // Ensure text fits Imagen requirements (max 25 characters per element)
+  // Ensure all text fits Imagen requirements and is comprehensive
   const processText = (text: string, maxLength: number = 25) => {
     return text.length > maxLength ? text.substring(0, maxLength - 3) + '...' : text;
   };
 
+  // Process all collected information
   const titleText = processText(data.title, 20);
-  const subtitleText = data.subtitle ? processText(data.subtitle, 25) : null;
-  const locationText = data.location ? processText(data.location, 20) : null;
+  const subtitleText = data.subtitle?.trim() ? processText(data.subtitle.trim(), 25) : null;
+  const locationText = data.location?.trim() ? processText(data.location.trim(), 20) : null;
+  const additionalInfoText = data.additionalInfo?.trim() ? processText(data.additionalInfo.trim(), 30) : null;
   
   // Format date in Italian style
   let dateText = null;
@@ -155,57 +158,77 @@ function createFlyerPrompt(data: FlyerRequest): string {
     });
   }
 
-  // Build comprehensive prompt
-  let prompt = `Create a professional ${formatInfo} flyer with ${styleDescriptions[data.style]}. `;
+  // Build comprehensive and detailed prompt
+  let prompt = `Create a professional high-quality ${formatSpecs} flyer with ${styleDescriptions[data.style]}. `;
   
-  // Main content structure
-  prompt += `The flyer must include the following text elements arranged hierarchically: `;
-  
-  // Title - most prominent
-  prompt += `Main title "${titleText}" in large bold font at the top. `;
-  
-  // Subtitle if provided
-  if (subtitleText) {
-    prompt += `Subtitle "${subtitleText}" in medium font below the title. `;
+  // EXACT DIMENSIONS SPECIFICATION
+  if (data.format === '1:1') {
+    prompt += `Design specifications: 1080x1080 pixels, perfect square format for Instagram and Facebook posts. `;
+  } else {
+    prompt += `Design specifications: 1080x1920 pixels, vertical story format (9:16 ratio) for Instagram Stories. `;
   }
   
-  // Event details section
-  if (locationText || dateText) {
-    prompt += `Event details section with: `;
+  // STRUCTURED CONTENT HIERARCHY - Include ALL collected information
+  prompt += `Content structure from top to bottom: `;
+  
+  // 1. MAIN TITLE (always present)
+  prompt += `PRIMARY TITLE: "${titleText}" - display as the main heading in large, bold, eye-catching typography at the top center. `;
+  
+  // 2. SUBTITLE (if provided)
+  if (subtitleText) {
+    prompt += `SECONDARY SUBTITLE: "${subtitleText}" - place directly below the main title in medium-sized font, complementary to main title. `;
+  }
+  
+  // 3. EVENT DETAILS SECTION (if any provided)
+  if (dateText || locationText) {
+    prompt += `EVENT DETAILS section in the middle area: `;
     if (dateText) {
-      prompt += `Date "${dateText}" `;
+      prompt += `DATE: "${dateText}" displayed prominently `;
     }
     if (locationText) {
-      prompt += `Location "${locationText}" `;
+      prompt += `LOCATION: "${locationText}" clearly visible `;
     }
-    prompt += `in smaller readable font. `;
+    prompt += `- format these details in readable, structured typography. `;
   }
   
-  // Additional info if provided
-  if (data.additionalInfo && data.additionalInfo.trim()) {
-    const additionalText = processText(data.additionalInfo, 30);
-    prompt += `Additional information "${additionalText}" in small font. `;
+  // 4. ADDITIONAL INFORMATION (body content)
+  if (additionalInfoText) {
+    prompt += `BODY CONTENT: "${additionalInfoText}" - include this important information in the lower section in clear, readable font. `;
   }
   
-  // Logo integration instructions
+  // 5. LOGO INTEGRATION (if provided)
   if (data.logos && data.logos.length > 0) {
-    prompt += `IMPORTANT: Seamlessly integrate and properly display the ${data.logos.length} provided logo image${data.logos.length > 1 ? 's' : ''} into the design. `;
-    prompt += `Place the logo${data.logos.length > 1 ? 's' : ''} prominently but harmoniously within the layout. `;
-    prompt += `Ensure logo${data.logos.length > 1 ? 's are' : ' is'} clearly visible and well-integrated with the text elements. `;
+    prompt += `CRITICAL: Integrate and display the ${data.logos.length} provided logo image${data.logos.length > 1 ? 's' : ''} prominently in the design. `;
+    prompt += `Place the logo${data.logos.length > 1 ? 's' : ''} strategically (typically top-left, top-right, or bottom) ensuring high visibility and professional integration. `;
+    prompt += `The logo${data.logos.length > 1 ? 's must' : ' must'} be clearly visible, properly scaled, and harmoniously integrated with all text elements. `;
     
     if (data.logoDescriptions && data.logoDescriptions.length > 0) {
-      prompt += `Logo context: ${data.logoDescriptions.join(', ')}. `;
+      prompt += `Logo descriptions for context: ${data.logoDescriptions.join(', ')}. `;
     }
   } else {
-    prompt += `Reserve appropriate space for organizational logo placement. `;
+    prompt += `Reserve dedicated space for organizational logo placement (typically in header or footer area). `;
   }
   
-  // Design quality requirements
-  prompt += `Ensure: clean composition with proper whitespace, excellent readability of all text, `;
-  prompt += `professional color harmony, balanced visual hierarchy, and eye-catching design suitable for social media. `;
-  prompt += `Use high contrast between text and background for maximum readability. `;
-  prompt += `The overall design should be polished, modern, and attention-grabbing while maintaining the ${data.style} aesthetic.`;
-
-  console.log('Generated prompt:', prompt);
+  // DESIGN QUALITY REQUIREMENTS
+  prompt += `ESSENTIAL DESIGN REQUIREMENTS: `;
+  prompt += `Perfect visual hierarchy with title most prominent, subtitle secondary, details tertiary. `;
+  prompt += `High contrast text on background for maximum readability. `;
+  prompt += `Balanced composition with appropriate white space. `;
+  prompt += `Professional color coordination matching ${data.style} aesthetic. `;
+  prompt += `Typography must be legible at social media viewing sizes. `;
+  prompt += `Overall design should be eye-catching, modern, and share-worthy for social media platforms. `;
+  
+  console.log('Generated comprehensive prompt with all data:', prompt);
+  console.log('Data being processed:', {
+    title: data.title,
+    subtitle: data.subtitle,
+    location: data.location,
+    date: data.date,
+    additionalInfo: data.additionalInfo,
+    style: data.style,
+    format: data.format,
+    logosCount: data.logos?.length || 0
+  });
+  
   return prompt;
 }
