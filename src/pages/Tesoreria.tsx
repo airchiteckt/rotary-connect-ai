@@ -460,9 +460,9 @@ export default function Tesoreria() {
                     {transactions.map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-4 rounded-lg border">
                         <div className="flex items-center space-x-4">
-                          <div className={\`p-2 rounded-full \${
+                          <div className={`p-2 rounded-full ${
                             transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                          }\`}>
+                          }`}>
                             {transaction.type === 'income' ? 
                               <TrendingUp className="w-4 h-4 text-green-600" /> :
                               <TrendingDown className="w-4 h-4 text-red-600" />
@@ -479,9 +479,9 @@ export default function Tesoreria() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={\`text-lg font-semibold \${
+                          <p className={`text-lg font-semibold ${
                             transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                          }\`}>
+                          }`}>
                             {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                           </p>
                           {transaction.payment_method && (
