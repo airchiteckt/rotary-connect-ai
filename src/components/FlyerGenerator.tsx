@@ -132,8 +132,14 @@ export const FlyerGenerator = () => {
 
       if (error) throw error;
 
-      if (data.success && data.imageData) {
-        setGeneratedImage(data.imageData);
+      if (data.success && (data.imageUrl || data.imageData)) {
+        const imageData = data.imageUrl || data.imageData;
+        // If it's base64 data, create proper data URL
+        const finalImageUrl = imageData.startsWith('data:') 
+          ? imageData 
+          : `data:image/png;base64,${imageData}`;
+        
+        setGeneratedImage(finalImageUrl);
         toast({
           title: "Locandina generata!",
           description: "La tua locandina è pronta per il download"

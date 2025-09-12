@@ -37,19 +37,18 @@ serve(async (req) => {
     
     console.log("Generating flyer with prompt:", prompt);
 
-    // Call Gemini API to generate the image
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generateImage?key=${GEMINI_API_KEY}`, {
+    // Call Gemini API to generate the image using the correct endpoint
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        prompt: prompt,
-        config: {
-          aspectRatio: flyerData.format === '1:1' ? 'ASPECT_RATIO_1_1' : 'ASPECT_RATIO_9_16',
-          safetyFilterLevel: 'BLOCK_ONLY_HIGH',
-          personGeneration: 'ALLOW_ADULT'
-        }
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
       }),
     });
 
@@ -62,9 +61,24 @@ serve(async (req) => {
     const result = await response.json();
     console.log("Gemini response:", result);
 
+    // Extract the image data from the response
+    const candidate = result.candidates?.[0];
+    if (!candidate?.content?.parts) {
+      throw new Error('No image generated in response');
+    }
+
+    // Find the part containing image data
+    const imagePart = candidate.content.parts.find((part: any) => part.inlineData);
+    if (!imagePart?.inlineData?.data) {
+      throw new Error('No image data found in response');
+    }
+
+    const imageData = imagePart.inlineData.data;
+    const mimeType = imagePart.inlineData.mimeType || 'image/png';
+
     return new Response(JSON.stringify({
       success: true,
-      imageData: result.candidates?.[0]?.content || result.image,
+      imageUrl: `data:${mimeType};base64,${imageData}`,
       prompt: prompt
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -84,47 +98,60 @@ serve(async (req) => {
 
 function createFlyerPrompt(data: FlyerRequest): string {
   const styleDescriptions = {
-    professionale: 'professional, clean, corporate design with elegant typography and sophisticated color scheme',
-    festa: 'festive, colorful, fun design with vibrant colors and celebration elements',
-    club: 'club-style design with modern typography and sophisticated layout',
-    service: 'service-oriented design emphasizing community and helping others',
-    elegante: 'elegant and refined design with premium aesthetics and gold accents',
-    moderno: 'modern minimalist design with clean lines and contemporary style'
+    professionale: 'minimalist and clean corporate design with elegant sans-serif typography',
+    festa: 'vibrant and festive design with colorful elements and celebration motifs',
+    club: 'modern club-style design with sophisticated layout and bold typography',
+    service: 'community-focused design with warm colors and professional appearance',
+    elegante: 'elegant and refined design with premium aesthetics and gold accent details',
+    moderno: 'contemporary minimalist design with clean geometric lines and modern fonts'
   };
 
   const formatDescription = data.format === '1:1' 
-    ? 'square format suitable for Instagram and Facebook posts'
-    : 'vertical format perfect for Instagram stories';
+    ? 'square poster format for social media'
+    : 'vertical story format for mobile social media';
 
-  let prompt = `Create a ${styleDescriptions[data.style]} flyer in ${formatDescription}. `;
+  // Optimize text for Imagen guidelines (max 25 characters per text element)
+  const shortTitle = data.title.length > 25 ? data.title.substring(0, 22) + '...' : data.title;
+  const shortSubtitle = data.subtitle && data.subtitle.length > 25 
+    ? data.subtitle.substring(0, 22) + '...' 
+    : data.subtitle;
+
+  let prompt = `A ${styleDescriptions[data.style]} ${formatDescription} flyer. `;
   
-  if (data.title) {
-    prompt += `Main title: "${data.title}". `;
+  // Add main text elements following Imagen best practices
+  if (shortTitle) {
+    prompt += `Include the text "${shortTitle}" as the main title in large bold font. `;
   }
   
-  if (data.subtitle) {
-    prompt += `Subtitle: "${data.subtitle}". `;
+  if (shortSubtitle) {
+    prompt += `Include the text "${shortSubtitle}" as subtitle in medium font. `;
   }
   
-  if (data.location) {
-    prompt += `Location: ${data.location}. `;
+  // Add location and date as separate text elements if they're short enough
+  if (data.location && data.location.length <= 20) {
+    prompt += `Include the text "${data.location}" as location info in small font. `;
   }
   
   if (data.date) {
-    prompt += `Date: ${data.date}. `;
-  }
-  
-  if (data.additionalInfo) {
-    prompt += `Additional information: ${data.additionalInfo}. `;
+    const dateFormatted = new Date(data.date).toLocaleDateString('it-IT', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    });
+    if (dateFormatted.length <= 20) {
+      prompt += `Include the text "${dateFormatted}" as date info in small font. `;
+    }
   }
 
+  // Add design specifications
   if (data.hasLogos && data.logoDescriptions?.length) {
-    prompt += `Include these logo elements: ${data.logoDescriptions.join(', ')}. `;
+    prompt += `Include logo placeholder areas for: ${data.logoDescriptions.join(', ')}. `;
   } else {
-    prompt += `Include space for organizational logos. `;
+    prompt += `Include space for organizational logo. `;
   }
 
-  prompt += `Design should be eye-catching, readable, and professionally designed for social media sharing. Include appropriate whitespace, hierarchy, and visual balance. Use colors that match the ${data.style} style theme.`;
+  prompt += `Use ${styleDescriptions[data.style]} with proper hierarchy, balanced composition, and readable typography. `;
+  prompt += `Professional social media design with clean layout and appropriate whitespace.`;
 
   return prompt;
 }
