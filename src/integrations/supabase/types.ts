@@ -262,6 +262,60 @@ export type Database = {
         }
         Relationships: []
       }
+      prefecture_events: {
+        Row: {
+          ceremony_type: string | null
+          created_at: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          event_type: string
+          id: string
+          location: string | null
+          notes: string | null
+          participants: number | null
+          protocol_document_url: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ceremony_type?: string | null
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          event_type: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          participants?: number | null
+          protocol_document_url?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ceremony_type?: string | null
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          event_type?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          participants?: number | null
+          protocol_document_url?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           club_name: string | null
@@ -316,6 +370,45 @@ export type Database = {
         }
         Relationships: []
       }
+      protocols: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_template: boolean | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+          version: number | null
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          is_template?: boolean | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+          version?: number | null
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_template?: boolean | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          version?: number | null
+        }
+        Relationships: []
+      }
       recurring_meetings: {
         Row: {
           created_at: string
@@ -350,6 +443,51 @@ export type Database = {
           location?: string | null
           meeting_time?: string
           meeting_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_guests: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          organization: string | null
+          phone: string | null
+          protocol_notes: string | null
+          special_requirements: string | null
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          organization?: string | null
+          phone?: string | null
+          protocol_notes?: string | null
+          special_requirements?: string | null
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          organization?: string | null
+          phone?: string | null
+          protocol_notes?: string | null
+          special_requirements?: string | null
+          status?: string
+          title?: string | null
           updated_at?: string
           user_id?: string
         }

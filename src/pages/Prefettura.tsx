@@ -1,16 +1,77 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Shield, Plus, Search, Filter, ArrowLeft, Calendar, Award, BookOpen, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import PrefectureCalendar from '@/components/PrefectureCalendar';
+import EventForm from '@/components/EventForm';
+import VIPGuestManager from '@/components/VIPGuestManager';
+import ProtocolManager from '@/components/ProtocolManager';
+import CeremonyStats from '@/components/CeremonyStats';
+import UpcomingCeremonies from '@/components/UpcomingCeremonies';
+import EventManager from '@/components/EventManager';
 
 export default function Prefettura() {
   const { user, loading } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('cerimoniale');
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    ceremonies: 0,
+    protocols: 0,
+    vipGuests: 0
+  });
+
+  useEffect(() => {
+    if (user) {
+      loadStats();
+    }
+  }, [user]);
+
+  const loadStats = async () => {
+    if (!user) return;
+
+    try {
+      // Load events and ceremonies
+      const { data: events } = await supabase
+        .from('prefecture_events')
+        .select('event_type, ceremony_type')
+        .eq('user_id', user.id);
+
+      // Load protocols
+      const { data: protocols } = await supabase
+        .from('protocols')
+        .select('id')
+        .eq('user_id', user.id);
+
+      // Load VIP guests
+      const { data: guests } = await supabase
+        .from('vip_guests')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+
+      const totalEvents = events?.length || 0;
+      const ceremonies = events?.filter(e => e.event_type === 'ceremony').length || 0;
+
+      setStats({
+        totalEvents,
+        ceremonies,
+        protocols: protocols?.length || 0,
+        vipGuests: guests?.length || 0
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -28,10 +89,10 @@ export default function Prefettura() {
   }
 
   const protocolStats = [
-    { label: 'Eventi Organizzati', value: 0, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Calendar },
-    { label: 'Cerimonie', value: 0, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Award },
-    { label: 'Protocolli Attivi', value: 0, color: 'text-green-600', bgColor: 'bg-green-100', icon: BookOpen },
-    { label: 'Ospiti VIP', value: 0, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Users }
+    { label: 'Eventi Organizzati', value: stats.totalEvents, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Calendar },
+    { label: 'Cerimonie', value: stats.ceremonies, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Award },
+    { label: 'Protocolli Attivi', value: stats.protocols, color: 'text-green-600', bgColor: 'bg-green-100', icon: BookOpen },
+    { label: 'Ospiti VIP', value: stats.vipGuests, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Users }
   ];
 
   return (
@@ -53,10 +114,26 @@ export default function Prefettura() {
               </div>
             </div>
             
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nuovo Evento
-            </Button>
+            <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo Evento
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Crea Nuovo Evento</DialogTitle>
+                </DialogHeader>
+                <EventForm 
+                  onEventCreated={() => {
+                    setShowEventForm(false);
+                    loadStats();
+                  }}
+                  onCancel={() => setShowEventForm(false)}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
@@ -83,9 +160,10 @@ export default function Prefettura() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="cerimoniale">Cerimoniale</TabsTrigger>
             <TabsTrigger value="eventi">Eventi</TabsTrigger>
+            <TabsTrigger value="calendario">Calendario</TabsTrigger>
             <TabsTrigger value="protocollo">Protocollo</TabsTrigger>
             <TabsTrigger value="ospiti">Ospiti</TabsTrigger>
           </TabsList>
@@ -104,11 +182,15 @@ export default function Prefettura() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col md:flex-row gap-4">
-                  <Button className="flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nuova Cerimonia
-                  </Button>
-                  <Button variant="outline">
+                  <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
+                    <DialogTrigger asChild>
+                      <Button className="flex-1">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nuova Cerimonia
+                      </Button>
+                    </DialogTrigger>
+                  </Dialog>
+                  <Button variant="outline" onClick={() => setActiveTab('protocollo')}>
                     <BookOpen className="w-4 h-4 mr-2" />
                     Protocolli
                   </Button>
@@ -118,140 +200,29 @@ export default function Prefettura() {
 
             {/* Ceremonial Types */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Insediamenti</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">Programmati</p>
-                    <Button size="sm" className="w-full">Organizza</Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Premiazioni</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">In programma</p>
-                    <Button size="sm" className="w-full">Pianifica</Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Ammissioni</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">Pendenti</p>
-                    <Button size="sm" className="w-full">Gestisci</Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <CeremonyStats 
+                stats={stats} 
+                onCreateCeremony={() => setShowEventForm(true)} 
+              />
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Cerimonie Programmate</CardTitle>
-                <CardDescription>
-                  Prossimi eventi cerimoniali
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessuna cerimonia programmata</p>
-                  <p className="text-sm">Inizia organizzando il primo evento</p>
-                </div>
-              </CardContent>
-            </Card>
+            <UpcomingCeremonies onStatsUpdate={loadStats} />
           </TabsContent>
 
           <TabsContent value="eventi" className="space-y-6">
-            {/* Event Management */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Cerca eventi..." 
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtri
-                  </Button>
-                  <Button variant="outline">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Calendario
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <EventManager onStatsUpdate={loadStats} />
+          </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Eventi in Programma</CardTitle>
-                <CardDescription>
-                  Tutti gli eventi organizzati dal club
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessun evento programmato</p>
-                  <p className="text-sm">Inizia organizzando il primo evento</p>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="calendario" className="space-y-6">
+            <PrefectureCalendar />
           </TabsContent>
 
           <TabsContent value="protocollo">
-            <Card>
-              <CardHeader>
-                <CardTitle>Protocolli e Procedure</CardTitle>
-                <CardDescription>
-                  Linee guida per cerimonie e eventi ufficiali
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Protocolli in preparazione</p>
-                  <p className="text-sm">Database procedure in arrivo</p>
-                </div>
-              </CardContent>
-            </Card>
+            <ProtocolManager />
           </TabsContent>
 
           <TabsContent value="ospiti">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestione Ospiti VIP</CardTitle>
-                <CardDescription>
-                  Organizza accoglienza e protocollo per ospiti speciali
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Sistema ospiti in preparazione</p>
-                  <p className="text-sm">Gestione VIP in arrivo</p>
-                </div>
-              </CardContent>
-            </Card>
+            <VIPGuestManager />
           </TabsContent>
         </Tabs>
       </main>
