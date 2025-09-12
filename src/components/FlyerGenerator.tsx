@@ -36,13 +36,15 @@ export const FlyerGenerator = () => {
     location: '',
     date: '',
     additionalInfo: '',
-    style: 'professionale' as const,
-    format: '1:1' as const
+    style: 'professionale' as const
   });
   
   const [uploadedLogos, setUploadedLogos] = useState<UploadedLogo[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedImages, setGeneratedImages] = useState<{
+    post: string | null;
+    story: string | null;
+  }>({ post: null, story: null });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -120,6 +122,7 @@ export const FlyerGenerator = () => {
     }
 
     setIsGenerating(true);
+    setGeneratedImages({ post: null, story: null });
 
     try {
       // Convert logos to base64
@@ -141,38 +144,74 @@ export const FlyerGenerator = () => {
         })
       );
 
-      const { data, error } = await supabase.functions.invoke('generate-flyer-ai', {
-        body: {
-          ...formData,
-          hasLogos: uploadedLogos.length > 0,
-          logoDescriptions: uploadedLogos.map(logo => logo.description),
-          logos: logoData
-        }
-      });
+      // Generate both formats simultaneously
+      const [postResult, storyResult] = await Promise.all([
+        // Generate 1:1 format for post
+        supabase.functions.invoke('generate-flyer-ai', {
+          body: {
+            ...formData,
+            format: '1:1',
+            hasLogos: uploadedLogos.length > 0,
+            logoDescriptions: uploadedLogos.map(logo => logo.description),
+            logos: logoData
+          }
+        }),
+        // Generate 9:16 format for story
+        supabase.functions.invoke('generate-flyer-ai', {
+          body: {
+            ...formData,
+            format: '9:16',
+            hasLogos: uploadedLogos.length > 0,
+            logoDescriptions: uploadedLogos.map(logo => logo.description),
+            logos: logoData
+          }
+        })
+      ]);
 
-      if (error) throw error;
+      // Handle post result
+      if (postResult.error) {
+        console.error('Error generating post:', postResult.error);
+        throw new Error('Errore nella generazione del post');
+      }
 
-      if (data.success && (data.imageUrl || data.imageData)) {
-        const imageData = data.imageUrl || data.imageData;
-        // If it's base64 data, create proper data URL
-        const finalImageUrl = imageData.startsWith('data:') 
+      // Handle story result
+      if (storyResult.error) {
+        console.error('Error generating story:', storyResult.error);
+        throw new Error('Errore nella generazione della story');
+      }
+
+      // Process and set images
+      const results = { post: null as string | null, story: null as string | null };
+
+      if (postResult.data?.success && (postResult.data.imageUrl || postResult.data.imageData)) {
+        const imageData = postResult.data.imageUrl || postResult.data.imageData;
+        results.post = imageData.startsWith('data:') 
           ? imageData 
           : `data:image/png;base64,${imageData}`;
-        
-        setGeneratedImage(finalImageUrl);
+      }
+
+      if (storyResult.data?.success && (storyResult.data.imageUrl || storyResult.data.imageData)) {
+        const imageData = storyResult.data.imageUrl || storyResult.data.imageData;
+        results.story = imageData.startsWith('data:') 
+          ? imageData 
+          : `data:image/png;base64,${imageData}`;
+      }
+
+      if (results.post || results.story) {
+        setGeneratedImages(results);
         toast({
-          title: "Locandina generata!",
-          description: "La tua locandina è pronta per il download"
+          title: "Locandine generate!",
+          description: `Generati ${results.post && results.story ? 'entrambi i formati' : 'un formato'} con successo`
         });
       } else {
-        throw new Error(data.error || 'Errore durante la generazione');
+        throw new Error('Nessuna immagine generata con successo');
       }
 
     } catch (error) {
-      console.error('Error generating flyer:', error);
+      console.error('Error generating flyers:', error);
       toast({
         title: "Errore",
-        description: "Errore durante la generazione della locandina",
+        description: error instanceof Error ? error.message : "Errore durante la generazione delle locandine",
         variant: "destructive"
       });
     } finally {
@@ -180,15 +219,22 @@ export const FlyerGenerator = () => {
     }
   };
 
-  const downloadFlyer = () => {
-    if (!generatedImage) return;
+  const downloadFlyer = (type: 'post' | 'story') => {
+    const image = generatedImages[type];
+    if (!image) return;
     
     const link = document.createElement('a');
-    link.href = generatedImage;
-    link.download = `locandina-${formData.title.replace(/\s+/g, '-').toLowerCase()}.png`;
+    link.href = image;
+    const formatLabel = type === 'post' ? 'post-1x1' : 'story-9x16';
+    link.download = `locandina-${formData.title.replace(/\s+/g, '-').toLowerCase()}-${formatLabel}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const downloadAll = () => {
+    if (generatedImages.post) downloadFlyer('post');
+    if (generatedImages.story) downloadFlyer('story');
   };
 
   const styles = [
@@ -198,11 +244,6 @@ export const FlyerGenerator = () => {
     { value: 'service', label: 'Service', description: 'Orientato al servizio comunitario' },
     { value: 'elegante', label: 'Elegante', description: 'Raffinato con accenti premium' },
     { value: 'moderno', label: 'Moderno', description: 'Minimalista e contemporaneo' }
-  ];
-
-  const formats = [
-    { value: '1:1', label: 'Quadrato (1:1)', description: 'Perfetto per Instagram e Facebook post' },
-    { value: '9:16', label: 'Verticale (9:16)', description: 'Ideale per Instagram Stories' }
   ];
 
   return (
@@ -312,28 +353,6 @@ export const FlyerGenerator = () => {
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <Label className="flex items-center gap-2">
-                <Square className="w-4 h-4" />
-                Formato
-              </Label>
-              <Select value={formData.format} onValueChange={(value) => handleInputChange('format', value)}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {formats.map(format => (
-                    <SelectItem key={format.value} value={format.value}>
-                      <div>
-                        <div className="font-medium">{format.label}</div>
-                        <div className="text-sm text-muted-foreground">{format.description}</div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </CardContent>
         </Card>
 
@@ -414,7 +433,7 @@ export const FlyerGenerator = () => {
               Generazione in corso...
             </>
           ) : (
-            'Genera Locandina AI'
+            'Genera Locandine (Post + Story)'
           )}
         </Button>
       </div>
@@ -425,42 +444,97 @@ export const FlyerGenerator = () => {
           <CardHeader>
             <CardTitle>Anteprima</CardTitle>
             <CardDescription>
-              La locandina generata apparirà qui
+              Le locandine generate appariranno qui (Post 1:1 + Story 9:16)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {generatedImage ? (
-              <div className="space-y-4">
-                <div className={`mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 ${formData.format === '1:1' ? 'aspect-square max-w-sm' : 'aspect-[9/16] max-w-xs'}`}>
-                  <img
-                    src={generatedImage}
-                    alt="Locandina generata"
-                    className="w-full h-full object-contain bg-white"
-                    onError={(e) => {
-                      console.error('Error loading image:', e);
-                      e.currentTarget.style.display = 'none';
-                    }}
-                    onLoad={() => {
-                      console.log('Image loaded successfully');
-                    }}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={downloadFlyer} className="flex-1">
-                    <Download className="w-4 h-4 mr-2" />
-                    Scarica
-                  </Button>
-                  <Button variant="outline" onClick={() => setGeneratedImage(null)}>
-                    Nuova Locandina
+            {generatedImages.post || generatedImages.story ? (
+              <div className="space-y-6">
+                {/* Post Format 1:1 */}
+                {generatedImages.post && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-center">Post Instagram/Facebook (1:1)</h4>
+                    <div className="mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 aspect-square max-w-sm">
+                      <img
+                        src={generatedImages.post}
+                        alt="Locandina Post 1:1"
+                        className="w-full h-full object-contain bg-white"
+                        onError={(e) => {
+                          console.error('Error loading post image:', e);
+                        }}
+                      />
+                    </div>
+                    <div className="mt-2 flex justify-center">
+                      <Button 
+                        onClick={() => downloadFlyer('post')} 
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Scarica Post
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Story Format 9:16 */}
+                {generatedImages.story && (
+                  <div>
+                    <h4 className="font-semibold mb-3 text-center">Story Instagram (9:16)</h4>
+                    <div className="mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 aspect-[9/16] max-w-xs">
+                      <img
+                        src={generatedImages.story}
+                        alt="Locandina Story 9:16"
+                        className="w-full h-full object-contain bg-white"
+                        onError={(e) => {
+                          console.error('Error loading story image:', e);
+                        }}
+                      />
+                    </div>
+                    <div className="mt-2 flex justify-center">
+                      <Button 
+                        onClick={() => downloadFlyer('story')} 
+                        variant="outline"
+                        size="sm"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Scarica Story
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Download All Button */}
+                {generatedImages.post && generatedImages.story && (
+                  <div className="flex justify-center pt-4 border-t">
+                    <Button onClick={downloadAll} className="w-full max-w-xs">
+                      <Download className="w-4 h-4 mr-2" />
+                      Scarica Entrambe
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex justify-center">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setGeneratedImages({ post: null, story: null })}
+                  >
+                    Genera Nuove Locandine
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className={`mx-auto bg-gray-50 rounded-lg flex items-center justify-center text-muted-foreground ${formData.format === '1:1' ? 'aspect-square max-w-sm' : 'aspect-[9/16] max-w-xs'}`}>
-                <div className="text-center">
-                  <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">La locandina apparirà qui</p>
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="flex justify-center space-x-8 mb-4">
+                  <div className="aspect-square w-20 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <ImageIcon className="w-8 h-8 opacity-50" />
+                  </div>
+                  <div className="aspect-[9/16] w-12 bg-gray-50 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                    <ImageIcon className="w-6 h-6 opacity-50" />
+                  </div>
                 </div>
+                <p className="text-sm">Le locandine appariranno qui</p>
+                <p className="text-xs text-muted-foreground">Formato Post (1:1) e Story (9:16)</p>
               </div>
             )}
           </CardContent>
@@ -476,7 +550,7 @@ export const FlyerGenerator = () => {
                 {styles.find(s => s.value === formData.style)?.label}
               </Badge>
               <Badge variant="outline">
-                {formats.find(f => f.value === formData.format)?.label}
+                Post 1:1 + Story 9:16
               </Badge>
               {uploadedLogos.length > 0 && (
                 <Badge variant="outline">
@@ -485,10 +559,11 @@ export const FlyerGenerator = () => {
               )}
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
-              <p>• Le locandine vengono generate tramite AI</p>
-              <p>• Il formato quadrato è perfetto per i post social</p>
-              <p>• Il formato verticale è ideale per le stories</p>
-              <p>• I loghi vengono integrati automaticamente nel design</p>
+              <p>• Genera automaticamente entrambi i formati</p>
+              <p>• Post 1:1: perfetto per Instagram e Facebook</p>
+              <p>• Story 9:16: ideale per Instagram Stories</p>
+              <p>• I loghi vengono integrati automaticamente</p>
+              <p>• Scarica singolarmente o entrambi insieme</p>
             </div>
           </CardContent>
         </Card>
