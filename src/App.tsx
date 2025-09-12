@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +11,6 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Segreteria from "./pages/Segreteria";
 import Tesoreria from "./pages/Tesoreria";
-import Organigramma from "./pages/Organigramma";
 import Presidenza from "./pages/Presidenza";
 import Prefettura from "./pages/Prefettura";
 import Direttivo from "./pages/Direttivo";
@@ -21,6 +21,8 @@ import Commissioni from "./pages/Commissioni";
 import RecurringMeetingsSettings from "./components/RecurringMeetingsSettings";
 import NotFound from "./pages/NotFound";
 
+const Organigramma = lazy(() => import("./pages/Organigramma"));
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -30,28 +32,30 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/segreteria" element={<Segreteria />} />
-            <Route path="/tesoreria" element={<Tesoreria />} />
-            <Route path="/organigramma" element={<Organigramma />} />
-            <Route path="/presidenza" element={<Presidenza />} />
-            <Route path="/prefettura" element={<Prefettura />} />
-            <Route path="/direttivo" element={<Direttivo />} />
-            <Route path="/comunicazione" element={<Comunicazione />} />
-            <Route path="/soci" element={<Soci />} />
-            <Route path="/commissioni" element={<Commissioni />} />
-            <Route path="/create-document" element={<CreateDocument />} />
-            <Route path="/document/:id" element={<CreateDocument />} />
-            <Route path="/document/:id/edit" element={<CreateDocument />} />
-            <Route path="/recurring-meetings" element={<RecurringMeetingsSettings />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <Suspense fallback={<div className="p-6 text-muted-foreground">Caricamento...</div>}>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+              <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/segreteria" element={<Segreteria />} />
+              <Route path="/tesoreria" element={<Tesoreria />} />
+              <Route path="/organigramma" element={<Organigramma />} />
+              <Route path="/presidenza" element={<Presidenza />} />
+              <Route path="/prefettura" element={<Prefettura />} />
+              <Route path="/direttivo" element={<Direttivo />} />
+              <Route path="/comunicazione" element={<Comunicazione />} />
+              <Route path="/soci" element={<Soci />} />
+              <Route path="/commissioni" element={<Commissioni />} />
+              <Route path="/create-document" element={<CreateDocument />} />
+              <Route path="/document/:id" element={<CreateDocument />} />
+              <Route path="/document/:id/edit" element={<CreateDocument />} />
+              <Route path="/recurring-meetings" element={<RecurringMeetingsSettings />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </Suspense>
         </TooltipProvider>
       </AuthProvider>
     </LanguageProvider>
