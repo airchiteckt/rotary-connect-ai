@@ -6,6 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface LogoData {
+  description: string;
+  data: string; // base64 encoded image data
+  mimeType: string;
+}
+
 interface FlyerRequest {
   title: string;
   subtitle?: string;
@@ -16,6 +22,7 @@ interface FlyerRequest {
   format: '1:1' | '9:16';
   hasLogos: boolean;
   logoDescriptions?: string[];
+  logos?: LogoData[];
 }
 
 serve(async (req) => {
@@ -37,6 +44,22 @@ serve(async (req) => {
     
     console.log("Generating flyer with prompt:", prompt);
 
+    // Build the content parts - include text prompt and any logos
+    const contentParts: any[] = [{ text: prompt }];
+    
+    // Add logos as additional content parts if provided
+    if (flyerData.logos && flyerData.logos.length > 0) {
+      console.log(`Adding ${flyerData.logos.length} logos to the request`);
+      flyerData.logos.forEach((logo, index) => {
+        contentParts.push({
+          inlineData: {
+            mimeType: logo.mimeType,
+            data: logo.data
+          }
+        });
+      });
+    }
+
     // Call Gemini API to generate the image using the correct endpoint
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -45,9 +68,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         contents: [{
-          parts: [{
-            text: prompt
-          }]
+          parts: contentParts
         }]
       }),
     });
@@ -143,8 +164,14 @@ function createFlyerPrompt(data: FlyerRequest): string {
     }
   }
 
-  // Add design specifications
-  if (data.hasLogos && data.logoDescriptions?.length) {
+  // Add design specifications for logos
+  if (data.hasLogos && data.logos && data.logos.length > 0) {
+    prompt += `Incorporate the ${data.logos.length} provided logo image${data.logos.length > 1 ? 's' : ''} naturally into the design. `;
+    if (data.logoDescriptions?.length) {
+      prompt += `Logo context: ${data.logoDescriptions.join(', ')}. `;
+    }
+    prompt += `Place the logos appropriately within the layout, maintaining visual hierarchy and readability. `;
+  } else if (data.hasLogos && data.logoDescriptions?.length) {
     prompt += `Include logo placeholder areas for: ${data.logoDescriptions.join(', ')}. `;
   } else {
     prompt += `Include space for organizational logo. `;

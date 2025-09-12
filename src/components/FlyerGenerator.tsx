@@ -122,11 +122,31 @@ export const FlyerGenerator = () => {
     setIsGenerating(true);
 
     try {
+      // Convert logos to base64
+      const logoData = await Promise.all(
+        uploadedLogos.map(async (logo) => {
+          return new Promise<{description: string, data: string, mimeType: string}>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const base64Data = (reader.result as string).split(',')[1]; // Remove data:image/...;base64, prefix
+              resolve({
+                description: logo.description,
+                data: base64Data,
+                mimeType: logo.file.type
+              });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(logo.file);
+          });
+        })
+      );
+
       const { data, error } = await supabase.functions.invoke('generate-flyer-ai', {
         body: {
           ...formData,
           hasLogos: uploadedLogos.length > 0,
-          logoDescriptions: uploadedLogos.map(logo => logo.description)
+          logoDescriptions: uploadedLogos.map(logo => logo.description),
+          logos: logoData
         }
       });
 
