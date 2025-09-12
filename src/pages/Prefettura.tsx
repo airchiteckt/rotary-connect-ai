@@ -17,6 +17,7 @@ import ProtocolManager from '@/components/ProtocolManager';
 import CeremonyStats from '@/components/CeremonyStats';
 import UpcomingCeremonies from '@/components/UpcomingCeremonies';
 import EventManager from '@/components/EventManager';
+import CeremonyKanban from '@/components/CeremonyKanban';
 
 export default function Prefettura() {
   const { user, loading } = useAuth();
@@ -198,7 +199,7 @@ export default function Prefettura() {
               </CardContent>
             </Card>
 
-            {/* Ceremonial Types */}
+            {/* Ceremony Statistics */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <CeremonyStats 
                 stats={stats} 
@@ -206,6 +207,10 @@ export default function Prefettura() {
               />
             </div>
 
+            {/* Kanban Board for Ceremonies */}
+            <CeremonyKanban onStatsUpdate={loadStats} />
+
+            {/* Upcoming Ceremonies List */}
             <UpcomingCeremonies onStatsUpdate={loadStats} />
           </TabsContent>
 
