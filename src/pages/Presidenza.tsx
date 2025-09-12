@@ -1,16 +1,61 @@
-import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Crown, Plus, Search, Filter, ArrowLeft, Target, Calendar, Users, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import PresidencyKanban from '@/components/PresidencyKanban';
+import ProjectForm from '@/components/ProjectForm';
 
 export default function Presidenza() {
   const { user, loading } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('progetti');
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [stats, setStats] = useState({
+    totalProjects: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    ideaProjects: 0
+  });
+
+  useEffect(() => {
+    if (user) {
+      loadStats();
+    }
+  }, [user]);
+
+  const loadStats = async () => {
+    if (!user) return;
+
+    try {
+      // Load projects
+      const { data: projects } = await supabase
+        .from('presidency_projects')
+        .select('status')
+        .eq('user_id', user.id);
+
+      const totalProjects = projects?.length || 0;
+      const activeProjects = projects?.filter(p => p.status === 'organized' || p.status === 'to_organize').length || 0;
+      const completedProjects = projects?.filter(p => p.status === 'completed').length || 0;
+      const ideaProjects = projects?.filter(p => p.status === 'ideas').length || 0;
+
+      setStats({
+        totalProjects,
+        activeProjects,
+        completedProjects,
+        ideaProjects
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -28,10 +73,10 @@ export default function Presidenza() {
   }
 
   const presidentialStats = [
-    { label: 'Progetti Attivi', value: 0, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Target },
-    { label: 'Eventi Pianificati', value: 0, color: 'text-green-600', bgColor: 'bg-green-100', icon: Calendar },
-    { label: 'Commissioni', value: 0, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Users },
-    { label: 'Documenti', value: 0, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: FileText }
+    { label: 'Progetti Totali', value: stats.totalProjects, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Target },
+    { label: 'Progetti Attivi', value: stats.activeProjects, color: 'text-green-600', bgColor: 'bg-green-100', icon: Calendar },
+    { label: 'Completati', value: stats.completedProjects, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Users },
+    { label: 'Nuove Idee', value: stats.ideaProjects, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: FileText }
   ];
 
   return (
@@ -41,8 +86,10 @@ export default function Presidenza() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
-                <ArrowLeft className="w-4 h-4" />
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/dashboard">
+                  <ArrowLeft className="w-4 h-4" />
+                </Link>
               </Button>
               <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center">
                 <Crown className="w-5 h-5 text-white" />
@@ -53,10 +100,27 @@ export default function Presidenza() {
               </div>
             </div>
             
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nuovo Progetto
-            </Button>
+            <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo Progetto
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Crea Nuovo Progetto</DialogTitle>
+                  <DialogDescription>Inserisci i dettagli del nuovo progetto presidenziale.</DialogDescription>
+                </DialogHeader>
+                <ProjectForm 
+                  onProjectCreated={() => {
+                    setShowProjectForm(false);
+                    loadStats();
+                  }}
+                  onCancel={() => setShowProjectForm(false)}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </header>
@@ -104,31 +168,36 @@ export default function Presidenza() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col md:flex-row gap-4">
-                  <Button className="flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nuovo Progetto
-                  </Button>
-                  <Button variant="outline">
+                  <Dialog open={showProjectForm} onOpenChange={setShowProjectForm}>
+                    <DialogTrigger asChild>
+                      <Button className="flex-1">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nuovo Progetto
+                      </Button>
+                    </DialogTrigger>
+                  </Dialog>
+                  <Button variant="outline" onClick={() => setActiveTab('progetti')}>
                     <Search className="w-4 h-4 mr-2" />
-                    Visualizza Tutti
+                    Visualizza Kanban
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Active Projects */}
+            {/* Kanban Board for Projects */}
+            <PresidencyKanban onStatsUpdate={loadStats} />
+
+            {/* Active Projects List - Optional additional view */}
             <Card>
               <CardHeader>
-                <CardTitle>Progetti Attivi</CardTitle>
+                <CardTitle>Progetti per Priorità</CardTitle>
                 <CardDescription>
-                  Progetti in corso di realizzazione
+                  Panoramica dei progetti organizzati per importanza
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessun progetto attivo</p>
-                  <p className="text-sm">Inizia creando il primo progetto del club</p>
+                <div className="text-center py-4 text-muted-foreground">
+                  <p className="text-sm">Utilizza il Kanban sopra per gestire i progetti</p>
                 </div>
               </CardContent>
             </Card>
