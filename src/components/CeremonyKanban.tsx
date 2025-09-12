@@ -229,8 +229,10 @@ export default function CeremonyKanban({ onStatsUpdate }: CeremonyKanbanProps) {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Crea Nuova Cerimonia</DialogTitle>
+              <p className="sr-only">Compila i dettagli per creare una nuova cerimonia.</p>
             </DialogHeader>
             <EventForm 
+              presetType="ceremony"
               onEventCreated={() => {
                 setShowEventForm(false);
                 loadCeremonies();

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Shield, Plus, Search, Filter, ArrowLeft, Calendar, Award, BookOpen, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +24,7 @@ export default function Prefettura() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('cerimoniale');
   const [showEventForm, setShowEventForm] = useState(false);
+  const [showCeremonyForm, setShowCeremonyForm] = useState(false);
   const [stats, setStats] = useState({
     totalEvents: 0,
     ceremonies: 0,
@@ -125,6 +126,7 @@ export default function Prefettura() {
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Crea Nuovo Evento</DialogTitle>
+                  <DialogDescription>Compila i dettagli dell'evento.</DialogDescription>
                 </DialogHeader>
                 <EventForm 
                   onEventCreated={() => {
@@ -183,13 +185,27 @@ export default function Prefettura() {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col md:flex-row gap-4">
-                  <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
+                  <Dialog open={showCeremonyForm} onOpenChange={setShowCeremonyForm}>
                     <DialogTrigger asChild>
                       <Button className="flex-1">
                         <Plus className="w-4 h-4 mr-2" />
                         Nuova Cerimonia
                       </Button>
                     </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Crea Nuova Cerimonia</DialogTitle>
+                        <DialogDescription>Inserisci i dettagli della cerimonia.</DialogDescription>
+                      </DialogHeader>
+                      <EventForm 
+                        presetType="ceremony"
+                        onEventCreated={() => {
+                          setShowCeremonyForm(false);
+                          loadStats();
+                        }}
+                        onCancel={() => setShowCeremonyForm(false)}
+                      />
+                    </DialogContent>
                   </Dialog>
                   <Button variant="outline" onClick={() => setActiveTab('protocollo')}>
                     <BookOpen className="w-4 h-4 mr-2" />

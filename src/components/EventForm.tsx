@@ -16,16 +16,17 @@ import { useToast } from '@/hooks/use-toast';
 interface EventFormProps {
   onEventCreated: () => void;
   onCancel: () => void;
+  presetType?: 'event' | 'ceremony' | 'protocol' | 'vip_guest';
 }
 
-export default function EventForm({ onEventCreated, onCancel }: EventFormProps) {
+export default function EventForm({ onEventCreated, onCancel, presetType }: EventFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    event_type: 'event',
+    event_type: presetType ?? 'event',
     ceremony_type: '',
     event_date: undefined as Date | undefined,
     event_time: '',
@@ -37,6 +38,15 @@ export default function EventForm({ onEventCreated, onCancel }: EventFormProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !formData.event_date) return;
+
+    if (formData.event_type === 'ceremony' && !formData.ceremony_type) {
+      toast({
+        title: 'Tipo cerimonia mancante',
+        description: 'Seleziona il tipo di cerimonia prima di procedere.',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setLoading(true);
     try {
@@ -101,6 +111,7 @@ export default function EventForm({ onEventCreated, onCancel }: EventFormProps) 
           <Select
             value={formData.event_type}
             onValueChange={(value) => updateFormData('event_type', value)}
+            disabled={!!presetType}
           >
             <SelectTrigger>
               <SelectValue placeholder="Seleziona il tipo" />
