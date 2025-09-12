@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Megaphone, Plus, Search, Filter, ArrowLeft, Image, Share2, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { FlyerGenerator } from '@/components/FlyerGenerator';
 
 export default function Comunicazione() {
   const { user, loading } = useAuth();
@@ -100,47 +101,7 @@ export default function Comunicazione() {
           </TabsList>
 
           <TabsContent value="locandine" className="space-y-6">
-            {/* Locandine Generator */}
-            <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Image className="w-5 h-5 text-purple-600" />
-                  Generatore Locandine AI
-                </CardTitle>
-                <CardDescription>
-                  Crea locandine professionali per i tuoi eventi in pochi clic
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <Button className="flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crea Nuova Locandina
-                  </Button>
-                  <Button variant="outline">
-                    <Search className="w-4 h-4 mr-2" />
-                    Template Predefiniti
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Flyers */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Locandine Recenti</CardTitle>
-                <CardDescription>
-                  Le tue ultime creazioni
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Image className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessuna locandina creata</p>
-                  <p className="text-sm">Inizia creando la tua prima locandina</p>
-                </div>
-              </CardContent>
-            </Card>
+            <FlyerGenerator />
           </TabsContent>
 
           <TabsContent value="social" className="space-y-6">
