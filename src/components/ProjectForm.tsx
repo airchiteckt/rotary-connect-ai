@@ -36,7 +36,7 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
     assigned_to: project?.assigned_to || '',
     notes: project?.notes || '',
     progress: project?.progress || 0,
-    commission_id: project?.commission_id || ''
+    commission_id: project?.commission_id || 'none'
   });
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
         assigned_to: formData.assigned_to.trim() || null,
         notes: formData.notes.trim() || null,
         progress: formData.progress,
-        commission_id: formData.commission_id || null
+        commission_id: formData.commission_id === 'none' ? null : formData.commission_id || null
       };
 
       if (project) {
@@ -252,7 +252,7 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
             <SelectValue placeholder="Seleziona una commissione (opzionale)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nessuna commissione</SelectItem>
+            <SelectItem value="none">Nessuna commissione</SelectItem>
             {commissions.map((commission) => (
               <SelectItem key={commission.id} value={commission.id}>
                 {commission.name} - {commission.responsible_person}
