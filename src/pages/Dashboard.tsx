@@ -77,11 +77,11 @@ export default function Dashboard() {
       color: "bg-blue-600"
     },
     {
-      title: "Tesoreria", 
-      description: "Gestione finanziaria, bilanci e rendiconti del club",
-      icon: DollarSign,
-      href: "/tesoreria",
-      color: "bg-emerald-600"
+      title: "Organigramma", 
+      description: "Struttura sociale e organizzativa del club",
+      icon: Building,
+      href: "/organigramma",
+      color: "bg-blue-600"
     },
     {
       title: "Presidenza",
@@ -197,9 +197,9 @@ export default function Dashboard() {
           <Card>
             <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
-                <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Budget</p>
-                <p className="text-sm sm:text-lg font-bold">€0</p>
+                <Building className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Cariche</p>
+                <p className="text-sm sm:text-lg font-bold">0</p>
               </div>
             </CardContent>
           </Card>
