@@ -292,6 +292,84 @@ export type Database = {
         }
         Relationships: []
       }
+      members: {
+        Row: {
+          created_at: string
+          current_position: string | null
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          membership_start_date: string
+          notes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_position?: string | null
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          membership_start_date: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_position?: string | null
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          membership_start_date?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      position_history: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          member_id: string
+          notes: string | null
+          position: string
+          start_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          member_id: string
+          notes?: string | null
+          position: string
+          start_date: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          member_id?: string
+          notes?: string | null
+          position?: string
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       prefecture_events: {
         Row: {
           ceremony_type: string | null

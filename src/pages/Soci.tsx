@@ -7,10 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, Search, Filter, ArrowLeft, UserPlus, Calendar, Award } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import MemberManager from '@/components/MemberManager';
+import MemberForm from '@/components/MemberForm';
 
 export default function Soci() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('anagrafica');
+  const [isNewMemberFormOpen, setIsNewMemberFormOpen] = useState(false);
+  const [memberStats, setMemberStats] = useState({
+    active: 0,
+    honorary: 0,
+    emeritus: 0,
+    guest: 0
+  });
 
   if (loading) {
     return (
@@ -27,18 +36,18 @@ export default function Soci() {
     return <Navigate to="/auth" replace />;
   }
 
-  const memberStats = [
-    { label: 'Soci Attivi', value: 0, color: 'text-green-600', bgColor: 'bg-green-100' },
-    { label: 'Nuovi Soci', value: 0, color: 'text-blue-600', bgColor: 'bg-blue-100' },
-    { label: 'In Scadenza', value: 0, color: 'text-orange-600', bgColor: 'bg-orange-100' },
-    { label: 'Onorari', value: 0, color: 'text-purple-600', bgColor: 'bg-purple-100' }
+  const displayStats = [
+    { label: 'Soci Attivi', value: memberStats.active, color: 'text-green-600', bgColor: 'bg-green-100' },
+    { label: 'Soci Onorari', value: memberStats.honorary, color: 'text-purple-600', bgColor: 'bg-purple-100' },
+    { label: 'Soci Emeriti', value: memberStats.emeritus, color: 'text-blue-600', bgColor: 'bg-blue-100' },
+    { label: 'Ospiti', value: memberStats.guest, color: 'text-orange-600', bgColor: 'bg-orange-100' }
   ];
 
   const memberCategories = [
-    { id: 'attivi', name: 'Soci Attivi', count: 0, color: 'bg-green-100 text-green-800' },
-    { id: 'onorari', name: 'Soci Onorari', count: 0, color: 'bg-purple-100 text-purple-800' },
-    { id: 'emeriti', name: 'Soci Emeriti', count: 0, color: 'bg-blue-100 text-blue-800' },
-    { id: 'ospiti', name: 'Ospiti', count: 0, color: 'bg-orange-100 text-orange-800' }
+    { id: 'active', name: 'Soci Attivi', count: memberStats.active, color: 'bg-green-100 text-green-800' },
+    { id: 'honorary', name: 'Soci Onorari', count: memberStats.honorary, color: 'bg-purple-100 text-purple-800' },
+    { id: 'emeritus', name: 'Soci Emeriti', count: memberStats.emeritus, color: 'bg-blue-100 text-blue-800' },
+    { id: 'guest', name: 'Ospiti', count: memberStats.guest, color: 'bg-orange-100 text-orange-800' }
   ];
 
   return (
@@ -60,7 +69,7 @@ export default function Soci() {
               </div>
             </div>
             
-            <Button>
+            <Button onClick={() => setIsNewMemberFormOpen(true)}>
               <UserPlus className="w-4 h-4 mr-2" />
               Nuovo Socio
             </Button>
@@ -72,7 +81,7 @@ export default function Soci() {
       <main className="container mx-auto px-4 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {memberStats.map((stat, index) => (
+          {displayStats.map((stat, index) => (
             <Card key={index}>
               <CardContent className="pt-6">
                 <div className="text-center">
@@ -95,30 +104,6 @@ export default function Soci() {
           </TabsList>
 
           <TabsContent value="anagrafica" className="space-y-6">
-            {/* Search and Filters */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Cerca soci..." 
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtri
-                  </Button>
-                  <Button variant="outline">
-                    Esporta Lista
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Member Categories */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {memberCategories.map((category) => (
@@ -138,22 +123,8 @@ export default function Soci() {
               ))}
             </div>
 
-            {/* Members List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Elenco Soci</CardTitle>
-                <CardDescription>
-                  Tutti i membri del club
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessun socio registrato</p>
-                  <p className="text-sm">Inizia aggiungendo i membri del tuo club</p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Members Manager */}
+            <MemberManager onStatsUpdate={setMemberStats} />
           </TabsContent>
 
           <TabsContent value="presenze">
@@ -211,6 +182,16 @@ export default function Soci() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* New Member Form */}
+      <MemberForm
+        isOpen={isNewMemberFormOpen}
+        onClose={() => setIsNewMemberFormOpen(false)}
+        member={null}
+        onSuccess={() => {
+          // The member manager will refresh automatically
+        }}
+      />
     </div>
   );
 }
