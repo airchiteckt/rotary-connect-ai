@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import TransactionDialog from '@/components/TransactionDialog';
+import MemberFeesManager from '@/components/MemberFeesManager';
 
 interface Transaction {
   id: string;
@@ -70,6 +72,8 @@ export default function Tesoreria() {
     overdue_fees_count: 0
   });
   const [loadingData, setLoadingData] = useState(true);
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
 
   const fetchFinancialData = async () => {
     if (!user) return;
@@ -229,7 +233,10 @@ export default function Tesoreria() {
               </div>
             </div>
             
-            <Button>
+            <Button onClick={() => {
+              setTransactionType('income');
+              setIsTransactionDialogOpen(true);
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               Nuova Transazione
             </Button>
@@ -296,7 +303,15 @@ export default function Tesoreria() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline" size="sm">
+                  <Button 
+                    className="w-full" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setTransactionType('income');
+                      setIsTransactionDialogOpen(true);
+                    }}
+                  >
                     Registra Entrata
                   </Button>
                 </CardContent>
@@ -310,7 +325,15 @@ export default function Tesoreria() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline" size="sm">
+                  <Button 
+                    className="w-full" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setTransactionType('expense');
+                      setIsTransactionDialogOpen(true);
+                    }}
+                  >
                     Registra Uscita
                   </Button>
                 </CardContent>
@@ -324,7 +347,12 @@ export default function Tesoreria() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Button className="w-full" variant="outline" size="sm">
+                  <Button 
+                    className="w-full" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setActiveTab('quote')}
+                  >
                     Quote Soci
                   </Button>
                 </CardContent>
@@ -432,9 +460,9 @@ export default function Tesoreria() {
                     {transactions.map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-4 rounded-lg border">
                         <div className="flex items-center space-x-4">
-                          <div className={`p-2 rounded-full ${
+                          <div className={\`p-2 rounded-full \${
                             transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                          }`}>
+                          }\`}>
                             {transaction.type === 'income' ? 
                               <TrendingUp className="w-4 h-4 text-green-600" /> :
                               <TrendingDown className="w-4 h-4 text-red-600" />
@@ -451,13 +479,16 @@ export default function Tesoreria() {
                           </div>
                         </div>
                         <div className="text-right">
-                        <p className={`text-lg font-semibold ${
-                          transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                          <p className={\`text-lg font-semibold \${
+                            transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                          }\`}>
+                            {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                           </p>
                           {transaction.payment_method && (
-                            <p className="text-sm text-muted-foreground">{transaction.payment_method}</p>
+                            <p className="text-xs text-muted-foreground">{transaction.payment_method}</p>
+                          )}
+                          {transaction.notes && (
+                            <p className="text-xs text-muted-foreground mt-1">{transaction.notes}</p>
                           )}
                         </div>
                       </div>
@@ -467,7 +498,7 @@ export default function Tesoreria() {
                   <div className="text-center py-8 text-muted-foreground">
                     <DollarSign className="w-12 h-12 mx-auto mb-4 opacity-50" />
                     <p>Nessuna transazione trovata</p>
-                    <p className="text-sm">Le transazioni appariranno qui</p>
+                    <p className="text-sm">Le transazioni appariranno qui una volta registrate</p>
                   </div>
                 )}
               </CardContent>
@@ -475,59 +506,13 @@ export default function Tesoreria() {
           </TabsContent>
 
           <TabsContent value="quote" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Quote Soci</CardTitle>
-                <CardDescription>
-                  Gestione e tracking delle quote associative
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingData ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Caricamento quote...</p>
-                  </div>
-                ) : memberFees.length > 0 ? (
-                  <div className="space-y-3">
-                    {memberFees.map((fee) => (
-                      <div key={fee.id} className="flex items-center justify-between p-4 rounded-lg border">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                            <Users className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              {fee.members.first_name} {fee.members.last_name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {fee.fee_type} • Scadenza: {format(new Date(fee.due_date), 'dd MMM yyyy', { locale: it })}
-                            </p>
-                            {fee.paid_date && (
-                              <p className="text-xs text-green-600">
-                                Pagato il {format(new Date(fee.paid_date), 'dd MMM yyyy', { locale: it })}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-right space-y-2">
-                          <p className="text-lg font-semibold">{formatCurrency(fee.amount)}</p>
-                          <Badge variant={getStatusBadge(fee.status).variant}>
-                            {getStatusBadge(fee.status).label}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Nessuna quota registrata</p>
-                    <p className="text-sm">Le quote dei soci appariranno qui</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <MemberFeesManager onStatsUpdate={(stats) => {
+              setFinancialStats(prev => ({
+                ...prev,
+                pending_fees: stats.pending_fees || 0,
+                overdue_fees_count: stats.overdue_fees || 0
+              }));
+            }} />
           </TabsContent>
 
           <TabsContent value="budget">
@@ -541,14 +526,24 @@ export default function Tesoreria() {
               <CardContent>
                 <div className="text-center py-8 text-muted-foreground">
                   <PieChart className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Sistema budget in preparazione</p>
-                  <p className="text-sm">Strumenti di pianificazione finanziaria in arrivo</p>
+                  <p>Funzionalità di budget in arrivo</p>
+                  <p className="text-sm">Gestisci i budget per progetti e attività del club</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </main>
+
+      <TransactionDialog
+        isOpen={isTransactionDialogOpen}
+        onClose={() => setIsTransactionDialogOpen(false)}
+        onSuccess={() => {
+          fetchFinancialData();
+          setIsTransactionDialogOpen(false);
+        }}
+        transactionType={transactionType}
+      />
     </div>
   );
 }
