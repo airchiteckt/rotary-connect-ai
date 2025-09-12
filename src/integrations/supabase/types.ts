@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      commissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          responsible_person: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          responsible_person: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          responsible_person?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           category: string
@@ -320,6 +350,7 @@ export type Database = {
         Row: {
           assigned_to: string | null
           budget: number | null
+          commission_id: string | null
           created_at: string
           deadline: string | null
           description: string | null
@@ -335,6 +366,7 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           budget?: number | null
+          commission_id?: string | null
           created_at?: string
           deadline?: string | null
           description?: string | null
@@ -350,6 +382,7 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           budget?: number | null
+          commission_id?: string | null
           created_at?: string
           deadline?: string | null
           description?: string | null
@@ -362,7 +395,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "presidency_projects_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "commissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

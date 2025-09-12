@@ -16,6 +16,7 @@ import Direttivo from "./pages/Direttivo";
 import Comunicazione from "./pages/Comunicazione";
 import Soci from "./pages/Soci";
 import CreateDocument from "./pages/CreateDocument";
+import Commissioni from "./pages/Commissioni";
 import RecurringMeetingsSettings from "./components/RecurringMeetingsSettings";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/direttivo" element={<Direttivo />} />
             <Route path="/comunicazione" element={<Comunicazione />} />
             <Route path="/soci" element={<Soci />} />
+            <Route path="/commissioni" element={<Commissioni />} />
             <Route path="/create-document" element={<CreateDocument />} />
             <Route path="/document/:id" element={<CreateDocument />} />
             <Route path="/document/:id/edit" element={<CreateDocument />} />

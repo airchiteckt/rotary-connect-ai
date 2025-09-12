@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,6 +25,7 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [commissions, setCommissions] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     title: project?.title || '',
     description: project?.description || '',
@@ -34,8 +35,29 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
     deadline: project?.deadline ? new Date(project.deadline) : undefined as Date | undefined,
     assigned_to: project?.assigned_to || '',
     notes: project?.notes || '',
-    progress: project?.progress || 0
+    progress: project?.progress || 0,
+    commission_id: project?.commission_id || ''
   });
+
+  useEffect(() => {
+    const fetchCommissions = async () => {
+      if (!user) return;
+      
+      try {
+        const { data } = await supabase
+          .from('commissions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name');
+        
+        if (data) setCommissions(data);
+      } catch (error) {
+        console.error('Error fetching commissions:', error);
+      }
+    };
+
+    fetchCommissions();
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +84,8 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
         deadline: formData.deadline ? format(formData.deadline, 'yyyy-MM-dd') : null,
         assigned_to: formData.assigned_to.trim() || null,
         notes: formData.notes.trim() || null,
-        progress: formData.progress
+        progress: formData.progress,
+        commission_id: formData.commission_id || null
       };
 
       if (project) {
@@ -217,6 +240,26 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
           onChange={(e) => updateFormData('assigned_to', e.target.value)}
           placeholder="Nome del responsabile"
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="commission">Commissione</Label>
+        <Select
+          value={formData.commission_id}
+          onValueChange={(value) => updateFormData('commission_id', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Seleziona una commissione (opzionale)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Nessuna commissione</SelectItem>
+            {commissions.map((commission) => (
+              <SelectItem key={commission.id} value={commission.id}>
+                {commission.name} - {commission.responsible_person}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

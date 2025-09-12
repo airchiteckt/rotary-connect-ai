@@ -117,6 +117,13 @@ export default function Dashboard() {
       icon: Users,
       href: "/soci",
       color: "bg-orange-600"
+    },
+    {
+      title: "Commissioni",
+      description: "Gestione commissioni e assegnazione progetti",
+      icon: UserCheck,
+      href: "/commissioni",
+      color: "bg-pink-600"
     }
   ];
 
