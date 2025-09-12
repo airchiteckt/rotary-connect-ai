@@ -431,11 +431,18 @@ export const FlyerGenerator = () => {
           <CardContent>
             {generatedImage ? (
               <div className="space-y-4">
-                <div className={`mx-auto bg-gray-100 rounded-lg overflow-hidden ${formData.format === '1:1' ? 'aspect-square max-w-sm' : 'aspect-[9/16] max-w-xs'}`}>
+                <div className={`mx-auto bg-gray-100 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 ${formData.format === '1:1' ? 'aspect-square max-w-sm' : 'aspect-[9/16] max-w-xs'}`}>
                   <img
                     src={generatedImage}
                     alt="Locandina generata"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-white"
+                    onError={(e) => {
+                      console.error('Error loading image:', e);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                    onLoad={() => {
+                      console.log('Image loaded successfully');
+                    }}
                   />
                 </div>
                 <div className="flex gap-2">
