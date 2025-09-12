@@ -9,6 +9,7 @@ import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Segreteria from "./pages/Segreteria";
+import Tesoreria from "./pages/Tesoreria";
 import Organigramma from "./pages/Organigramma";
 import Presidenza from "./pages/Presidenza";
 import Prefettura from "./pages/Prefettura";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/segreteria" element={<Segreteria />} />
+            <Route path="/tesoreria" element={<Tesoreria />} />
             <Route path="/organigramma" element={<Organigramma />} />
             <Route path="/presidenza" element={<Presidenza />} />
             <Route path="/prefettura" element={<Prefettura />} />
