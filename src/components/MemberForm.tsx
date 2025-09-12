@@ -218,14 +218,13 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
           <div className="space-y-2">
             <Label htmlFor="current_position">Carica Attuale</Label>
             <Select
-              value={formData.current_position}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, current_position: value }))}
+              value={formData.current_position || undefined}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, current_position: value || '' }))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleziona una carica" />
+                <SelectValue placeholder="Seleziona una carica (opzionale)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nessuna carica</SelectItem>
                 {positions.map((position) => (
                   <SelectItem key={position} value={position}>
                     {position}
