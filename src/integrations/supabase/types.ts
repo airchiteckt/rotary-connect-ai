@@ -990,7 +990,15 @@ export type Database = {
         Args: { new_user_id: string; referral_code_input: string }
         Returns: boolean
       }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_trial_valid: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
+      is_user_admin: {
         Args: { user_uuid: string }
         Returns: boolean
       }

@@ -16,8 +16,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Settings, User, Shield, Bell, Palette, Upload, Save, CreditCard, Users, Copy, Crown, Gift, UserPlus, Mail, Clock, CheckCircle, XCircle, Trash2, Edit, History, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import MemberForm from './MemberForm';
-import PositionHistoryManager from './PositionHistoryManager';
 
 export default function UserSettings() {
   const { user, profile, signOut } = useAuth();
@@ -36,13 +34,8 @@ export default function UserSettings() {
   const [isPremium, setIsPremium] = useState(false);
   
   // Organization management state
-  const [invites, setInvites] = useState<any[]>([]);
-  const [members, setMembers] = useState<any[]>([]);
-  const [organizationMembers, setOrganizationMembers] = useState<any[]>([]);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
-  const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [isMemberFormOpen, setIsMemberFormOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [clubMembers, setClubMembers] = useState<any[]>([]);
+  const [pendingInvites, setPendingInvites] = useState<any[]>([]);
   const [inviteForm, setInviteForm] = useState({
     email: '',
     first_name: '',
@@ -91,79 +84,39 @@ export default function UserSettings() {
 
   const loadOrganizationData = async () => {
     if (!user) return;
-    
-    await Promise.all([
-      loadInvites(),
-      loadClubMembers(),
-      loadOrganizationMembers()
-    ]);
-  };
-
-  const loadInvites = async () => {
-    if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Load club members
+      const { data: members, error: membersError } = await supabase
+        .from('club_members')
+        .select(`
+          id,
+          user_id,
+          role,
+          status,
+          joined_at,
+          profiles (
+            full_name,
+            role
+          )
+        `)
+        .eq('club_owner_id', user.id)
+        .eq('status', 'active');
+
+      if (membersError) throw membersError;
+      setClubMembers(members || []);
+
+      // Load pending invites
+      const { data: invites, error: invitesError } = await supabase
         .from('club_invites')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('status', 'pending');
 
-      if (error) throw error;
-      setInvites(data || []);
+      if (invitesError) throw invitesError;
+      setPendingInvites(invites || []);
     } catch (error) {
-      console.error('Error loading invites:', error);
-    }
-  };
-
-  const loadClubMembers = async () => {
-    if (!user) return;
-
-    try {
-      const { data: membersData, error } = await supabase
-        .from('club_members')
-        .select('id, user_id, role, status, joined_at')
-        .eq('club_owner_id', user.id)
-        .order('joined_at', { ascending: false });
-
-      if (error) throw error;
-
-      const membersWithProfiles = [];
-      for (const member of membersData || []) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('user_id', member.user_id)
-          .single();
-
-        membersWithProfiles.push({
-          ...member,
-          profiles: {
-            full_name: profile?.full_name || 'Nome non disponibile'
-          }
-        });
-      }
-
-      setMembers(membersWithProfiles);
-    } catch (error) {
-      console.error('Error loading club members:', error);
-    }
-  };
-
-  const loadOrganizationMembers = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('members')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setOrganizationMembers(data || []);
-    } catch (error) {
-      console.error('Error loading organization members:', error);
+      console.error('Error loading organization data:', error);
     }
   };
 
@@ -203,7 +156,14 @@ export default function UserSettings() {
 
   const sendInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || profile?.role !== 'admin') {
+      toast({
+        title: "Accesso negato",
+        description: "Solo gli amministratori possono invitare nuovi membri.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -219,19 +179,18 @@ export default function UserSettings() {
 
       if (error) throw error;
 
-      toast({
-        title: "Invito inviato",
-        description: `L'invito è stato inviato a ${inviteForm.email}`,
-      });
-
       setInviteForm({ email: '', first_name: '', last_name: '', role: 'member' });
-      setIsInviteOpen(false);
-      loadInvites();
-    } catch (error: any) {
+      loadOrganizationData();
+      
+      toast({
+        title: "Invito inviato!",
+        description: `Invito inviato a ${inviteForm.email}`,
+      });
+    } catch (error) {
       console.error('Error sending invite:', error);
       toast({
         title: "Errore",
-        description: error.message || "Impossibile inviare l'invito",
+        description: "Impossibile inviare l'invito. Riprova.",
         variant: "destructive",
       });
     } finally {
@@ -240,6 +199,15 @@ export default function UserSettings() {
   };
 
   const deleteInvite = async (inviteId: string) => {
+    if (profile?.role !== 'admin') {
+      toast({
+        title: "Accesso negato",
+        description: "Solo gli amministratori possono eliminare inviti.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('club_invites')
@@ -248,42 +216,82 @@ export default function UserSettings() {
 
       if (error) throw error;
 
+      loadOrganizationData();
       toast({
         title: "Invito eliminato",
-        description: "L'invito è stato rimosso con successo",
+        description: "L'invito è stato eliminato con successo.",
       });
-
-      loadInvites();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting invite:', error);
       toast({
         title: "Errore",
-        description: "Impossibile eliminare l'invito",
+        description: "Impossibile eliminare l'invito.",
         variant: "destructive",
       });
     }
   };
 
-  const deleteMember = async (memberId: string) => {
+  const updateMemberRole = async (userId: string, newRole: string) => {
+    if (profile?.role !== 'admin') {
+      toast({
+        title: "Accesso negato",
+        description: "Solo gli amministratori possono modificare i ruoli.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
-        .from('members')
-        .delete()
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      loadOrganizationData();
+      toast({
+        title: "Ruolo aggiornato",
+        description: `Ruolo aggiornato a ${newRole}.`,
+      });
+    } catch (error) {
+      console.error('Error updating member role:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile aggiornare il ruolo.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeMember = async (memberId: string) => {
+    if (profile?.role !== 'admin') {
+      toast({
+        title: "Accesso negato",
+        description: "Solo gli amministratori possono rimuovere membri.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('club_members')
+        .update({ status: 'inactive' })
         .eq('id', memberId);
 
       if (error) throw error;
 
+      loadOrganizationData();
       toast({
-        title: "Membro eliminato",
-        description: "Il membro è stato eliminato con successo.",
+        title: "Membro rimosso",
+        description: "Il membro è stato rimosso dall'organizzazione.",
       });
-
-      loadOrganizationMembers();
     } catch (error) {
-      console.error('Error deleting member:', error);
+      console.error('Error removing member:', error);
       toast({
         title: "Errore",
-        description: "Si è verificato un errore nell'eliminazione del membro.",
+        description: "Impossibile rimuovere il membro.",
         variant: "destructive",
       });
     }
@@ -304,7 +312,7 @@ export default function UserSettings() {
           address: profileData.address,
           updated_at: new Date().toISOString()
         })
-        .eq('id', user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -338,6 +346,17 @@ export default function UserSettings() {
     }
   };
 
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'default';
+      case 'treasurer':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -346,24 +365,24 @@ export default function UserSettings() {
           <span className="hidden sm:inline">Impostazioni</span>
         </Button>
       </DialogTrigger>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              Impostazioni Account
-            </DialogTitle>
-          </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Impostazioni Account
+          </DialogTitle>
+        </DialogHeader>
 
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="profile">Profilo</TabsTrigger>
-              <TabsTrigger value="subscription">Abbonamento</TabsTrigger>
-              <TabsTrigger value="organization" disabled={!isPremium}>
-                Organizzazione {!isPremium && <Badge variant="outline" className="ml-1 text-xs">Premium</Badge>}
-              </TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="profile">Profilo</TabsTrigger>
+            <TabsTrigger value="subscription">Abbonamento</TabsTrigger>
+            <TabsTrigger value="organization" disabled={!isPremium}>
+              Organizzazione {!isPremium && <Badge variant="outline" className="ml-1 text-xs">Premium</Badge>}
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="profile" className="space-y-6 mt-6">
+          <TabsContent value="profile" className="space-y-6 mt-6">
             {/* Profile Info */}
             <Card>
               <CardHeader>
@@ -384,6 +403,11 @@ export default function UserSettings() {
                     <h3 className="font-semibold">{profile?.full_name}</h3>
                     <p className="text-sm text-muted-foreground">{user?.email}</p>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <Badge variant={getRoleColor(profile?.role || 'member')}>
+                        {profile?.role === 'admin' && '👑 '}
+                        {profile?.role === 'treasurer' && '💰 '}
+                        {profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || 'Membro'}
+                      </Badge>
                       <Badge variant={daysRemaining > 7 ? "default" : "destructive"}>
                         {daysRemaining} giorni di prova rimasti
                       </Badge>
@@ -396,7 +420,7 @@ export default function UserSettings() {
                     </div>
                   </div>
                 </div>
-  
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="full_name">Nome Completo</Label>
@@ -438,7 +462,7 @@ export default function UserSettings() {
                     />
                   </div>
                 </div>
-  
+
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
                   <Textarea
@@ -449,7 +473,7 @@ export default function UserSettings() {
                     rows={3}
                   />
                 </div>
-  
+
                 <Button onClick={handleSaveProfile} disabled={isLoading} className="w-full">
                   <Save className="w-4 h-4 mr-2" />
                   {isLoading ? 'Salvando...' : 'Salva Modifiche'}
@@ -498,465 +522,389 @@ export default function UserSettings() {
                 Esci dall'Account
               </Button>
             </div>
-            </TabsContent>
+          </TabsContent>
 
-            <TabsContent value="subscription" className="space-y-6 mt-6">
-              {/* Subscription */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <CreditCard className="w-5 h-5" />
-                    Piano di Abbonamento
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm font-medium">Piano Attuale</span>
-                      <p className="text-xs text-muted-foreground">
-                        {profile?.subscription_type === 'trial' ? 'Prova Gratuita' : 
-                         profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
-                      </p>
-                    </div>
-                    <Badge variant={profile?.subscription_type === 'active' ? "default" : 
-                                  profile?.subscription_type === 'trial' ? "secondary" : "destructive"}>
-                      {profile?.subscription_type === 'active' && <Crown className="w-3 h-3 mr-1" />}
-                      {profile?.subscription_type === 'trial' ? 'Prova' : 
+          <TabsContent value="subscription" className="space-y-6 mt-6">
+            {/* Subscription */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <CreditCard className="w-5 h-5" />
+                  Piano di Abbonamento
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium">Piano Attuale</span>
+                    <p className="text-xs text-muted-foreground">
+                      {profile?.subscription_type === 'trial' ? 'Prova Gratuita' : 
                        profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
-                    </Badge>
+                    </p>
                   </div>
+                  <Badge variant={profile?.subscription_type === 'active' ? "default" : 
+                                profile?.subscription_type === 'trial' ? "secondary" : "destructive"}>
+                    {profile?.subscription_type === 'active' && <Crown className="w-3 h-3 mr-1" />}
+                    {profile?.subscription_type === 'trial' ? 'Prova' : 
+                     profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
+                  </Badge>
+                </div>
 
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm font-medium">Membri del Club</span>
-                      <p className="text-xs text-muted-foreground">
-                        Membri attivi nel tuo club
-                      </p>
-                    </div>
-                    <Badge variant="outline">{memberCount}</Badge>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium">Membri del Club</span>
+                    <p className="text-xs text-muted-foreground">
+                      Membri attivi nel tuo club
+                    </p>
                   </div>
+                  <Badge variant="outline">{memberCount}</Badge>
+                </div>
 
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm font-medium">Costo Mensile</span>
-                      <p className="text-xs text-muted-foreground">
-                        Basato sul numero di membri
-                      </p>
-                    </div>
-                    <Badge variant="default">€{monthlyPrice}/mese</Badge>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-sm font-medium">Costo Mensile</span>
+                    <p className="text-xs text-muted-foreground">
+                      Basato sul numero di membri
+                    </p>
                   </div>
+                  <Badge variant="default">€{monthlyPrice}/mese</Badge>
+                </div>
 
-                  <div className="text-xs text-muted-foreground p-3 bg-muted rounded-lg">
-                    <p><strong>Piano tariffario:</strong></p>
-                    <p>• Fino a 20 membri: €15/mese</p>
-                    <p>• Fino a 30 membri: €25/mese</p> 
-                    <p>• Fino a 50 membri: €35/mese</p>
-                    <p>• Oltre 50 membri: €50/mese</p>
+                <div className="text-xs text-muted-foreground p-3 bg-muted rounded-lg">
+                  <p><strong>Piano tariffario:</strong></p>
+                  <p>• Fino a 20 membri: €15/mese</p>
+                  <p>• Fino a 30 membri: €25/mese</p> 
+                  <p>• Fino a 50 membri: €35/mese</p>
+                  <p>• Oltre 50 membri: €50/mese</p>
+                </div>
+                
+                {!isPremium && (
+                  <Button 
+                    className="w-full" 
+                    onClick={activatePremium}
+                    disabled={isLoading}
+                  >
+                    <Crown className="w-4 h-4 mr-2" />
+                    {isLoading ? 'Attivazione...' : `Attiva Premium - €${monthlyPrice}/mese`}
+                  </Button>
+                )}
+                
+                {isPremium && (
+                  <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                    <Crown className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                    <p className="text-green-800 font-medium">Premium Attivo</p>
+                    <p className="text-xs text-green-600">Organizzazione attiva</p>
                   </div>
-                  
-                  {!isPremium && (
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Referral System */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Users className="w-5 h-5" />
+                  Sistema Referral
+                </CardTitle>
+                <CardDescription>
+                  Invita altri club e ottieni 3 mesi gratis per ogni invito (max 4 inviti)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Il tuo codice referral</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={profile?.referral_code || ''} 
+                      readOnly 
+                      className="font-mono"
+                    />
                     <Button 
-                      className="w-full" 
-                      onClick={activatePremium}
-                      disabled={isLoading}
+                      size="icon" 
+                      variant="outline"
+                      onClick={copyReferralCode}
                     >
-                      <Crown className="w-4 h-4 mr-2" />
-                      {isLoading ? 'Attivazione...' : `Attiva Premium - €${monthlyPrice}/mese`}
+                      <Copy className="w-4 h-4" />
                     </Button>
-                  )}
-                  
-                  {isPremium && (
-                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                      <Crown className="w-8 h-8 mx-auto mb-2 text-green-600" />
-                      <p className="text-green-800 font-medium">Premium Attivo</p>
-                      <p className="text-xs text-green-600">Organizzazione attiva</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {profile?.referral_count || 0}/4
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                    <div className="text-sm text-muted-foreground">Inviti utilizzati</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary">
+                      {profile?.bonus_months || 0}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Mesi bonus ottenuti</div>
+                  </div>
+                </div>
+                
+                <div className="text-sm text-muted-foreground">
+                  Condividi il tuo codice con altri club. Quando si iscriveranno, entrambi otterrete 3 mesi gratuiti!
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              {/* Referral System */}
+          <TabsContent value="organization">
+            {!isPremium ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Users className="w-5 h-5" />
-                    Sistema Referral
-                  </CardTitle>
+                  <CardTitle>Gestione Organizzazione</CardTitle>
                   <CardDescription>
-                    Invita altri club e ottieni 3 mesi gratis per ogni invito (max 4 inviti)
+                    Passa al piano premium per gestire la tua organizzazione e invitare membri.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Il tuo codice referral</Label>
-                    <div className="flex gap-2">
-                      <Input 
-                        value={profile?.referral_code || ''} 
-                        readOnly 
-                        className="font-mono"
-                      />
-                      <Button 
-                        size="icon" 
-                        variant="outline"
-                        onClick={copyReferralCode}
-                      >
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">
-                        {profile?.referral_count || 0}/4
-                      </div>
-                      <div className="text-sm text-muted-foreground">Inviti utilizzati</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">
-                        {profile?.bonus_months || 0}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Mesi bonus ottenuti</div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-sm text-muted-foreground">
-                    Condividi il tuo codice con altri club. Quando si iscriveranno, entrambi otterrete 3 mesi gratuiti!
-                  </div>
+                <CardContent>
+                  <Button onClick={activatePremium} disabled={isLoading}>
+                    {isLoading ? "Attivazione..." : "Attiva Premium"}
+                  </Button>
                 </CardContent>
               </Card>
-
-              {/* Preferences */}
+            ) : profile?.role !== 'admin' ? (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Palette className="w-5 h-5" />
-                    Preferenze
-                  </CardTitle>
+                  <CardTitle>Accesso Limitato</CardTitle>
+                  <CardDescription>
+                    Solo gli amministratori possono gestire l'organizzazione e invitare nuovi membri.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm font-medium">Tema</span>
-                      <p className="text-xs text-muted-foreground">Scegli il tema dell'interfaccia</p>
-                    </div>
-                    <Badge variant="outline">Sistema</Badge>
+                <CardContent>
+                  <div className="text-sm text-muted-foreground">
+                    Il tuo ruolo attuale: <span className="font-medium capitalize">{profile?.role}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <span className="text-sm font-medium">Lingua</span>
-                      <p className="text-xs text-muted-foreground">Lingua dell'interfaccia</p>
-                    </div>
-                    <Badge variant="outline">Italiano</Badge>
+                  <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-sm text-amber-800">
+                      Per ottenere i permessi di amministratore, contatta un amministratore esistente del club.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Actions */}
-              <div className="flex flex-col gap-2">
-                <Button variant="outline" onClick={() => toast({ title: "Funzione in arrivo", description: "La modifica password sarà disponibile presto." })}>
-                  Cambia Password
-                </Button>
-                <Button variant="destructive" onClick={() => {
-                  signOut();
-                  setIsOpen(false);
-                  toast({ title: "Logout effettuato", description: "A presto!" });
-                }}>
-                  Esci dall'Account
-                </Button>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="organization" className="space-y-6 mt-6">
-              {isPremium ? (
-                <>
-                  {/* Organization Header */}
-                  <Card className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Crown className="w-5 h-5 text-green-600" />
-                        Gestione Organizzazione
-                      </CardTitle>
-                      <CardDescription>
-                        Gestisci i membri della tua organizzazione e invita nuovi collaboratori
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="text-center p-4 bg-white rounded-lg">
-                          <div className="text-2xl font-bold text-green-600">{memberCount}</div>
-                          <div className="text-sm text-muted-foreground">Membri Club</div>
-                        </div>
-                        <div className="text-center p-4 bg-white rounded-lg">
-                          <div className="text-2xl font-bold text-blue-600">{organizationMembers.length}</div>
-                          <div className="text-sm text-muted-foreground">Soci Registrati</div>
-                        </div>
-                        <div className="text-center p-4 bg-white rounded-lg">
-                          <div className="text-2xl font-bold text-orange-600">{invites.filter(i => i.status === 'pending').length}</div>
-                          <div className="text-sm text-muted-foreground">Inviti Pendenti</div>
-                        </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Organization Header */}
+                <Card className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Crown className="w-5 h-5 text-green-600" />
+                      Gestione Organizzazione - Amministratore
+                    </CardTitle>
+                    <CardDescription>
+                      Gestisci i membri della tua organizzazione e invita nuovi collaboratori
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-white rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{clubMembers.length}</div>
+                        <div className="text-sm text-muted-foreground">Membri Attivi</div>
                       </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Invite Members */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <UserPlus className="w-5 h-5" />
-                          Invita Membri
-                        </div>
-                        <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
-                          <DialogTrigger asChild>
-                            <Button>
-                              <UserPlus className="w-4 h-4 mr-2" />
-                              Nuovo Invito
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Invita Nuovo Membro</DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={sendInvite} className="space-y-4">
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label htmlFor="first_name">Nome</Label>
-                                  <Input
-                                    id="first_name"
-                                    value={inviteForm.first_name}
-                                    onChange={(e) => setInviteForm(prev => ({ ...prev, first_name: e.target.value }))}
-                                    required
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="last_name">Cognome</Label>
-                                  <Input
-                                    id="last_name"
-                                    value={inviteForm.last_name}
-                                    onChange={(e) => setInviteForm(prev => ({ ...prev, last_name: e.target.value }))}
-                                    required
-                                  />
-                                </div>
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                  id="email"
-                                  type="email"
-                                  value={inviteForm.email}
-                                  onChange={(e) => setInviteForm(prev => ({ ...prev, email: e.target.value }))}
-                                  required
-                                />
-                              </div>
-                              
-                              <div className="space-y-2">
-                                <Label htmlFor="role">Ruolo</Label>
-                                <Select value={inviteForm.role} onValueChange={(value) => setInviteForm(prev => ({ ...prev, role: value }))}>
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="member">Membro</SelectItem>
-                                    <SelectItem value="secretary">Segretario</SelectItem>
-                                    <SelectItem value="treasurer">Tesoriere</SelectItem>
-                                    <SelectItem value="admin">Amministratore</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                <Button type="submit" disabled={isLoading} className="flex-1">
-                                  {isLoading ? 'Invio...' : 'Invia Invito'}
-                                </Button>
-                                <Button type="button" variant="outline" onClick={() => setIsInviteOpen(false)}>
-                                  Annulla
-                                </Button>
-                              </div>
-                            </form>
-                          </DialogContent>
-                        </Dialog>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {invites.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>Nessun invito inviato ancora</p>
-                          <p className="text-sm">Inizia invitando i membri del tuo club</p>
-                        </div>
-                      ) : (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Email</TableHead>
-                              <TableHead>Ruolo</TableHead>
-                              <TableHead>Stato</TableHead>
-                              <TableHead>Azioni</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {invites.map((invite) => (
-                              <TableRow key={invite.id}>
-                                <TableCell className="font-medium">
-                                  {invite.first_name} {invite.last_name}
-                                </TableCell>
-                                <TableCell>{invite.email}</TableCell>
-                                <TableCell>
-                                  <Badge variant="outline">{invite.role}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    {invite.status === 'pending' && <Clock className="w-4 h-4 text-yellow-500" />}
-                                    {invite.status === 'accepted' && <CheckCircle className="w-4 h-4 text-green-500" />}
-                                    {invite.status === 'expired' && <XCircle className="w-4 h-4 text-red-500" />}
-                                    <Badge variant={
-                                      invite.status === 'pending' ? 'secondary' :
-                                      invite.status === 'accepted' ? 'default' : 'destructive'
-                                    }>
-                                      {invite.status === 'pending' ? 'In attesa' : 
-                                       invite.status === 'accepted' ? 'Accettato' : 
-                                       invite.status === 'expired' ? 'Scaduto' : invite.status}
-                                    </Badge>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {invite.status === 'pending' && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => deleteInvite(invite.id)}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Organization Members List */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5" />
-                        Soci dell'Organizzazione ({organizationMembers.length})
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {organizationMembers.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                          <p>Nessun socio registrato</p>
-                          <p className="text-sm">I soci appariranno qui quando verranno aggiunti</p>
-                        </div>
-                      ) : (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Nome</TableHead>
-                              <TableHead>Email</TableHead>
-                              <TableHead>Stato</TableHead>
-                              <TableHead>Data Iscrizione</TableHead>
-                              <TableHead>Azioni</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {organizationMembers.map((member) => (
-                              <TableRow key={member.id}>
-                                <TableCell className="font-medium">
-                                  {member.first_name} {member.last_name}
-                                </TableCell>
-                                <TableCell>{member.email}</TableCell>
-                                <TableCell>
-                                  <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                                    {member.status === 'active' ? 'Attivo' : member.status}
-                                  </Badge>
-                                </TableCell>
-                                <TableCell>
-                                  {format(new Date(member.membership_start_date), 'dd MMM yyyy', { locale: it })}
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => {
-                                        setSelectedMember(member);
-                                        setIsMemberFormOpen(true);
-                                      }}
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={() => deleteMember(member.id)}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      )}
-                    </CardContent>
-                  </Card>
-                </>
-              ) : (
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center py-8">
-                      <Crown className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold mb-2">Premium Richiesto</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Attiva il piano Premium per accedere alla gestione dell'organizzazione
-                      </p>
-                      <Button onClick={activatePremium} disabled={isLoading}>
-                        <Crown className="w-4 h-4 mr-2" />
-                        {isLoading ? 'Attivazione...' : 'Attiva Premium'}
-                      </Button>
+                      <div className="text-center p-4 bg-white rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">{pendingInvites.length}</div>
+                        <div className="text-sm text-muted-foreground">Inviti Pendenti</div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
-              )}
-            </TabsContent>
-          </Tabs>
 
-          {/* Member Form Modal */}
-          {isMemberFormOpen && (
-            <MemberForm
-              isOpen={isMemberFormOpen}
-              onClose={() => {
-                setIsMemberFormOpen(false);
-                setSelectedMember(null);
-              }}
-              member={selectedMember}
-              onSuccess={loadOrganizationMembers}
-            />
-          )}
+                {/* Invite Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <UserPlus className="w-5 h-5" />
+                      Invita Nuovo Membro
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={sendInvite} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="first_name">Nome</Label>
+                          <Input
+                            id="first_name"
+                            value={inviteForm.first_name}
+                            onChange={(e) => setInviteForm({...inviteForm, first_name: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="last_name">Cognome</Label>
+                          <Input
+                            id="last_name"
+                            value={inviteForm.last_name}
+                            onChange={(e) => setInviteForm({...inviteForm, last_name: e.target.value})}
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={inviteForm.email}
+                          onChange={(e) => setInviteForm({...inviteForm, email: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="role">Ruolo</Label>
+                        <Select value={inviteForm.role} onValueChange={(value) => setInviteForm({...inviteForm, role: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleziona ruolo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="member">Membro</SelectItem>
+                            <SelectItem value="admin">Amministratore</SelectItem>
+                            <SelectItem value="treasurer">Tesoriere</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <Button type="submit" disabled={isLoading} className="w-full">
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        {isLoading ? 'Invio...' : 'Invia Invito'}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
 
-          {/* Position History Modal */}
-          {isHistoryOpen && selectedMember && (
-            <PositionHistoryManager
-              isOpen={isHistoryOpen}
-              onClose={() => {
-                setIsHistoryOpen(false);
-                setSelectedMember(null);
-              }}
-              member={selectedMember}
-              onPositionUpdate={loadOrganizationMembers}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    );
-  }
+                {/* Club Members */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Membri del Club ({clubMembers.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {clubMembers.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>Nessun membro ancora</p>
+                        <p className="text-sm">Inizia invitando i membri del tuo club</p>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Ruolo</TableHead>
+                            <TableHead>Data Iscrizione</TableHead>
+                            <TableHead className="min-w-[200px]">Azioni</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {clubMembers.map((member) => (
+                            <TableRow key={member.id}>
+                              <TableCell>{member.profiles?.full_name || 'N/A'}</TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={getRoleColor(member.profiles?.role)} 
+                                  className="capitalize"
+                                >
+                                  {member.profiles?.role === 'admin' && '👑 '}
+                                  {member.profiles?.role === 'treasurer' && '💰 '}
+                                  {member.profiles?.role || member.role}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{new Date(member.joined_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-2 flex-wrap">
+                                  {member.profiles?.role !== 'admin' && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => updateMemberRole(member.user_id, 'admin')}
+                                    >
+                                      Rendi Admin
+                                    </Button>
+                                  )}
+                                  {member.profiles?.role !== 'treasurer' && (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => updateMemberRole(member.user_id, 'treasurer')}
+                                    >
+                                      Rendi Tesoriere
+                                    </Button>
+                                  )}
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removeMember(member.id)}
+                                  >
+                                    Rimuovi
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Pending Invites */}
+                {pendingInvites.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Mail className="w-5 h-5" />
+                        Inviti Pendenti ({pendingInvites.length})
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Nome</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Ruolo</TableHead>
+                            <TableHead>Scadenza</TableHead>
+                            <TableHead>Azioni</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {pendingInvites.map((invite) => (
+                            <TableRow key={invite.id}>
+                              <TableCell>{invite.first_name} {invite.last_name}</TableCell>
+                              <TableCell>{invite.email}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {invite.role}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{new Date(invite.expires_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => deleteInvite(invite.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
