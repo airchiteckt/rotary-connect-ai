@@ -14,6 +14,7 @@ const translations = {
   it: {
     // Header & Navigation
     'nav.login': 'Accedi alla Piattaforma',
+    'nav.register': 'Registrati',
     'nav.waitingList': 'Entra in Lista d\'Attesa',
     'nav.learnMore': 'Scopri di Più',
     
@@ -107,6 +108,7 @@ const translations = {
   en: {
     // Header & Navigation
     'nav.login': 'Access Platform',
+    'nav.register': 'Register',
     'nav.waitingList': 'Join Waiting List',
     'nav.learnMore': 'Learn More',
     
@@ -200,6 +202,7 @@ const translations = {
   es: {
     // Header & Navigation
     'nav.login': 'Acceder a la Plataforma',
+    'nav.register': 'Registrarse',
     'nav.waitingList': 'Unirse a Lista de Espera',
     'nav.learnMore': 'Saber Más',
     
