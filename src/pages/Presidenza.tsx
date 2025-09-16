@@ -12,7 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PresidencyKanban from '@/components/PresidencyKanban';
 import ProjectForm from '@/components/ProjectForm';
-import ClubInviteManager from '@/components/ClubInviteManager';
 
 export default function Presidenza() {
   const { user, loading } = useAuth();
@@ -206,7 +205,30 @@ export default function Presidenza() {
           </TabsContent>
 
           <TabsContent value="membri" className="space-y-6">
-            <ClubInviteManager />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Gestione Membri
+                </CardTitle>
+                <CardDescription>
+                  La gestione dei membri è ora disponibile nelle impostazioni utente
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Gestione Membri Spostata</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Ora puoi gestire i membri del tuo club direttamente dalle impostazioni del tuo account, 
+                    attivando il piano Premium.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Clicca sul pulsante Impostazioni nella barra superiore per accedere alla gestione completa dell'organizzazione.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="governance" className="space-y-6">

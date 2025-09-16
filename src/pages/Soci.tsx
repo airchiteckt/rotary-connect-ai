@@ -7,16 +7,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Users, Plus, Search, Filter, ArrowLeft, UserPlus, Calendar, Award } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import MemberManager from '@/components/MemberManager';
-import MemberForm from '@/components/MemberForm';
 import { useComingSoonToast } from '@/components/ComingSoonToast';
 import HelpSupport from '@/components/HelpSupport';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Soci() {
   const { user, loading } = useAuth();
   const { showComingSoon } = useComingSoonToast();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('anagrafica');
-  const [isNewMemberFormOpen, setIsNewMemberFormOpen] = useState(false);
   const [memberStats, setMemberStats] = useState({
     active: 0,
     honorary: 0,
@@ -72,7 +71,7 @@ export default function Soci() {
               </div>
             </div>
             
-            <Button onClick={() => setIsNewMemberFormOpen(true)}>
+            <Button onClick={() => toast({ title: "Funzione spostata", description: "La gestione soci è ora nelle impostazioni utente con il piano Premium." })}>
               <UserPlus className="w-4 h-4 mr-2" />
               Nuovo Socio
             </Button>
@@ -127,7 +126,30 @@ export default function Soci() {
             </div>
 
             {/* Members Manager */}
-            <MemberManager onStatsUpdate={setMemberStats} />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Gestione Soci
+                </CardTitle>
+                <CardDescription>
+                  La gestione dei soci è ora disponibile nelle impostazioni utente
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Gestione Soci Spostata</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Per una migliore esperienza utente, la gestione completa dei soci è stata spostata 
+                    nelle impostazioni del tuo account con il piano Premium.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Attiva il piano Premium dalle impostazioni per accedere alla gestione completa dell'organizzazione.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="presenze">
@@ -189,15 +211,6 @@ export default function Soci() {
         </Tabs>
       </main>
 
-      {/* New Member Form */}
-      <MemberForm
-        isOpen={isNewMemberFormOpen}
-        onClose={() => setIsNewMemberFormOpen(false)}
-        member={null}
-        onSuccess={() => {
-          // The member manager will refresh automatically
-        }}
-      />
       
       {/* Help Support Button */}
       <HelpSupport />
