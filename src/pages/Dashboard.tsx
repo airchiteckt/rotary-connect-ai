@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { FileText, Mail, Image, Users, Calendar, Settings, LogOut, Crown, Dollar
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, signOut, checkTrialStatus } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -292,7 +293,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Button className="w-full" variant="outline" onClick={() => window.location.href = item.href}>
+                <Button className="w-full" variant="outline" onClick={() => navigate(item.href)}>
                   Accedi a {item.title}
                 </Button>
               </CardContent>

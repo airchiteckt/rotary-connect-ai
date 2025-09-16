@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +25,7 @@ interface Document {
 
 export default function Segreteria() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('documenti');
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
@@ -214,7 +215,7 @@ export default function Segreteria() {
               </div>
             </div>
             
-            <Button onClick={() => window.location.href = '/create-document'}>
+            <Button onClick={() => navigate('/create-document')}>
               <Plus className="w-4 h-4 mr-2" />
               Nuovo Documento
             </Button>
@@ -270,7 +271,7 @@ export default function Segreteria() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <Button className="w-full" variant="outline" size="sm" onClick={() => window.location.href = `/create-document?type=${type.id}`}>
+                    <Button className="w-full" variant="outline" size="sm" onClick={() => navigate(`/create-document?type=${type.id}`)}>
                       Gestisci
                     </Button>
                   </CardContent>
@@ -315,20 +316,20 @@ export default function Segreteria() {
                           </div>
                         </div>
                          <div className="flex items-center space-x-2">
-                           <Button 
-                             variant="ghost" 
-                             size="sm"
-                             onClick={() => window.location.href = `/document/${doc.id}?tab=preview`}
-                           >
-                             <Eye className="w-4 h-4" />
-                           </Button>
-                           <Button 
-                             variant="ghost" 
-                             size="sm"
-                             onClick={() => window.location.href = `/document/${doc.id}/edit`}
-                           >
-                             <Edit className="w-4 h-4" />
-                           </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => navigate(`/document/${doc.id}?tab=preview`)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => navigate(`/document/${doc.id}/edit`)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
                            <AlertDialog>
                              <AlertDialogTrigger asChild>
                                <Button 
@@ -539,14 +540,14 @@ export default function Segreteria() {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => window.location.href = `/document/${doc.id}?tab=preview`}
+                            onClick={() => navigate(`/document/${doc.id}?tab=preview`)}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => window.location.href = `/document/${doc.id}/edit`}
+                            onClick={() => navigate(`/document/${doc.id}/edit`)}
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -586,7 +587,7 @@ export default function Segreteria() {
           <TabsContent value="impostazioni" className="space-y-6">
             {/* Quick Access Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="cursor-pointer hover:shadow-lg transition-all duration-200" onClick={() => window.location.href = '/recurring-meetings'}>
+              <Card className="cursor-pointer hover:shadow-lg transition-all duration-200" onClick={() => navigate('/recurring-meetings')}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">

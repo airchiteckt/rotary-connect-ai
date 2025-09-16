@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +27,7 @@ interface PositionStats {
 export default function Organigramma() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('struttura');
   const [members, setMembers] = useState<Member[]>([]);
   const [positionStats, setPositionStats] = useState<PositionStats>({
@@ -170,7 +171,7 @@ export default function Organigramma() {
               </div>
             </div>
             
-            <Button onClick={() => window.location.href = '/soci'}>
+            <Button onClick={() => navigate('/soci')}>
               <Plus className="w-4 h-4 mr-2" />
               Gestisci Soci
             </Button>
