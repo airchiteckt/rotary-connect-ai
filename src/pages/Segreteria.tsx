@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Eye, Trash2 } from 'lucide-react';
+import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Eye, Trash2, Mic } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TemplateEditor } from '@/components/TemplateEditor';
+import SegreteriAI from '@/components/SegreteriAI';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Document {
@@ -224,8 +225,12 @@ export default function Segreteria() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="documenti">Documenti</TabsTrigger>
+            <TabsTrigger value="segreteria-ai">
+              <Mic className="w-4 h-4 mr-2" />
+              Segreteria AI
+            </TabsTrigger>
             <TabsTrigger value="templates">Template</TabsTrigger>
             <TabsTrigger value="archivio">Archivio</TabsTrigger>
             <TabsTrigger value="statistiche">Statistiche</TabsTrigger>
@@ -373,6 +378,10 @@ export default function Segreteria() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="segreteria-ai" className="space-y-6">
+            <SegreteriAI />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
