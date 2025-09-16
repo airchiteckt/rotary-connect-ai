@@ -593,6 +593,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string | null
+          bonus_months: number | null
           club_name: string | null
           created_at: string
           default_footer_data: string | null
@@ -602,6 +604,9 @@ export type Database = {
           header_text: string | null
           id: string
           president_name: string | null
+          referral_code: string | null
+          referral_count: number | null
+          referred_by: string | null
           role: string | null
           secretary_name: string | null
           subscription_type: string | null
@@ -610,6 +615,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_status?: string | null
+          bonus_months?: number | null
           club_name?: string | null
           created_at?: string
           default_footer_data?: string | null
@@ -619,6 +626,9 @@ export type Database = {
           header_text?: string | null
           id?: string
           president_name?: string | null
+          referral_code?: string | null
+          referral_count?: number | null
+          referred_by?: string | null
           role?: string | null
           secretary_name?: string | null
           subscription_type?: string | null
@@ -627,6 +637,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_status?: string | null
+          bonus_months?: number | null
           club_name?: string | null
           created_at?: string
           default_footer_data?: string | null
@@ -636,6 +648,9 @@ export type Database = {
           header_text?: string | null
           id?: string
           president_name?: string | null
+          referral_code?: string | null
+          referral_count?: number | null
+          referred_by?: string | null
           role?: string | null
           secretary_name?: string | null
           subscription_type?: string | null
@@ -867,6 +882,10 @@ export type Database = {
         Args: { doc_type: string; user_uuid: string }
         Returns: string
       }
+      generate_referral_code: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       get_district_events_for_month: {
         Args: { target_month?: number; user_uuid: string }
         Returns: {
@@ -875,6 +894,10 @@ export type Database = {
           luogo: string
           nome: string
         }[]
+      }
+      handle_referral_signup: {
+        Args: { new_user_id: string; referral_code_input: string }
+        Returns: boolean
       }
       is_trial_valid: {
         Args: { user_uuid: string }

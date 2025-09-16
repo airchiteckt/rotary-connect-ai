@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
   const { user, signIn, signUp } = useAuth();
@@ -66,19 +67,49 @@ export default function Auth() {
     const password = formData.get('password') as string;
     const full_name = formData.get('full_name') as string;
     const club_name = formData.get('club_name') as string;
+    const referral_code = formData.get('referral_code') as string;
 
-    const { error } = await signUp(email, password, { full_name, club_name });
-    
-    if (error) {
+    try {
+      // Use Supabase directly to get user data for referral handling
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name, club_name }
+        }
+      });
+      
+      if (error) throw error;
+
+      // Handle referral code if provided and user was created
+      if (data?.user && referral_code) {
+        const { data: referralResult } = await supabase.rpc('handle_referral_signup', {
+          new_user_id: data.user.id,
+          referral_code_input: referral_code.toUpperCase()
+        });
+        
+        if (referralResult) {
+          toast({
+            title: "Registrazione completata",
+            description: "Verifica la tua email per attivare l'account. Hai ottenuto 3 mesi bonus con il codice referral!",
+          });
+        } else {
+          toast({
+            title: "Registrazione completata",
+            description: "Verifica la tua email per attivare l'account. Codice referral non valido o già utilizzato.",
+          });
+        }
+      } else {
+        toast({
+          title: "Registrazione completata",
+          description: "Verifica la tua email per attivare l'account. Inizia il tuo mese di prova gratuito!",
+        });
+      }
+    } catch (error: any) {
       toast({
         title: "Errore di registrazione",
         description: error.message,
         variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Registrazione completata",
-        description: "Verifica la tua email per attivare l'account. Inizia il tuo mese di prova gratuito!",
       });
     }
     
@@ -159,6 +190,21 @@ export default function Auth() {
                     placeholder="Nome del tuo club"
                     required
                   />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="referral_code">Codice Referral (opzionale)</Label>
+                  <Input
+                    id="referral_code"
+                    name="referral_code"
+                    type="text"
+                    placeholder="Inserisci il codice di invito"
+                    className="font-mono uppercase"
+                    onChange={(e) => e.target.value = e.target.value.toUpperCase()}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Hai un codice di invito? Ottieni 3 mesi gratuiti aggiuntivi!
+                  </p>
                 </div>
                 
                 <div className="space-y-2">

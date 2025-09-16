@@ -10,7 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, User, Shield, Bell, Palette, Upload, Save } from 'lucide-react';
+import { Settings, User, Shield, Bell, Palette, Upload, Save, CreditCard, Users, Copy, Crown, Gift } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -74,8 +74,19 @@ export default function UserSettings() {
     }
   };
 
+  const totalTrialDays = 30 + ((profile?.bonus_months || 0) * 30);
   const daysRemaining = profile?.trial_start_date ? 
-    Math.max(0, 30 - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
+    Math.max(0, totalTrialDays - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
+  
+  const copyReferralCode = () => {
+    if (profile?.referral_code) {
+      navigator.clipboard.writeText(profile.referral_code);
+      toast({
+        title: "Codice copiato",
+        description: "Il tuo codice referral è stato copiato negli appunti.",
+      });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -113,10 +124,16 @@ export default function UserSettings() {
                 <div className="flex-1">
                   <h3 className="font-semibold">{profile?.full_name}</h3>
                   <p className="text-sm text-muted-foreground">{user?.email}</p>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <Badge variant={daysRemaining > 7 ? "default" : "destructive"}>
                       {daysRemaining} giorni di prova rimasti
                     </Badge>
+                    {profile?.bonus_months > 0 && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <Gift className="w-3 h-3" />
+                        +{profile.bonus_months} mesi bonus
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -205,6 +222,94 @@ export default function UserSettings() {
                 <Badge variant={daysRemaining > 0 ? "default" : "destructive"}>
                   {daysRemaining > 0 ? 'Prova Attiva' : 'Prova Scaduta'}
                 </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subscription */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CreditCard className="w-5 h-5" />
+                Piano di Abbonamento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-sm font-medium">Piano Attuale</span>
+                  <p className="text-xs text-muted-foreground">
+                    {profile?.subscription_type === 'trial' ? 'Prova Gratuita' : 
+                     profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
+                  </p>
+                </div>
+                <Badge variant={profile?.subscription_type === 'active' ? "default" : 
+                              profile?.subscription_type === 'trial' ? "secondary" : "destructive"}>
+                  {profile?.subscription_type === 'active' && <Crown className="w-3 h-3 mr-1" />}
+                  {profile?.subscription_type === 'trial' ? 'Prova' : 
+                   profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
+                </Badge>
+              </div>
+              
+              {profile?.subscription_type !== 'active' && (
+                <Button 
+                  className="w-full" 
+                  onClick={() => toast({ title: "Funzione in arrivo", description: "Il pagamento sarà disponibile presto." })}
+                >
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Passa a Premium - €29.90/mese
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Referral System */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Users className="w-5 h-5" />
+                Sistema Referral
+              </CardTitle>
+              <CardDescription>
+                Invita altri club e ottieni 3 mesi gratis per ogni invito (max 4 inviti)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Il tuo codice referral</Label>
+                <div className="flex gap-2">
+                  <Input 
+                    value={profile?.referral_code || ''} 
+                    readOnly 
+                    className="font-mono"
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="outline"
+                    onClick={copyReferralCode}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {profile?.referral_count || 0}/4
+                  </div>
+                  <div className="text-sm text-muted-foreground">Inviti utilizzati</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {profile?.bonus_months || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Mesi bonus ottenuti</div>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                Condividi il tuo codice con altri club. Quando si iscriveranno, entrambi otterrete 3 mesi gratuiti!
               </div>
             </CardContent>
           </Card>
