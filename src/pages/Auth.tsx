@@ -102,8 +102,9 @@ export default function Auth() {
         
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-1">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" className="w-full">{t('auth.login')}</TabsTrigger>
+              <TabsTrigger value="signup" className="w-full">{t('auth.register')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -133,17 +134,62 @@ export default function Auth() {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? t('auth.loggingIn') : t('auth.login')}
                 </Button>
-                
-                <div className="text-center pt-4">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {t('auth.noAccount')}
-                  </p>
-                  <Button variant="outline" asChild className="w-full">
-                    <a href="/#waiting-list">
-                      {t('auth.joinWaitingList')}
-                    </a>
-                  </Button>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="full_name">Nome Completo</Label>
+                  <Input
+                    id="full_name"
+                    name="full_name"
+                    type="text"
+                    placeholder="Il tuo nome completo"
+                    required
+                  />
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="club_name">Nome Club</Label>
+                  <Input
+                    id="club_name"
+                    name="club_name"
+                    type="text"
+                    placeholder="Nome del tuo club"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signup_email">{t('auth.email')}</Label>
+                  <Input
+                    id="signup_email"
+                    name="email"
+                    type="email"
+                    placeholder={t('auth.emailPlaceholder')}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signup_password">{t('auth.password')}</Label>
+                  <Input
+                    id="signup_password"
+                    name="password"
+                    type="password"
+                    placeholder={t('auth.passwordPlaceholder')}
+                    required
+                  />
+                </div>
+                
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Registrazione...' : 'Registrati - Prova Gratuita 30 giorni'}
+                </Button>
+                
+                <p className="text-xs text-center text-muted-foreground">
+                  Registrandoti accetti i nostri termini di servizio e la privacy policy
+                </p>
               </form>
             </TabsContent>
             

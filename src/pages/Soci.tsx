@@ -9,9 +9,12 @@ import { Users, Plus, Search, Filter, ArrowLeft, UserPlus, Calendar, Award } fro
 import { Input } from '@/components/ui/input';
 import MemberManager from '@/components/MemberManager';
 import MemberForm from '@/components/MemberForm';
+import { useComingSoonToast } from '@/components/ComingSoonToast';
+import HelpSupport from '@/components/HelpSupport';
 
 export default function Soci() {
   const { user, loading } = useAuth();
+  const { showComingSoon } = useComingSoonToast();
   const [activeTab, setActiveTab] = useState('anagrafica');
   const [isNewMemberFormOpen, setIsNewMemberFormOpen] = useState(false);
   const [memberStats, setMemberStats] = useState({
@@ -136,10 +139,11 @@ export default function Soci() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Sistema Presenze", "Presto potrai tracciare le presenze automaticamente")}>
                   <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Sistema presenze in preparazione</p>
                   <p className="text-sm">Presto potrai tracciare le presenze automaticamente</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -154,10 +158,11 @@ export default function Soci() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Gestione Quote", "Sistema di pagamenti in preparazione")}>
                   <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Gestione quote in arrivo</p>
                   <p className="text-sm">Sistema di pagamenti in preparazione</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -172,10 +177,11 @@ export default function Soci() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Sistema Riconoscimenti", "Traccia premi e distintivi dei soci")}>
                   <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Sistema riconoscimenti in arrivo</p>
                   <p className="text-sm">Traccia premi e distintivi dei soci</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -192,6 +198,9 @@ export default function Soci() {
           // The member manager will refresh automatically
         }}
       />
+      
+      {/* Help Support Button */}
+      <HelpSupport />
     </div>
   );
 }

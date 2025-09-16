@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Mail, Image, Users, Calendar, Settings, LogOut, Crown, DollarSign, Shield, UserCheck, Megaphone, Building } from 'lucide-react';
+import UserSettings from '@/components/UserSettings';
+import HelpSupport from '@/components/HelpSupport';
 
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, signOut, checkTrialStatus } = useAuth();
@@ -165,6 +167,7 @@ export default function Dashboard() {
                 <p className="font-medium text-sm truncate max-w-[120px]">{profile?.full_name}</p>
                 <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
               </div>
+              <UserSettings />
               <Button variant="ghost" size="sm" onClick={() => {
                 signOut();
                 toast({
@@ -316,6 +319,9 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </main>
+      
+      {/* Help Support Button */}
+      <HelpSupport />
     </div>
   );
 }

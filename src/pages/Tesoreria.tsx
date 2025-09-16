@@ -13,6 +13,8 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import TransactionDialog from '@/components/TransactionDialog';
 import MemberFeesManager from '@/components/MemberFeesManager';
+import { useComingSoonToast } from '@/components/ComingSoonToast';
+import HelpSupport from '@/components/HelpSupport';
 
 interface Transaction {
   id: string;
@@ -61,6 +63,7 @@ interface FinancialStats {
 export default function Tesoreria() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const { showComingSoon } = useComingSoonToast();
   const [activeTab, setActiveTab] = useState('bilancio');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [memberFees, setMemberFees] = useState<MemberFee[]>([]);
@@ -524,10 +527,11 @@ export default function Tesoreria() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Funzionalità Budget", "Gestisci i budget per progetti e attività del club")}>
                   <PieChart className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Funzionalità di budget in arrivo</p>
                   <p className="text-sm">Gestisci i budget per progetti e attività del club</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>

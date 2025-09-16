@@ -8,9 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Megaphone, Plus, Search, Filter, ArrowLeft, Image, Share2, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { FlyerGenerator } from '@/components/FlyerGenerator';
+import { useComingSoonToast } from '@/components/ComingSoonToast';
+import HelpSupport from '@/components/HelpSupport';
 
 export default function Comunicazione() {
   const { user, loading } = useAuth();
+  const { showComingSoon } = useComingSoonToast();
   const [activeTab, setActiveTab] = useState('locandine');
 
   if (loading) {
@@ -155,10 +158,11 @@ export default function Comunicazione() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Calendario Social", "Presto potrai pianificare i tuoi post sui social media")}>
                   <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Calendario social in preparazione</p>
                   <p className="text-sm">Presto potrai pianificare i tuoi post</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -173,10 +177,11 @@ export default function Comunicazione() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Sistema Newsletter", "Strumenti di email marketing per comunicare con i soci")}>
                   <Megaphone className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Sistema newsletter in arrivo</p>
                   <p className="text-sm">Strumenti di email marketing in preparazione</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -191,16 +196,20 @@ export default function Comunicazione() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Analytics Comunicazione", "Metriche di performance per i tuoi contenuti")}>
                   <Share2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Analytics in preparazione</p>
                   <p className="text-sm">Le metriche di performance appariranno qui</p>
+                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </main>
+      
+      {/* Help Support Button */}
+      <HelpSupport />
     </div>
   );
 }
