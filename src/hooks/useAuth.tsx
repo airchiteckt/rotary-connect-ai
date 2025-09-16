@@ -114,11 +114,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setIsTrialValid(false);
+    try {
+      // Clear local state first to ensure UI updates immediately
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setIsTrialValid(false);
+      
+      // Then attempt to sign out from Supabase
+      await supabase.auth.signOut();
+    } catch (error) {
+      // Even if signOut fails, we still want to clear the local state
+      console.error('Error during sign out:', error);
+      // Force clear the session from localStorage as fallback
+      localStorage.removeItem('sb-ajgyrhddxljfauwneput-auth-token');
+    }
   };
 
   const value = {
