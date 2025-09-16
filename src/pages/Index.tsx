@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight, Maximize2 } from 'lucide-react';
-import WaitingListForm from '@/components/WaitingListForm';
+
 import Footer from '@/components/Footer';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -100,18 +100,20 @@ const Index = () => {
           
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 max-w-md sm:max-w-2xl mx-auto">
             <Button asChild size="lg" className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto bg-primary hover:bg-primary/90">
-              <a href="#waiting-list">
-                {t('nav.waitingList')}
+              <Link to="/auth?tab=signup">
+                {t('nav.register')}
                 <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
-              </a>
+              </Link>
             </Button>
             <Button 
+              asChild
               variant="outline" 
               size="lg" 
               className="text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto"
-              onClick={() => document.getElementById('screenshots')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              {t('nav.learnMore')}
+              <Link to="/auth?tab=signin">
+                {t('nav.login')}
+              </Link>
             </Button>
           </div>
         </div>
@@ -277,22 +279,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Waiting List Section */}
-      <section id="waiting-list" className="w-full py-8 sm:py-12 lg:py-16 bg-muted/30">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4">{t('waitingList.title')}</h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-2 leading-relaxed">
-              <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5 flex-shrink-0" />
-              <span>{t('waitingList.subtitle')}</span>
-            </p>
-          </div>
-          
-          <div className="flex justify-center">
-            <WaitingListForm />
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="w-full py-8 sm:py-12 lg:py-16">
