@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PresidencyKanban from '@/components/PresidencyKanban';
 import ProjectForm from '@/components/ProjectForm';
+import ClubInviteManager from '@/components/ClubInviteManager';
 
 export default function Presidenza() {
   const { user, loading } = useAuth();
@@ -147,8 +148,9 @@ export default function Presidenza() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="progetti">Progetti</TabsTrigger>
+            <TabsTrigger value="membri">Membri</TabsTrigger>
             <TabsTrigger value="governance">Governance</TabsTrigger>
             <TabsTrigger value="pianificazione">Pianificazione</TabsTrigger>
             <TabsTrigger value="commissioni">Commissioni</TabsTrigger>
@@ -201,6 +203,10 @@ export default function Presidenza() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="membri" className="space-y-6">
+            <ClubInviteManager />
           </TabsContent>
 
           <TabsContent value="governance" className="space-y-6">

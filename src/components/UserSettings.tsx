@@ -26,6 +26,8 @@ export default function UserSettings() {
     phone: profile?.phone || '',
     address: profile?.address || ''
   });
+  const [memberCount, setMemberCount] = useState(1);
+  const [monthlyPrice, setMonthlyPrice] = useState(15);
 
   useEffect(() => {
     if (profile) {
@@ -36,8 +38,31 @@ export default function UserSettings() {
         phone: profile.phone || '',
         address: profile.address || ''
       });
+      loadMemberCount();
     }
   }, [profile]);
+
+  const loadMemberCount = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .rpc('get_club_member_count', { club_owner_uuid: user.id });
+
+      if (error) throw error;
+      const count = data || 1;
+      setMemberCount(count);
+
+      // Calculate price
+      const { data: priceData, error: priceError } = await supabase
+        .rpc('calculate_club_price', { member_count: count });
+
+      if (priceError) throw priceError;
+      setMonthlyPrice(priceData || 15);
+    } catch (error) {
+      console.error('Error loading member count:', error);
+    }
+  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -250,6 +275,34 @@ export default function UserSettings() {
                    profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
                 </Badge>
               </div>
+
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-sm font-medium">Membri del Club</span>
+                  <p className="text-xs text-muted-foreground">
+                    Membri attivi nel tuo club
+                  </p>
+                </div>
+                <Badge variant="outline">{memberCount}</Badge>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="text-sm font-medium">Costo Mensile</span>
+                  <p className="text-xs text-muted-foreground">
+                    Basato sul numero di membri
+                  </p>
+                </div>
+                <Badge variant="default">€{monthlyPrice}/mese</Badge>
+              </div>
+
+              <div className="text-xs text-muted-foreground p-3 bg-muted rounded-lg">
+                <p><strong>Piano tariffario:</strong></p>
+                <p>• Fino a 20 membri: €15/mese</p>
+                <p>• Fino a 30 membri: €25/mese</p> 
+                <p>• Fino a 50 membri: €35/mese</p>
+                <p>• Oltre 50 membri: €50/mese</p>
+              </div>
               
               {profile?.subscription_type !== 'active' && (
                 <Button 
@@ -257,7 +310,7 @@ export default function UserSettings() {
                   onClick={() => toast({ title: "Funzione in arrivo", description: "Il pagamento sarà disponibile presto." })}
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
-                  Passa a Premium - €29.90/mese
+                  Passa a Premium - €{monthlyPrice}/mese
                 </Button>
               )}
             </CardContent>

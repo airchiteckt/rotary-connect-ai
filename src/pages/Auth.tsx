@@ -193,18 +193,25 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="referral_code">Codice Referral (opzionale)</Label>
+                  <Label htmlFor="referral_code" className="text-green-700 font-medium">
+                    🎁 Codice Referral (opzionale)
+                  </Label>
                   <Input
                     id="referral_code"
                     name="referral_code"
                     type="text"
                     placeholder="Inserisci il codice di invito"
-                    className="font-mono uppercase"
+                    className="font-mono uppercase border-green-200 focus:border-green-400 bg-green-50"
                     onChange={(e) => e.target.value = e.target.value.toUpperCase()}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Hai un codice di invito? Ottieni 3 mesi gratuiti aggiuntivi!
-                  </p>
+                  <div className="bg-green-100 border border-green-200 rounded-lg p-2">
+                    <p className="text-xs text-green-700 font-medium flex items-center gap-1">
+                      💡 <strong>Bonus speciale:</strong> Con un codice referral ottieni 3 mesi gratuiti aggiuntivi!
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      Il club che ti ha invitato riceverà anche 3 mesi bonus.
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
