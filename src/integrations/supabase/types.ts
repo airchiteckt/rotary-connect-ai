@@ -59,6 +59,81 @@ export type Database = {
         }
         Relationships: []
       }
+      club_invites: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          first_name: string
+          id: string
+          invite_token: string
+          last_name: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          first_name: string
+          id?: string
+          invite_token: string
+          last_name: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          first_name?: string
+          id?: string
+          invite_token?: string
+          last_name?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      club_members: {
+        Row: {
+          club_owner_id: string
+          created_at: string
+          id: string
+          joined_at: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          club_owner_id: string
+          created_at?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          club_owner_id?: string
+          created_at?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       commissions: {
         Row: {
           created_at: string
@@ -869,6 +944,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_club_invite: {
+        Args: { invite_token_param: string }
+        Returns: boolean
+      }
+      calculate_club_price: {
+        Args: { member_count: number }
+        Returns: number
+      }
       calculate_next_meeting_dates: {
         Args: { months_ahead?: number; user_uuid: string }
         Returns: {
@@ -882,9 +965,17 @@ export type Database = {
         Args: { doc_type: string; user_uuid: string }
         Returns: string
       }
+      generate_invite_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       generate_referral_code: {
         Args: { user_uuid: string }
         Returns: string
+      }
+      get_club_member_count: {
+        Args: { club_owner_uuid: string }
+        Returns: number
       }
       get_district_events_for_month: {
         Args: { target_month?: number; user_uuid: string }
