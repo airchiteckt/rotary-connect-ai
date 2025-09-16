@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, User, Shield, Bell, Palette, Upload, Save, CreditCard, Users, Copy, Crown, Gift, UserPlus, Mail, Clock, CheckCircle, XCircle, Trash2, Edit, History, Calendar } from 'lucide-react';
+import { Settings, User, Shield, Bell, Palette, Upload, Save, CreditCard, Users, Copy, Crown, Gift, UserPlus, Mail, Clock, CheckCircle, XCircle, Trash2, Edit, History, Calendar, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -86,25 +86,31 @@ export default function UserSettings() {
     if (!user) return;
 
     try {
-      // Load club members
-      const { data: members, error: membersError } = await supabase
+      // Load club members from club_members table
+      const { data: clubMembersData, error: membersError } = await supabase
         .from('club_members')
-        .select(`
-          id,
-          user_id,
-          role,
-          status,
-          joined_at,
-          profiles (
-            full_name,
-            role
-          )
-        `)
+        .select('id, user_id, role, status, joined_at')
         .eq('club_owner_id', user.id)
         .eq('status', 'active');
 
       if (membersError) throw membersError;
-      setClubMembers(members || []);
+
+      // Get profile data for each member
+      const membersWithProfiles = [];
+      for (const member of clubMembersData || []) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, role')
+          .eq('user_id', member.user_id)
+          .single();
+
+        membersWithProfiles.push({
+          ...member,
+          profiles: profile || { full_name: 'Nome non disponibile', role: 'member' }
+        });
+      }
+
+      setClubMembers(membersWithProfiles);
 
       // Load pending invites
       const { data: invites, error: invitesError } = await supabase
@@ -683,6 +689,27 @@ export default function UserSettings() {
                       Per ottenere i permessi di amministratore, contatta un amministratore esistente del club.
                     </p>
                   </div>
+                  
+                  {profile?.club_slug && (
+                    <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Pagina Pubblica del Club</h4>
+                      <p className="text-sm text-blue-800 mb-3">
+                        Il tuo club ha una pagina pubblica accessibile a tutti:
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <code className="text-sm bg-white px-2 py-1 rounded border">
+                          fastclub.it/club/{profile.club_slug}
+                        </code>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => window.open(`/club/${profile.club_slug}`, '_blank')}
+                        >
+                          Visualizza
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -699,7 +726,7 @@ export default function UserSettings() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div className="text-center p-4 bg-white rounded-lg">
                         <div className="text-2xl font-bold text-green-600">{clubMembers.length}</div>
                         <div className="text-sm text-muted-foreground">Membri Attivi</div>
@@ -709,6 +736,46 @@ export default function UserSettings() {
                         <div className="text-sm text-muted-foreground">Inviti Pendenti</div>
                       </div>
                     </div>
+
+                    {/* Public Club Page Link */}
+                    {profile?.club_slug && (
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                          <Globe className="w-4 h-4" />
+                          Pagina Pubblica del Club
+                        </h4>
+                        <p className="text-sm text-blue-800 mb-3">
+                          Il tuo club ha una pagina pubblica accessibile a tutti. Condividila per far conoscere la vostra organizzazione!
+                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <code className="text-sm bg-white px-3 py-2 rounded border flex-1 min-w-0">
+                            fastclub.it/club/{profile.club_slug}
+                          </code>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => window.open(`/club/${profile.club_slug}`, '_blank')}
+                          >
+                            <Globe className="w-4 h-4 mr-1" />
+                            Visualizza
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/club/${profile.club_slug}`);
+                              toast({
+                                title: "URL copiato!",
+                                description: "Il link della pagina pubblica è stato copiato negli appunti.",
+                              });
+                            }}
+                          >
+                            <Copy className="w-4 h-4 mr-1" />
+                            Copia
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 

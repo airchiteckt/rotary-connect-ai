@@ -671,6 +671,7 @@ export type Database = {
           account_status: string | null
           bonus_months: number | null
           club_name: string | null
+          club_slug: string | null
           created_at: string
           default_footer_data: string | null
           default_location: string | null
@@ -693,6 +694,7 @@ export type Database = {
           account_status?: string | null
           bonus_months?: number | null
           club_name?: string | null
+          club_slug?: string | null
           created_at?: string
           default_footer_data?: string | null
           default_location?: string | null
@@ -715,6 +717,7 @@ export type Database = {
           account_status?: string | null
           bonus_months?: number | null
           club_name?: string | null
+          club_slug?: string | null
           created_at?: string
           default_footer_data?: string | null
           default_location?: string | null
@@ -960,6 +963,10 @@ export type Database = {
           meeting_time: string
           meeting_type: string
         }[]
+      }
+      generate_club_slug: {
+        Args: { club_name_input: string }
+        Returns: string
       }
       generate_document_number: {
         Args: { doc_type: string; user_uuid: string }
