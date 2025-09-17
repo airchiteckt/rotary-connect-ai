@@ -269,7 +269,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send emails (Resend supports bulk sending)
     const emailResponse = await resend.emails.send({
-      from: type === 'support' ? "FastClub Support <info@fastclub.it>" : "FastClub <onboarding@resend.dev>",
+      from: "FastClub <info@fastclub.it>",
       to: recipients,
       subject: emailSubject,
       html: emailHtml,
