@@ -242,9 +242,16 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if RESEND_API_KEY is available
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY environment variable is not set');
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+
     const { type, to, subject, data = {} }: EmailRequest = await req.json();
 
-    console.log('Sending email:', { type, to: Array.isArray(to) ? `${to.length} recipients` : to });
+    console.log('Received email request:', { type, to: Array.isArray(to) ? `${to.length} recipients` : to, data });
 
     if (!type || !to) {
       throw new Error('Missing required fields: type and to');
@@ -262,7 +269,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send emails (Resend supports bulk sending)
     const emailResponse = await resend.emails.send({
-      from: type === 'support' ? "FastClub Support <info@fastclub.it>" : "FastClub <noreply@fastclub.lovableproject.com>",
+      from: type === 'support' ? "FastClub Support <info@fastclub.it>" : "FastClub <onboarding@resend.dev>",
       to: recipients,
       subject: emailSubject,
       html: emailHtml,

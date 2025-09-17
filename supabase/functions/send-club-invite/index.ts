@@ -51,22 +51,28 @@ serve(async (req) => {
     console.log('Owner profile:', ownerProfile);
 
     // Call the send-email function to send the club invite email
-    const { error: emailError } = await supabase.functions.invoke('send-email', {
-      body: {
-        type: 'clubInvite',
-        to: invite.email,
-        data: {
-          firstName: invite.first_name,
-          lastName: invite.last_name,
-          email: invite.email,
-          clubName: ownerProfile.club_name,
-          inviterName: ownerProfile.full_name,
-          role: invite.role,
-          expiresAt: invite.expires_at,
-          registrationUrl: `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://fastclub.it'}/auth?invite=${invite.invite_token}`
-        }
+    const emailPayload = {
+      type: 'clubInvite',
+      to: invite.email,
+      data: {
+        firstName: invite.first_name,
+        lastName: invite.last_name,
+        email: invite.email,
+        clubName: ownerProfile.club_name,
+        inviterName: ownerProfile.full_name,
+        role: invite.role,
+        expiresAt: invite.expires_at,
+        registrationUrl: `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://fastclub.it'}/auth?invite=${invite.invite_token}`
       }
+    };
+
+    console.log('Calling send-email with payload:', emailPayload);
+
+    const { data: emailData, error: emailError } = await supabase.functions.invoke('send-email', {
+      body: emailPayload
     });
+
+    console.log('Email function response:', { emailData, emailError });
 
     if (emailError) {
       console.error('Error sending email:', emailError);
