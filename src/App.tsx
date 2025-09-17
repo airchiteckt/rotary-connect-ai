@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index.tsx";
@@ -35,7 +35,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <Suspense fallback={<div className="p-6 text-muted-foreground">Caricamento...</div>}>
-            <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -53,11 +53,11 @@ const App = () => (
               <Route path="/document/:id" element={<CreateDocument />} />
               <Route path="/document/:id/edit" element={<CreateDocument />} />
               <Route path="/recurring-meetings" element={<RecurringMeetingsSettings />} />
-              <Route path="/club/:clubSlug" element={<SimpleTestClub />} />
+              <Route path="/club/:clubSlug" element={<ClubPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
-            </HashRouter>
+            </BrowserRouter>
           </Suspense>
         </TooltipProvider>
       </AuthProvider>
