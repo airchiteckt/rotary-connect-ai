@@ -22,7 +22,7 @@ import { type AppSection } from '@/hooks/usePermissions';
 import PublicPageManager from '@/components/PublicPageManager';
 
 export default function UserSettings() {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isTrialValid } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,9 +59,9 @@ export default function UserSettings() {
         phone: profile.phone || '',
         address: profile.address || ''
       });
-      setIsPremium(profile.subscription_type === 'active');
+      setIsPremium(profile.subscription_type === 'active' || isTrialValid);
       loadMemberCount();
-      if (profile.subscription_type === 'active') {
+      if (profile.subscription_type === 'active' || isTrialValid) {
         loadOrganizationData();
       }
     }
