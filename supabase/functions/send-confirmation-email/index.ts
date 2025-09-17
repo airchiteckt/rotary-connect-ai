@@ -107,7 +107,7 @@ const handler = async (req: Request): Promise<Response> => {
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "FastClub <noreply@fastclub.it>",
+      from: "FastClub <info@fastclub.it>",
       to: user.email,
       subject: "Conferma la tua registrazione su FastClub",
       html: emailHtml,
