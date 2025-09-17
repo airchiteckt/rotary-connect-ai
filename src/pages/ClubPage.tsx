@@ -85,7 +85,13 @@ export default function ClubPage() {
         if (profileError.code === 'PGRST116') {
           setNotFound(true);
         }
-        throw profileError;
+        console.error('Profile error:', profileError);
+        return;
+      }
+
+      if (!profile) {
+        setNotFound(true);
+        return;
       }
 
       setClubProfile(profile);
