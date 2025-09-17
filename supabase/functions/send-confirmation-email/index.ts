@@ -50,7 +50,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Processing confirmation email for:', user.email);
 
-    const confirmationUrl = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`;
+    const confirmationUrl = `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent('https://da165ecc-c493-49d4-a70d-8103c465b89e.lovableproject.com/dashboard')}`;
     const firstName = user.user_metadata?.full_name?.split(' ')[0] || 'Utente';
 
     const emailHtml = `
