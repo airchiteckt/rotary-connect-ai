@@ -14,8 +14,7 @@ export const translations = {
   it: {
     // Header & Navigation
     'nav.login': 'Accedi alla Piattaforma',
-    'nav.register': 'Registrati',
-    'nav.waitingList': 'Entra in Lista d\'Attesa',
+    'nav.register': 'Registrati Gratis',
     'nav.learnMore': 'Scopri di Più',
     
     // Hero Section
@@ -54,10 +53,6 @@ export const translations = {
     'screenshots.members.title': 'Gestione Soci',
     'screenshots.members.desc': 'Anagrafica completa, presenze, quote sociali e riconoscimenti membri',
     
-    // Waiting List
-    'waitingList.title': 'Lista d\'Attesa',
-    'waitingList.subtitle': 'Siamo in fase di test limitato. Iscriviti per essere tra i primi ad accedere!',
-    
     // Pricing
     'pricing.title': 'Scegli il Piano Perfetto per il tuo Club',
     'pricing.subtitle': 'Inizia gratis per 30 giorni, senza carta di credito richiesta',
@@ -95,7 +90,7 @@ export const translations = {
     
     // Auth Page
     'auth.title': 'FastClub',
-    'auth.description': 'Siamo attualmente in fase di testing con accesso limitato. Se hai già un account puoi accedere, altrimenti iscriviti alla lista d\'attesa.',
+    'auth.description': 'Inizia subito con FastClub - La piattaforma AI per la gestione completa del tuo club. Registrati per 30 giorni di prova gratuita.',
     'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.emailPlaceholder': 'nome@esempio.it',
@@ -104,43 +99,20 @@ export const translations = {
     'auth.register': 'Registrati',
     'auth.loggingIn': 'Accesso in corso...',
     'auth.noAccount': 'Non hai ancora un account?',
-    'auth.joinWaitingList': 'Iscriviti alla Lista d\'Attesa',
+    'auth.hasAccount': 'Hai già un account?',
+    'auth.signUp': 'Crea il tuo account',
+    'auth.signIn': 'Accedi al tuo account',
     
     // Footer
     'footer.email': 'Email:',
     'footer.copyright': '© 2024',
     'footer.allRights': 'Tutti i diritti riservati.',
-
-    // Waiting List Form
-    'form.title': 'Entra in Lista d\'Attesa',
-    'form.subtitle': 'Sii tra i primi a scoprire',
-    'form.subtitleSuffix': 'quando sarà disponibile',
-    'form.firstName': 'Nome',
-    'form.lastName': 'Cognome',
-    'form.clubName': 'Nome Club/Associazione',
-    'form.city': 'Città',
-    'form.email': 'Email',
-    'form.firstNamePlaceholder': 'Il tuo nome',
-    'form.lastNamePlaceholder': 'Il tuo cognome',
-    'form.clubNamePlaceholder': 'Nome del tuo club o associazione',
-    'form.cityPlaceholder': 'La tua città',
-    'form.emailPlaceholder': 'la.tua.email@esempio.com',
-    'form.submit': 'Entra in Lista d\'Attesa',
-    'form.submitting': 'Registrazione...',
-    'form.required': '* Campi obbligatori. La tua email non sarà condivisa con terzi.',
-    'form.success.title': 'Registrazione Completata!',
-    'form.success.message': 'Grazie per il tuo interesse. Ti contatteremo presto con tutti i dettagli di',
-    'form.error.allFields': 'Tutti i campi sono obbligatori',
-    'form.error.emailExists': 'Questa email è già registrata nella waiting list',
-    'form.error.generic': 'Errore durante la registrazione. Riprova più tardi.',
-    'form.success.toast': 'Registrazione completata! Controlla la tua email per il messaggio di benvenuto.',
   },
   
   en: {
     // Header & Navigation
     'nav.login': 'Access Platform',
-    'nav.register': 'Register',
-    'nav.waitingList': 'Join Waiting List',
+    'nav.register': 'Register Free',
     'nav.learnMore': 'Learn More',
     
     // Hero Section
@@ -179,10 +151,6 @@ export const translations = {
     'screenshots.members.title': 'Member Management',
     'screenshots.members.desc': 'Complete registry, attendance, membership fees and member recognition',
     
-    // Waiting List
-    'waitingList.title': 'Waiting List',
-    'waitingList.subtitle': 'We are in limited testing phase. Sign up to be among the first to access!',
-    
     // Pricing
     'pricing.title': 'Choose the Perfect Plan for Your Club',
     'pricing.subtitle': 'Start free for 30 days, no credit card required',
@@ -220,7 +188,7 @@ export const translations = {
     
     // Auth Page
     'auth.title': 'FastClub',
-    'auth.description': 'We are currently in limited access testing phase. If you already have an account you can log in, otherwise join the waiting list.',
+    'auth.description': 'Get started with FastClub - The AI platform for complete club management. Sign up for a 30-day free trial.',
     'auth.email': 'Email',
     'auth.password': 'Password',
     'auth.emailPlaceholder': 'name@example.com',
@@ -229,43 +197,20 @@ export const translations = {
     'auth.register': 'Register',
     'auth.loggingIn': 'Logging in...',
     'auth.noAccount': 'Don\'t have an account yet?',
-    'auth.joinWaitingList': 'Join the Waiting List',
+    'auth.hasAccount': 'Already have an account?',
+    'auth.signUp': 'Create your account',
+    'auth.signIn': 'Sign in to your account',
     
     // Footer
     'footer.email': 'Email:',
     'footer.copyright': '© 2024',
     'footer.allRights': 'All rights reserved.',
-
-    // Waiting List Form
-    'form.title': 'Join Waiting List',
-    'form.subtitle': 'Be among the first to discover',
-    'form.subtitleSuffix': 'when it\'s available',
-    'form.firstName': 'First Name',
-    'form.lastName': 'Last Name',
-    'form.clubName': 'Club/Association Name',
-    'form.city': 'City',
-    'form.email': 'Email',
-    'form.firstNamePlaceholder': 'Your first name',
-    'form.lastNamePlaceholder': 'Your last name',
-    'form.clubNamePlaceholder': 'Your club or association name',
-    'form.cityPlaceholder': 'Your city',
-    'form.emailPlaceholder': 'your.email@example.com',
-    'form.submit': 'Join Waiting List',
-    'form.submitting': 'Submitting...',
-    'form.required': '* Required fields. Your email will not be shared with third parties.',
-    'form.success.title': 'Registration Complete!',
-    'form.success.message': 'Thank you for your interest. We\'ll contact you soon with all the details about',
-    'form.error.allFields': 'All fields are required',
-    'form.error.emailExists': 'This email is already registered in the waiting list',
-    'form.error.generic': 'Error during registration. Please try again later.',
-    'form.success.toast': 'Registration complete! Check your email for the welcome message.',
   },
   
   es: {
     // Header & Navigation
     'nav.login': 'Acceder a la Plataforma',
-    'nav.register': 'Registrarse',
-    'nav.waitingList': 'Unirse a Lista de Espera',
+    'nav.register': 'Registrarse Gratis',
     'nav.learnMore': 'Saber Más',
     
     // Hero Section
@@ -304,10 +249,6 @@ export const translations = {
     'screenshots.members.title': 'Gestión de Socios',
     'screenshots.members.desc': 'Registro completo, asistencia, cuotas de membresía y reconocimiento de miembros',
     
-    // Waiting List
-    'waitingList.title': 'Lista de Espera',
-    'waitingList.subtitle': '¡Estamos en fase de pruebas limitadas. Regístrate para estar entre los primeros en acceder!',
-    
     // Pricing
     'pricing.title': 'Elige el Plan Perfecto para tu Club',
     'pricing.subtitle': 'Comienza gratis por 30 días, sin tarjeta de crédito requerida',
@@ -345,7 +286,7 @@ export const translations = {
     
     // Auth Page
     'auth.title': 'FastClub',
-    'auth.description': 'Actualmente estamos en fase de pruebas con acceso limitado. Si ya tienes una cuenta puedes acceder, de lo contrario únete a la lista de espera.',
+    'auth.description': 'Comienza con FastClub - La plataforma AI para la gestión completa de tu club. Regístrate para una prueba gratuita de 30 días.',
     'auth.email': 'Email',
     'auth.password': 'Contraseña',
     'auth.emailPlaceholder': 'nombre@ejemplo.com',
@@ -354,36 +295,14 @@ export const translations = {
     'auth.register': 'Registrarse',
     'auth.loggingIn': 'Accediendo...',
     'auth.noAccount': '¿No tienes cuenta aún?',
-    'auth.joinWaitingList': 'Unirse a la Lista de Espera',
+    'auth.hasAccount': '¿Ya tienes una cuenta?',
+    'auth.signUp': 'Crea tu cuenta',
+    'auth.signIn': 'Inicia sesión en tu cuenta',
     
     // Footer
     'footer.email': 'Email:',
     'footer.copyright': '© 2024',
     'footer.allRights': 'Todos los derechos reservados.',
-
-    // Waiting List Form
-    'form.title': 'Unirse a Lista de Espera',
-    'form.subtitle': 'Sé uno de los primeros en descubrir',
-    'form.subtitleSuffix': 'cuando esté disponible',
-    'form.firstName': 'Nombre',
-    'form.lastName': 'Apellido',
-    'form.clubName': 'Nombre del Club/Asociación',
-    'form.city': 'Ciudad',
-    'form.email': 'Email',
-    'form.firstNamePlaceholder': 'Tu nombre',
-    'form.lastNamePlaceholder': 'Tu apellido',
-    'form.clubNamePlaceholder': 'Nombre de tu club o asociación',
-    'form.cityPlaceholder': 'Tu ciudad',
-    'form.emailPlaceholder': 'tu.email@ejemplo.com',
-    'form.submit': 'Unirse a Lista de Espera',
-    'form.submitting': 'Enviando...',
-    'form.required': '* Campos obligatorios. Tu email no será compartido con terceros.',
-    'form.success.title': '¡Registro Completado!',
-    'form.success.message': 'Gracias por tu interés. Te contactaremos pronto con todos los detalles de',
-    'form.error.allFields': 'Todos los campos son obligatorios',
-    'form.error.emailExists': 'Este email ya está registrado en la lista de espera',
-    'form.error.generic': 'Error durante el registro. Inténtalo de nuevo más tarde.',
-    'form.success.toast': '¡Registro completado! Revisa tu email para el mensaje de bienvenida.',
   }
 };
 
