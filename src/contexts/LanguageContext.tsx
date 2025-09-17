@@ -10,7 +10,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const translations = {
+export const translations = {
   it: {
     // Header & Navigation
     'nav.login': 'Accedi alla Piattaforma',
@@ -58,6 +58,35 @@ const translations = {
     'waitingList.title': 'Lista d\'Attesa',
     'waitingList.subtitle': 'Siamo in fase di test limitato. Iscriviti per essere tra i primi ad accedere!',
     
+    // Pricing
+    'pricing.title': 'Scegli il Piano Perfetto per il tuo Club',
+    'pricing.subtitle': 'Inizia gratis per 30 giorni, senza carta di credito richiesta',
+    'pricing.free.title': 'Prova Gratuita',
+    'pricing.free.price': 'Gratuito',
+    'pricing.free.duration': '30 giorni',
+    'pricing.free.features': [
+      'Accesso completo a tutte le funzionalità',
+      'Gestione illimitata soci',
+      'Generazione documenti AI',
+      'Dashboard avanzata',
+      'Supporto email'
+    ],
+    'pricing.free.cta': 'Inizia Prova Gratuita',
+    'pricing.pro.title': 'Piano Professional',
+    'pricing.pro.price': '29€',
+    'pricing.pro.duration': 'al mese',
+    'pricing.pro.features': [
+      'Tutte le funzionalità della prova gratuita',
+      'Backup automatico cloud',
+      'Integrazione email avanzata',
+      'Supporto prioritario 24/7',
+      'Training personalizzato',
+      'Aggiornamenti continui'
+    ],
+    'pricing.pro.cta': 'Scegli Professional',
+    'pricing.note': 'Nessun impegno • Annulla quando vuoi • Supporto italiano',
+    'pricing.startTrial': 'Inizia la tua prova gratuita oggi',
+
     // CTA Section
     'cta.title': 'Hai già un account?',
     'cta.button': 'Accedi Ora',
@@ -153,6 +182,35 @@ const translations = {
     'waitingList.title': 'Waiting List',
     'waitingList.subtitle': 'We are in limited testing phase. Sign up to be among the first to access!',
     
+    // Pricing
+    'pricing.title': 'Choose the Perfect Plan for Your Club',
+    'pricing.subtitle': 'Start free for 30 days, no credit card required',
+    'pricing.free.title': 'Free Trial',
+    'pricing.free.price': 'Free',
+    'pricing.free.duration': '30 days',
+    'pricing.free.features': [
+      'Full access to all features',
+      'Unlimited member management',
+      'AI document generation',
+      'Advanced dashboard',
+      'Email support'
+    ],
+    'pricing.free.cta': 'Start Free Trial',
+    'pricing.pro.title': 'Professional Plan',
+    'pricing.pro.price': '€29',
+    'pricing.pro.duration': 'per month',
+    'pricing.pro.features': [
+      'All free trial features',
+      'Automatic cloud backup',
+      'Advanced email integration',
+      'Priority 24/7 support',
+      'Personalized training',
+      'Continuous updates'
+    ],
+    'pricing.pro.cta': 'Choose Professional',
+    'pricing.note': 'No commitment • Cancel anytime • Italian support',
+    'pricing.startTrial': 'Start your free trial today',
+
     // CTA Section
     'cta.title': 'Already have an account?',
     'cta.button': 'Login Now',
@@ -248,6 +306,35 @@ const translations = {
     'waitingList.title': 'Lista de Espera',
     'waitingList.subtitle': '¡Estamos en fase de pruebas limitadas. Regístrate para estar entre los primeros en acceder!',
     
+    // Pricing
+    'pricing.title': 'Elige el Plan Perfecto para tu Club',
+    'pricing.subtitle': 'Comienza gratis por 30 días, sin tarjeta de crédito requerida',
+    'pricing.free.title': 'Prueba Gratuita',
+    'pricing.free.price': 'Gratis',
+    'pricing.free.duration': '30 días',
+    'pricing.free.features': [
+      'Acceso completo a todas las funciones',
+      'Gestión ilimitada de socios',
+      'Generación de documentos AI',
+      'Dashboard avanzado',
+      'Soporte por email'
+    ],
+    'pricing.free.cta': 'Comenzar Prueba Gratuita',
+    'pricing.pro.title': 'Plan Profesional',
+    'pricing.pro.price': '29€',
+    'pricing.pro.duration': 'al mes',
+    'pricing.pro.features': [
+      'Todas las funciones de la prueba gratuita',
+      'Backup automático en la nube',
+      'Integración avanzada de email',
+      'Soporte prioritario 24/7',
+      'Entrenamiento personalizado',
+      'Actualizaciones continuas'
+    ],
+    'pricing.pro.cta': 'Elegir Profesional',
+    'pricing.note': 'Sin compromiso • Cancela cuando quieras • Soporte italiano',
+    'pricing.startTrial': 'Comienza tu prueba gratuita hoy',
+
     // CTA Section
     'cta.title': '¿Ya tienes una cuenta?',
     'cta.button': 'Acceder Ahora',
@@ -308,7 +395,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>(getInitialLanguage());
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations[typeof language]] || key;
+    const value = translations[language][key as keyof typeof translations[typeof language]];
+    if (Array.isArray(value)) {
+      return value.join(', '); // Fallback for arrays when used as string
+    }
+    return value || key;
   };
 
   return (

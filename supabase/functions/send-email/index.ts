@@ -52,7 +52,7 @@ const emailTemplates = {
         </p>
         
         <div style="text-align: center; margin: 40px 0;">
-          <a href="https://fastclub.lovableproject.com" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          <a href="https://fastclub.lovableproject.com" style="background-color: hsl(210, 100%, 45%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold;">
             Scopri di più su FastClub
           </a>
         </div>
@@ -60,7 +60,8 @@ const emailTemplates = {
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 40px 0;">
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
-          FastClub - La piattaforma digitale per il tuo club<br>
+          FastClub - La piattaforma AI per la gestione completa del tuo club<br>
+          Email: support@fastclub.lovableproject.com | Web: fastclub.lovableproject.com<br>
           Hai ricevuto questa email perché ti sei iscritto alla waiting list di FastClub.
         </p>
       </div>
@@ -151,7 +152,7 @@ const emailTemplates = {
         </div>
         
         <div style="text-align: center; margin: 40px 0;">
-          <a href="${data.registrationUrl || 'https://fastclub.it/auth'}" style="background-color: #2563eb; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+          <a href="${data.registrationUrl || 'https://fastclub.lovableproject.com/auth?tab=signup'}" style="background-color: hsl(210, 100%, 45%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
             Registrati su FastClub
           </a>
         </div>
@@ -169,7 +170,8 @@ const emailTemplates = {
         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 40px 0;">
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
-          FastClub - La piattaforma digitale per il tuo club<br>
+          FastClub - La piattaforma AI per la gestione completa del tuo club<br>
+          Email: support@fastclub.lovableproject.com | Web: fastclub.lovableproject.com<br>
           Hai ricevuto questa email perché sei stato invitato a unirti a ${data.clubName || 'un club'} su FastClub.
         </p>
       </div>
@@ -225,7 +227,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send emails (Resend supports bulk sending)
     const emailResponse = await resend.emails.send({
-      from: "FastClub <info@fastclub.it>",
+      from: "FastClub <noreply@fastclub.lovableproject.com>",
       to: recipients,
       subject: emailSubject,
       html: emailHtml,

@@ -3,18 +3,18 @@ import { Navigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight, Maximize2 } from 'lucide-react';
+import { FileText, Mail, Image, Users, Shield, Calendar, ArrowRight, Maximize2, Check, Star } from 'lucide-react';
 
 import Footer from '@/components/Footer';
 import { useState } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage, translations } from '@/contexts/LanguageContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 
 // Fixed logo import issue
 
 const Index = () => {
   const { user, loading } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedImage, setSelectedImage] = useState<{src: string, title: string, description: string} | null>(null);
 
   const screenshots = [
@@ -279,6 +279,92 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section className="w-full py-8 sm:py-12 lg:py-16 bg-muted/30">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">{t('pricing.title')}</h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              {t('pricing.subtitle')}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 max-w-4xl mx-auto">
+            {/* Free Trial Plan */}
+            <Card className="relative hover:shadow-xl transition-all duration-300 border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <div className="bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium flex items-center gap-1">
+                  <Star className="w-4 h-4" />
+                  {t('features.trial.title')}
+                </div>
+              </div>
+              <CardHeader className="text-center pb-4 pt-8">
+                <CardTitle className="text-xl sm:text-2xl mb-2">{t('pricing.free.title')}</CardTitle>
+                <div className="mb-4">
+                  <span className="text-3xl sm:text-4xl font-bold text-primary">{t('pricing.free.price')}</span>
+                  <span className="text-muted-foreground ml-2">{t('pricing.free.duration')}</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-3">
+                  {(translations[language]['pricing.free.features' as keyof typeof translations[typeof language]] as string[]).map((feature, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                      <span className="text-sm sm:text-base">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-4">
+                  <Button asChild size="lg" className="w-full text-base font-semibold">
+                    <Link to="/auth?tab=signup">
+                      {t('pricing.free.cta')}
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Professional Plan */}
+            <Card className="hover:shadow-xl transition-all duration-300 bg-card">
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-xl sm:text-2xl mb-2">{t('pricing.pro.title')}</CardTitle>
+                <div className="mb-4">
+                  <span className="text-3xl sm:text-4xl font-bold">{t('pricing.pro.price')}</span>
+                  <span className="text-muted-foreground ml-2">{t('pricing.pro.duration')}</span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <ul className="space-y-3">
+                  {(translations[language]['pricing.pro.features' as keyof typeof translations[typeof language]] as string[]).map((feature, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <Check className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                      <span className="text-sm sm:text-base">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-4">
+                  <Button asChild variant="secondary" size="lg" className="w-full text-base font-semibold">
+                    <Link to="/auth?tab=signup">
+                      {t('pricing.pro.cta')}
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="text-center mt-8 sm:mt-12">
+            <p className="text-sm sm:text-base text-muted-foreground mb-4">
+              {t('pricing.note')}
+            </p>
+            <p className="text-base sm:text-lg font-semibold text-primary">
+              {t('pricing.startTrial')}
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <section className="w-full py-8 sm:py-12 lg:py-16">
