@@ -11,7 +11,7 @@ const corsHeaders = {
 };
 
 interface EmailRequest {
-  type: 'welcome' | 'confirmation' | 'notification' | 'campaign' | 'clubInvite';
+  type: 'welcome' | 'confirmation' | 'notification' | 'campaign' | 'clubInvite' | 'support';
   to: string | string[];
   subject?: string;
   data?: Record<string, any>;
@@ -194,6 +194,41 @@ const emailTemplates = {
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
           FastClub - La piattaforma digitale per il tuo club
+        </p>
+      </div>
+    `
+  },
+
+  support: {
+    subject: (data: any) => `[TICKET SUPPORTO] ${data.subject || 'Richiesta di supporto'}`,
+    html: (data: any) => `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://ajgyrhddxljfauwneput.supabase.co/storage/v1/object/public/document-assets/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" style="height: 60px;">
+        </div>
+        
+        <h1 style="color: #dc2626; text-align: center; margin-bottom: 30px;">🎫 Nuovo Ticket di Supporto</h1>
+        
+        <div style="background-color: #fef2f2; border-left: 4px solid #dc2626; padding: 20px; margin: 20px 0;">
+          <h3 style="color: #b91c1c; margin-top: 0;">Dettagli del Ticket</h3>
+          <p><strong>Tipo:</strong> ${data.type || 'Non specificato'}</p>
+          <p><strong>Priorità:</strong> ${data.priority || 'Media'}</p>
+          <p><strong>Oggetto:</strong> ${data.subject || 'Non specificato'}</p>
+          <p><strong>Email utente:</strong> ${data.userEmail || 'Non disponibile'}</p>
+          <p><strong>Nome utente:</strong> ${data.userName || 'Non disponibile'}</p>
+          <p><strong>Data:</strong> ${new Date().toLocaleString('it-IT')}</p>
+        </div>
+        
+        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #374151; margin-top: 0;">Descrizione del Problema</h3>
+          <p style="font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${data.description || 'Nessuna descrizione fornita'}</p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 40px 0;">
+        
+        <p style="font-size: 14px; color: #6b7280; text-align: center;">
+          FastClub - Sistema di Supporto Tecnico<br>
+          Ticket generato automaticamente dalla piattaforma
         </p>
       </div>
     `

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import HelpSupport from "@/components/HelpSupport";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -34,6 +35,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <HelpSupport />
           <Suspense fallback={<div className="p-6 text-muted-foreground">Caricamento...</div>}>
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <Routes>

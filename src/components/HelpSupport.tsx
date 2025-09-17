@@ -29,9 +29,24 @@ export default function HelpSupport() {
 
     setIsLoading(true);
     try {
-      // For now, we'll just show a success message
-      // TODO: Implement proper support ticket system
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      const { data, error } = await supabase.functions.invoke('send-email', {
+        body: {
+          type: 'support',
+          to: 'info@fastclub.it',
+          data: {
+            type: formData.type,
+            subject: formData.subject,
+            description: formData.description,
+            priority: formData.priority,
+            userEmail: user?.email,
+            userName: profile?.first_name && profile?.last_name 
+              ? `${profile.first_name} ${profile.last_name}`
+              : user?.email
+          }
+        }
+      });
+
+      if (error) throw error;
 
       toast({
         title: "Richiesta inviata",
@@ -89,7 +104,7 @@ export default function HelpSupport() {
                     </div>
                     <div>
                       <p className="font-medium">Email</p>
-                      <p className="text-sm text-muted-foreground">support@fastclub.it</p>
+                      <p className="text-sm text-muted-foreground">info@fastclub.it</p>
                     </div>
                   </div>
                 </CardContent>
