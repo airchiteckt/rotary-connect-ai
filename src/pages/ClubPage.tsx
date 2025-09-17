@@ -74,22 +74,25 @@ export default function ClubPage() {
 
   const loadClubData = async () => {
     try {
+      console.log('Loading club data for slug:', clubSlug);
+
       // Load club profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('club_slug', clubSlug)
-        .single();
+        .maybeSingle();
+
+      console.log('Profile data:', profile, 'Error:', profileError);
 
       if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          setNotFound(true);
-        }
         console.error('Profile error:', profileError);
+        setNotFound(true);
         return;
       }
 
       if (!profile) {
+        console.log('No profile found');
         setNotFound(true);
         return;
       }
@@ -97,65 +100,82 @@ export default function ClubPage() {
       setClubProfile(profile);
 
       // Load club members
-      const { data: membersData, error: membersError } = await supabase
-        .from('club_members')
-        .select('id, user_id, role, joined_at')
-        .eq('club_owner_id', profile.user_id)
-        .eq('status', 'active');
+      try {
+        const { data: membersData, error: membersError } = await supabase
+          .from('club_members')
+          .select('id, user_id, role, joined_at')
+          .eq('club_owner_id', profile.user_id)
+          .eq('status', 'active');
 
-      if (membersError) throw membersError;
+        if (!membersError && membersData) {
+          // Get profile data for each member
+          const membersWithProfiles = [];
+          for (const member of membersData) {
+            try {
+              const { data: memberProfile } = await supabase
+                .from('profiles')
+                .select('full_name, role')
+                .eq('user_id', member.user_id)
+                .maybeSingle();
 
-      // Get profile data for each member
-      const membersWithProfiles = [];
-      for (const member of membersData || []) {
-        const { data: memberProfile } = await supabase
-          .from('profiles')
-          .select('full_name, role')
-          .eq('user_id', member.user_id)
-          .single();
-
-        membersWithProfiles.push({
-          ...member,
-          profiles: memberProfile || { full_name: 'Nome non disponibile', role: 'member' }
-        });
+              membersWithProfiles.push({
+                ...member,
+                profiles: memberProfile || { full_name: 'Nome non disponibile', role: 'member' }
+              });
+            } catch (err) {
+              console.log('Error loading member profile:', err);
+            }
+          }
+          setClubMembers(membersWithProfiles);
+        }
+      } catch (err) {
+        console.log('Error loading club members:', err);
       }
 
-      setClubMembers(membersWithProfiles);
-
       // Load upcoming events
-      const { data: events, error: eventsError } = await supabase
-        .from('prefecture_events')
-        .select('*')
-        .eq('user_id', profile.user_id)
-        .gte('event_date', new Date().toISOString().split('T')[0])
-        .order('event_date', { ascending: true })
-        .limit(5);
+      try {
+        const { data: events, error: eventsError } = await supabase
+          .from('prefecture_events')
+          .select('*')
+          .eq('user_id', profile.user_id)
+          .gte('event_date', new Date().toISOString().split('T')[0])
+          .order('event_date', { ascending: true })
+          .limit(5);
 
-      if (eventsError) throw eventsError;
-      setUpcomingEvents(events || []);
+        if (!eventsError && events) {
+          setUpcomingEvents(events);
+        }
+      } catch (err) {
+        console.log('Error loading events:', err);
+      }
 
       // Load organization members (from members table)
-      const { data: orgMembers, error: orgMembersError } = await supabase
-        .from('members')
-        .select('id, first_name, last_name, current_position, membership_start_date, email')
-        .eq('user_id', profile.user_id)
-        .eq('status', 'active')
-        .order('membership_start_date', { ascending: true });
+      try {
+        const { data: orgMembers, error: orgMembersError } = await supabase
+          .from('members')
+          .select('id, first_name, last_name, current_position, membership_start_date, email')
+          .eq('user_id', profile.user_id)
+          .eq('status', 'active')
+          .order('membership_start_date', { ascending: true });
 
-      if (orgMembersError) throw orgMembersError;
-      
-      const formattedOrgMembers = (orgMembers || []).map(member => ({
-        id: member.id,
-        full_name: `${member.first_name} ${member.last_name}`,
-        current_position: member.current_position || 'Socio',
-        membership_start_date: member.membership_start_date,
-        email: member.email
-      }));
-      
-      setOrganizationMembers(formattedOrgMembers);
+        if (!orgMembersError && orgMembers) {
+          const formattedOrgMembers = orgMembers.map(member => ({
+            id: member.id,
+            full_name: `${member.first_name} ${member.last_name}`,
+            current_position: member.current_position || 'Socio',
+            membership_start_date: member.membership_start_date,
+            email: member.email
+          }));
+          
+          setOrganizationMembers(formattedOrgMembers);
+        }
+      } catch (err) {
+        console.log('Error loading organization members:', err);
+      }
 
     } catch (error) {
       console.error('Error loading club data:', error);
+      setNotFound(true);
     } finally {
       setLoading(false);
     }
