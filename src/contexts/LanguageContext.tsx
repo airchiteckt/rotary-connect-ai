@@ -73,7 +73,7 @@ export const translations = {
     ],
     'pricing.free.cta': 'Inizia Prova Gratuita',
     'pricing.pro.title': 'Piano Professional',
-    'pricing.pro.price': '29€',
+    'pricing.pro.price': 'da 15€',
     'pricing.pro.duration': 'al mese',
     'pricing.pro.features': [
       'Tutte le funzionalità della prova gratuita',
@@ -85,6 +85,7 @@ export const translations = {
     ],
     'pricing.pro.cta': 'Scegli Professional',
     'pricing.note': 'Nessun impegno • Annulla quando vuoi • Supporto italiano',
+    'pricing.details': 'Prezzo basato sul numero di membri: €15 (fino a 20), €25 (fino a 30), €35 (fino a 50), €50 (oltre 50)',
     'pricing.startTrial': 'Inizia la tua prova gratuita oggi',
 
     // CTA Section
@@ -197,7 +198,7 @@ export const translations = {
     ],
     'pricing.free.cta': 'Start Free Trial',
     'pricing.pro.title': 'Professional Plan',
-    'pricing.pro.price': '€29',
+    'pricing.pro.price': 'from €15',
     'pricing.pro.duration': 'per month',
     'pricing.pro.features': [
       'All free trial features',
@@ -209,6 +210,7 @@ export const translations = {
     ],
     'pricing.pro.cta': 'Choose Professional',
     'pricing.note': 'No commitment • Cancel anytime • Italian support',
+    'pricing.details': 'Pricing based on member count: €15 (up to 20), €25 (up to 30), €35 (up to 50), €50 (over 50)',
     'pricing.startTrial': 'Start your free trial today',
 
     // CTA Section
@@ -321,7 +323,7 @@ export const translations = {
     ],
     'pricing.free.cta': 'Comenzar Prueba Gratuita',
     'pricing.pro.title': 'Plan Profesional',
-    'pricing.pro.price': '29€',
+    'pricing.pro.price': 'desde 15€',
     'pricing.pro.duration': 'al mes',
     'pricing.pro.features': [
       'Todas las funciones de la prueba gratuita',
@@ -333,6 +335,7 @@ export const translations = {
     ],
     'pricing.pro.cta': 'Elegir Profesional',
     'pricing.note': 'Sin compromiso • Cancela cuando quieras • Soporte italiano',
+    'pricing.details': 'Precio basado en número de miembros: €15 (hasta 20), €25 (hasta 30), €35 (hasta 50), €50 (más de 50)',
     'pricing.startTrial': 'Comienza tu prueba gratuita hoy',
 
     // CTA Section

@@ -356,8 +356,11 @@ const Index = () => {
           </div>
           
           <div className="text-center mt-8 sm:mt-12">
-            <p className="text-sm sm:text-base text-muted-foreground mb-4">
+            <p className="text-sm sm:text-base text-muted-foreground mb-2">
               {t('pricing.note')}
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              {t('pricing.details')}
             </p>
             <p className="text-base sm:text-lg font-semibold text-primary">
               {t('pricing.startTrial')}
