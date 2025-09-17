@@ -747,7 +747,7 @@ export default function UserSettings() {
                       </div>
                       <div className="text-center p-4 bg-white rounded-lg">
                         <div className="text-2xl font-bold text-orange-600">{pendingInvites.length}</div>
-                        <div className="text-sm text-muted-foreground">Inviti Pendenti</div>
+                        <div className="text-sm text-muted-foreground">Invitati - Non ancora su FastClub</div>
                       </div>
                     </div>
 
@@ -948,8 +948,11 @@ export default function UserSettings() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Mail className="w-5 h-5" />
-                        Inviti Pendenti ({pendingInvites.length})
+                        Membri Invitati - Non ancora su FastClub ({pendingInvites.length})
                       </CardTitle>
+                      <CardDescription>
+                        I seguenti membri sono stati invitati ma non si sono ancora registrati su FastClub
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <Table>
@@ -958,6 +961,7 @@ export default function UserSettings() {
                             <TableHead>Nome</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Ruolo</TableHead>
+                            <TableHead>Stato</TableHead>
                             <TableHead>Scadenza</TableHead>
                             <TableHead>Azioni</TableHead>
                           </TableRow>
@@ -972,12 +976,21 @@ export default function UserSettings() {
                                   {invite.role}
                                 </Badge>
                               </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4 text-yellow-500" />
+                                  <Badge className="bg-yellow-100 text-yellow-800">
+                                    Invitato - In attesa di registrazione
+                                  </Badge>
+                                </div>
+                              </TableCell>
                               <TableCell>{new Date(invite.expires_at).toLocaleDateString()}</TableCell>
                               <TableCell>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => deleteInvite(invite.id)}
+                                  title="Elimina invito"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>

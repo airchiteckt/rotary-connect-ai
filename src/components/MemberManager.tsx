@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Users, Search, Edit, Trash2, History, Mail, Calendar } from 'lucide-react';
+import { Users, Search, Edit, Trash2, History, Mail, Calendar, Clock, CheckCircle, XCircle, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,6 +26,17 @@ interface Member {
   created_at: string;
 }
 
+interface ClubInvite {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  status: string;
+  expires_at: string;
+  created_at: string;
+}
+
 interface MemberManagerProps {
   onStatsUpdate: (stats: { active: number; honorary: number; emeritus: number; guest: number }) => void;
 }
@@ -34,6 +45,7 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
+  const [invites, setInvites] = useState<ClubInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -43,8 +55,26 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
   useEffect(() => {
     if (user) {
       loadMembers();
+      loadInvites();
     }
   }, [user]);
+
+  const loadInvites = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('club_invites')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setInvites(data || []);
+    } catch (error) {
+      console.error('Errore nel caricamento degli inviti:', error);
+    }
+  };
 
   const loadMembers = async () => {
     if (!user) return;
@@ -124,20 +154,69 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      active: { label: 'Attivo', className: 'bg-green-100 text-green-800 hover:bg-green-200' },
-      honorary: { label: 'Onorario', className: 'bg-purple-100 text-purple-800 hover:bg-purple-200' },
-      emeritus: { label: 'Emerito', className: 'bg-blue-100 text-blue-800 hover:bg-blue-200' },
-      guest: { label: 'Ospite', className: 'bg-orange-100 text-orange-800 hover:bg-orange-200' },
-      inactive: { label: 'Non Attivo', className: 'bg-gray-100 text-gray-800 hover:bg-gray-200' }
-    };
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800">Attivo</Badge>;
+      case 'honorary':
+        return <Badge className="bg-blue-100 text-blue-800">Onorario</Badge>;
+      case 'emeritus':
+        return <Badge className="bg-purple-100 text-purple-800">Emerito</Badge>;
+      case 'guest':
+        return <Badge className="bg-gray-100 text-gray-800">Ospite</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
 
-    const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.active;
-    return (
-      <Badge className={config.className}>
-        {config.label}
-      </Badge>
-    );
+  const getInviteStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Clock className="w-4 h-4 text-yellow-500" />;
+      case 'accepted':
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'expired':
+        return <XCircle className="w-4 h-4 text-red-500" />;
+      default:
+        return <Clock className="w-4 h-4 text-gray-500" />;
+    }
+  };
+
+  const getInviteStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800">Invitato - Non ancora su FastClub</Badge>;
+      case 'accepted':
+        return <Badge className="bg-green-100 text-green-800">Accettato</Badge>;
+      case 'expired':
+        return <Badge variant="destructive">Scaduto</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const deleteInvite = async (inviteId: string) => {
+    try {
+      const { error } = await supabase
+        .from('club_invites')
+        .delete()
+        .eq('id', inviteId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Successo",
+        description: "Invito eliminato correttamente.",
+      });
+
+      loadInvites();
+    } catch (error) {
+      console.error('Errore nell\'eliminazione dell\'invito:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore nell'eliminazione dell'invito.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -274,6 +353,92 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
         </CardContent>
       </Card>
 
+      {/* Invited Members Section */}
+      {invites.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <UserPlus className="w-5 h-5" />
+              <span>Membri Invitati ({invites.filter(i => i.status === 'pending').length})</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                I seguenti membri sono stati invitati ma non si sono ancora uniti a FastClub:
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Ruolo</TableHead>
+                    <TableHead>Stato</TableHead>
+                    <TableHead>Data Invito</TableHead>
+                    <TableHead>Scadenza</TableHead>
+                    <TableHead>Azioni</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invites.map((invite) => (
+                    <TableRow key={invite.id}>
+                      <TableCell className="font-medium">
+                        {invite.first_name} {invite.last_name}
+                      </TableCell>
+                      <TableCell>{invite.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{invite.role}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getInviteStatusIcon(invite.status)}
+                          {getInviteStatusBadge(invite.status)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-muted-foreground" />
+                          <span>{format(new Date(invite.created_at), 'dd/MM/yyyy', { locale: it })}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(invite.expires_at), 'dd/MM/yyyy', { locale: it })}
+                      </TableCell>
+                      <TableCell>
+                        {invite.status === 'pending' && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Conferma eliminazione invito</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Sei sicuro di voler eliminare l'invito per {invite.first_name} {invite.last_name}? 
+                                  Questa azione non può essere annullata.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annulla</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteInvite(invite.id)}>
+                                  Elimina
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <MemberForm
         isOpen={isFormOpen}
         onClose={() => {
@@ -281,7 +446,10 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
           setSelectedMember(null);
         }}
         member={selectedMember}
-        onSuccess={loadMembers}
+        onSuccess={() => {
+          loadMembers();
+          loadInvites();
+        }}
       />
 
       {selectedMember && (
@@ -292,7 +460,10 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
             setSelectedMember(null);
           }}
           member={selectedMember}
-          onPositionUpdate={loadMembers}
+          onPositionUpdate={() => {
+            loadMembers();
+            loadInvites();
+          }}
         />
       )}
     </>
