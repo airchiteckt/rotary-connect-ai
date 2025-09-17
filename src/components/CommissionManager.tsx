@@ -146,7 +146,11 @@ export const CommissionManager = () => {
           {commissions.map((commission) => {
             const commissionProjects = getCommissionProjects(commission.id);
             return (
-              <Card key={commission.id}>
+               <Card 
+                key={commission.id} 
+                className="cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => openKanban(commission)}
+              >
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
@@ -165,15 +169,7 @@ export const CommissionManager = () => {
                         </p>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        onClick={() => openKanban(commission)}
-                      >
-                        <Kanban className="w-4 h-4 mr-1" />
-                        Kanban
-                      </Button>
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="outline"
                         size="sm"
