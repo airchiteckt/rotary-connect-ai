@@ -68,6 +68,7 @@ export type Database = {
           id: string
           invite_token: string
           last_name: string
+          permissions: Database["public"]["Enums"]["app_section"][] | null
           role: string
           status: string
           updated_at: string
@@ -81,6 +82,7 @@ export type Database = {
           id?: string
           invite_token: string
           last_name: string
+          permissions?: Database["public"]["Enums"]["app_section"][] | null
           role?: string
           status?: string
           updated_at?: string
@@ -94,6 +96,7 @@ export type Database = {
           id?: string
           invite_token?: string
           last_name?: string
+          permissions?: Database["public"]["Enums"]["app_section"][] | null
           role?: string
           status?: string
           updated_at?: string
@@ -474,6 +477,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      member_permissions: {
+        Row: {
+          club_owner_id: string
+          created_at: string
+          id: string
+          section: Database["public"]["Enums"]["app_section"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          club_owner_id: string
+          created_at?: string
+          id?: string
+          section: Database["public"]["Enums"]["app_section"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          club_owner_id?: string
+          created_at?: string
+          id?: string
+          section?: Database["public"]["Enums"]["app_section"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       members: {
         Row: {
@@ -1009,9 +1039,27 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
+      user_has_section_permission: {
+        Args: {
+          club_owner_uuid: string
+          section_name: string
+          user_uuid: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_section:
+        | "dashboard"
+        | "segreteria"
+        | "tesoreria"
+        | "presidenza"
+        | "prefettura"
+        | "direttivo"
+        | "comunicazione"
+        | "soci"
+        | "commissioni"
+        | "organigramma"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1138,6 +1186,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_section: [
+        "dashboard",
+        "segreteria",
+        "tesoreria",
+        "presidenza",
+        "prefettura",
+        "direttivo",
+        "comunicazione",
+        "soci",
+        "commissioni",
+        "organigramma",
+      ],
+    },
   },
 } as const

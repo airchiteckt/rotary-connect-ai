@@ -42,6 +42,9 @@ export default function UserSettings() {
     last_name: '',
     role: 'member'
   });
+  const [selectedPermissions, setSelectedPermissions] = useState<AppSection[]>([]);
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<any>(null);
 
   useEffect(() => {
     if (profile) {
@@ -180,12 +183,14 @@ export default function UserSettings() {
           email: inviteForm.email,
           first_name: inviteForm.first_name,
           last_name: inviteForm.last_name,
-          role: inviteForm.role
+          role: inviteForm.role,
+          permissions: selectedPermissions
         } as any);
 
       if (error) throw error;
 
       setInviteForm({ email: '', first_name: '', last_name: '', role: 'member' });
+      setSelectedPermissions([]);
       loadOrganizationData();
       
       toast({
@@ -829,11 +834,19 @@ export default function UserSettings() {
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="member">Membro</SelectItem>
-                            <SelectItem value="admin">Amministratore</SelectItem>
-                            <SelectItem value="treasurer">Tesoriere</SelectItem>
+                            <SelectItem value="moderator">Moderatore</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
+                      
+                      {/* Permissions Selector - Only show for non-admin roles */}
+                      {inviteForm.role !== 'admin' && (
+                        <SectionPermissionSelector
+                          selectedPermissions={selectedPermissions}
+                          onPermissionsChange={setSelectedPermissions}
+                          title="Sezioni Accessibili"
+                        />
+                      )}
                       
                       <Button type="submit" disabled={isLoading} className="w-full">
                         <UserPlus className="w-4 h-4 mr-2" />
@@ -972,6 +985,13 @@ export default function UserSettings() {
           </TabsContent>
         </Tabs>
       </DialogContent>
+      
+      {/* Permissions Manager */}
+      <MemberPermissionsManager
+        isOpen={permissionsDialogOpen}
+        onOpenChange={setPermissionsDialogOpen}
+        member={selectedMember}
+      />
     </Dialog>
   );
 }

@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Mail, Image, Users, Calendar, Settings, LogOut, Crown, DollarSign, Shield, UserCheck, Megaphone, Building } from 'lucide-react';
 import UserSettings from '@/components/UserSettings';
+import { usePermissions } from '@/hooks/usePermissions';
 import HelpSupport from '@/components/HelpSupport';
 
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, signOut, checkTrialStatus } = useAuth();
+  const { hasPermission } = usePermissions();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -77,65 +79,77 @@ export default function Dashboard() {
       description: "Documenti, verbali, programmi mensili e comunicazioni ufficiali",
       icon: FileText,
       href: "/segreteria",
-      color: "bg-blue-600"
+      color: "bg-blue-600",
+      section: "segreteria" as const
     },
     {
       title: "Tesoreria", 
       description: "Gestione finanziaria, bilanci e quote soci",
       icon: DollarSign,
       href: "/tesoreria",
-      color: "bg-emerald-600"
+      color: "bg-emerald-600",
+      section: "tesoreria" as const
     },
     {
       title: "Organigramma", 
       description: "Struttura sociale e organizzativa del club",
       icon: Building,
       href: "/organigramma",
-      color: "bg-blue-600"
+      color: "bg-blue-600",
+      section: "organigramma" as const
     },
     {
       title: "Presidenza",
       description: "Strumenti per la governance e coordinamento club",
       icon: Crown,
       href: "/presidenza", 
-      color: "bg-amber-600"
+      color: "bg-amber-600",
+      section: "presidenza" as const
     },
     {
       title: "Prefettura",
       description: "Cerimoniale, protocollo e organizzazione eventi",
       icon: Shield,
       href: "/prefettura",
-      color: "bg-red-600"
+      color: "bg-red-600",
+      section: "prefettura" as const
     },
     {
       title: "Direttivo",
       description: "Coordinamento consiglio direttivo e commissioni",
       icon: Building,
       href: "/direttivo",
-      color: "bg-indigo-600"
+      color: "bg-indigo-600",
+      section: "direttivo" as const
     },
     {
       title: "Comunicazione",
       description: "Locandine, social media e comunicazione esterna",
       icon: Megaphone,
       href: "/comunicazione",
-      color: "bg-purple-600"
+      color: "bg-purple-600",
+      section: "comunicazione" as const
     },
     {
       title: "Soci",
       description: "Anagrafica soci, presenze e gestione membri",
       icon: Users,
       href: "/soci",
-      color: "bg-orange-600"
+      color: "bg-orange-600",
+      section: "soci" as const
     },
     {
       title: "Commissioni",
       description: "Gestione commissioni e assegnazione progetti",
       icon: UserCheck,
       href: "/commissioni",
-      color: "bg-pink-600"
+      color: "bg-pink-600",
+      section: "commissioni" as const
     }
   ];
+
+  // Filter menu items based on user permissions
+  const accessibleMenuItems = menuItems.filter(item => hasPermission(item.section));
 
   const daysRemaining = profile?.trial_start_date ? 
     Math.max(0, 30 - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
@@ -278,7 +292,7 @@ export default function Dashboard() {
 
         {/* Main Menu */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {menuItems.map((item) => (
+          {accessibleMenuItems.length > 0 ? accessibleMenuItems.map((item) => (
             <Card key={item.title} className="cursor-pointer hover:shadow-lg transition-all duration-200 group">
               <CardHeader>
                 <div className="flex items-center space-x-3">
@@ -301,7 +315,20 @@ export default function Dashboard() {
                 </Button>
               </CardContent>
             </Card>
-          ))}
+          )) : (
+            <Card className="col-span-full">
+              <CardContent className="pt-6 text-center">
+                <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Accesso Limitato</h3>
+                <p className="text-muted-foreground mb-4">
+                  Non hai ancora i permessi per accedere alle sezioni dell'app.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Contatta l'amministratore del tuo club per richiedere l'accesso alle sezioni di cui hai bisogno.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Trial Notice */}
