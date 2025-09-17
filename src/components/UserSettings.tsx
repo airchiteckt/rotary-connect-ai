@@ -19,6 +19,7 @@ import { it } from 'date-fns/locale';
 import { SectionPermissionSelector } from './SectionPermissionSelector';
 import { MemberPermissionsManager } from './MemberPermissionsManager';
 import { type AppSection } from '@/hooks/usePermissions';
+import PublicPageManager from '@/components/PublicPageManager';
 
 export default function UserSettings() {
   const { user, profile, signOut } = useAuth();
@@ -388,8 +389,9 @@ export default function UserSettings() {
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile">Profilo</TabsTrigger>
+            <TabsTrigger value="club">Pagina Club</TabsTrigger>
             <TabsTrigger value="subscription">Abbonamento</TabsTrigger>
             <TabsTrigger value="organization" disabled={!isPremium}>
               Organizzazione {!isPremium && <Badge variant="outline" className="ml-1 text-xs">Premium</Badge>}
@@ -536,6 +538,10 @@ export default function UserSettings() {
                 Esci dall'Account
               </Button>
             </div>
+          </TabsContent>
+
+          <TabsContent value="club" className="space-y-6 mt-6">
+            <PublicPageManager />
           </TabsContent>
 
           <TabsContent value="subscription" className="space-y-6 mt-6">
