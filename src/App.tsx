@@ -21,6 +21,7 @@ import Commissioni from "./pages/Commissioni";
 import RecurringMeetingsSettings from "./components/RecurringMeetingsSettings";
 import NotFound from "./pages/NotFound";
 import ClubPage from "./pages/ClubPage";
+import TestClub from "./pages/TestClub";
 
 const Organigramma = lazy(() => import("./pages/Organigramma"));
 
@@ -52,7 +53,7 @@ const App = () => (
               <Route path="/document/:id" element={<CreateDocument />} />
               <Route path="/document/:id/edit" element={<CreateDocument />} />
               <Route path="/recurring-meetings" element={<RecurringMeetingsSettings />} />
-              <Route path="/club/:clubSlug" element={<ClubPage />} />
+              <Route path="/club/:clubSlug" element={<TestClub />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>
