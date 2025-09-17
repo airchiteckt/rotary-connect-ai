@@ -16,6 +16,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Settings, User, Shield, Bell, Palette, Upload, Save, CreditCard, Users, Copy, Crown, Gift, UserPlus, Mail, Clock, CheckCircle, XCircle, Trash2, Edit, History, Calendar, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { SectionPermissionSelector } from './SectionPermissionSelector';
+import { MemberPermissionsManager } from './MemberPermissionsManager';
+import { type AppSection } from '@/hooks/usePermissions';
 
 export default function UserSettings() {
   const { user, profile, signOut } = useAuth();
