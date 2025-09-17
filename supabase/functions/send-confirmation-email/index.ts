@@ -100,14 +100,14 @@ const handler = async (req: Request): Promise<Response> => {
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
           FastClub - La piattaforma AI per la gestione completa del tuo club<br>
-          Email: support@fastclub.lovableproject.com | Web: fastclub.lovableproject.com<br>
+          Email: support@fastclub.it | Web: fastclub.it<br>
           Hai ricevuto questa email perché ti sei registrato su FastClub.
         </p>
       </div>
     `;
 
     const emailResponse = await resend.emails.send({
-      from: "FastClub <noreply@fastclub.lovableproject.com>",
+      from: "FastClub <noreply@fastclub.it>",
       to: user.email,
       subject: "Conferma la tua registrazione su FastClub",
       html: emailHtml,
