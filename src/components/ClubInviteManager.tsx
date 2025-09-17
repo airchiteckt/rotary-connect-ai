@@ -155,6 +155,28 @@ export default function ClubInviteManager() {
 
       if (error) throw error;
 
+      // Send invite email
+      const { data: insertedInvite } = await supabase
+        .from('club_invites')
+        .select('id')
+        .eq('email', formData.email)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (insertedInvite) {
+        // Call the send-club-invite function
+        const { error: emailError } = await supabase.functions.invoke('send-club-invite', {
+          body: { inviteId: insertedInvite.id }
+        });
+
+        if (emailError) {
+          console.error('Error sending invite email:', emailError);
+          // Don't fail the whole operation if email fails
+        }
+      }
+
       toast({
         title: "Invito inviato",
         description: `L'invito è stato inviato a ${formData.email}`,

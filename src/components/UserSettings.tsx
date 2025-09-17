@@ -193,13 +193,35 @@ export default function UserSettings() {
 
       if (error) throw error;
 
+      // Send invite email
+      const { data: insertedInvite } = await supabase
+        .from('club_invites')
+        .select('id')
+        .eq('email', inviteForm.email)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (insertedInvite) {
+        // Call the send-club-invite function
+        const { error: emailError } = await supabase.functions.invoke('send-club-invite', {
+          body: { inviteId: insertedInvite.id }
+        });
+
+        if (emailError) {
+          console.error('Error sending invite email:', emailError);
+          // Don't fail the whole operation if email fails
+        }
+      }
+
       setInviteForm({ email: '', first_name: '', last_name: '', role: 'member' });
       setSelectedPermissions([]);
       loadOrganizationData();
       
       toast({
-        title: "Invito inviato!",
-        description: `Invito inviato a ${inviteForm.email}`,
+        title: "Invito inviato con email!",
+        description: `L'invito email è stato inviato a ${inviteForm.email}`,
       });
     } catch (error) {
       console.error('Error sending invite:', error);

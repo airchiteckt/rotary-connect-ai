@@ -40,28 +40,35 @@ serve(async (req) => {
 
     console.log('Invite details:', invite);
 
-    // For now, we'll just return success
-    // In a real implementation, you would integrate with an email service like Resend
-    const emailData = {
-      to: invite.email,
-      subject: `Invito al club ${invite.profiles.club_name}`,
-      html: `
-        <h2>Sei stato invitato a unirti al club ${invite.profiles.club_name}!</h2>
-        <p>Ciao ${invite.first_name},</p>
-        <p>${invite.profiles.full_name} ti ha invitato a unirti al club ${invite.profiles.club_name} come ${invite.role}.</p>
-        <p>Per accettare l'invito, registrati su RotaryManager e usa il codice: <strong>${invite.invite_token}</strong></p>
-        <p>L'invito scade il ${new Date(invite.expires_at).toLocaleDateString('it-IT')}</p>
-        <p>Grazie!</p>
-      `
-    };
+    // Call the send-email function to send the club invite email
+    const { error: emailError } = await supabase.functions.invoke('send-email', {
+      body: {
+        type: 'clubInvite',
+        to: invite.email,
+        data: {
+          firstName: invite.first_name,
+          lastName: invite.last_name,
+          email: invite.email,
+          clubName: invite.profiles.club_name,
+          inviterName: invite.profiles.full_name,
+          role: invite.role,
+          expiresAt: invite.expires_at,
+          registrationUrl: `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://fastclub.it'}/auth?invite=${invite.invite_token}`
+        }
+      }
+    });
 
-    console.log('Email would be sent:', emailData);
+    if (emailError) {
+      console.error('Error sending email:', emailError);
+      throw emailError;
+    }
+
+    console.log('Club invite email sent successfully');
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Invite processed successfully',
-        emailData 
+        message: 'Club invite email sent successfully'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

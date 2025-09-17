@@ -11,7 +11,7 @@ const corsHeaders = {
 };
 
 interface EmailRequest {
-  type: 'welcome' | 'confirmation' | 'notification' | 'campaign';
+  type: 'welcome' | 'confirmation' | 'notification' | 'campaign' | 'clubInvite';
   to: string | string[];
   subject?: string;
   data?: Record<string, any>;
@@ -123,6 +123,59 @@ const emailTemplates = {
     `
   },
   
+  clubInvite: {
+    subject: (data: any) => `Invito al club ${data.clubName || 'FastClub'}`,
+    html: (data: any) => `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <img src="https://ajgyrhddxljfauwneput.supabase.co/storage/v1/object/public/document-assets/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" style="height: 60px;">
+        </div>
+        
+        <h1 style="color: #2563eb; text-align: center; margin-bottom: 30px;">Sei stato invitato su FastClub!</h1>
+        
+        <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+          Ciao ${data.firstName || 'Caro collega'},
+        </p>
+        
+        <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+          <strong>${data.inviterName || 'Un amministratore'}</strong> ti ha invitato a unirti al club <strong>${data.clubName || 'FastClub'}</strong> come <strong>${data.role || 'membro'}</strong>.
+        </p>
+        
+        <div style="background-color: #f0f9ff; border-left: 4px solid #2563eb; padding: 20px; margin: 30px 0;">
+          <h3 style="color: #1e40af; margin-top: 0;">Per accettare l'invito:</h3>
+          <ol style="line-height: 1.8; margin: 0; padding-left: 20px;">
+            <li>Registrati su FastClub usando questo link</li>
+            <li>Completa la registrazione con la stessa email (${data.email})</li>
+            <li>Il tuo account verrà automaticamente collegato al club</li>
+          </ol>
+        </div>
+        
+        <div style="text-align: center; margin: 40px 0;">
+          <a href="${data.registrationUrl || 'https://fastclub.it/auth'}" style="background-color: #2563eb; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+            Registrati su FastClub
+          </a>
+        </div>
+        
+        <div style="background-color: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0; font-size: 14px; color: #92400e;">
+            <strong>⚠️ Importante:</strong> Questo invito scade il ${data.expiresAt ? new Date(data.expiresAt).toLocaleDateString('it-IT', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }) : '7 giorni'}. Non perdere l'opportunità di unirti al team!
+          </p>
+        </div>
+        
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 40px 0;">
+        
+        <p style="font-size: 14px; color: #6b7280; text-align: center;">
+          FastClub - La piattaforma digitale per il tuo club<br>
+          Hai ricevuto questa email perché sei stato invitato a unirti a ${data.clubName || 'un club'} su FastClub.
+        </p>
+      </div>
+    `
+  },
+
   campaign: {
     subject: (data: any) => data.subject || 'Aggiornamenti da FastClub',
     html: (data: any) => data.html || `
