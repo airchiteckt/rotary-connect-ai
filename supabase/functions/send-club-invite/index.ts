@@ -26,10 +26,7 @@ serve(async (req) => {
     // Get invite details
     const { data: invite, error: inviteError } = await supabase
       .from('club_invites')
-      .select(`
-        *,
-        profiles!inner(full_name, club_name)
-      `)
+      .select('*')
       .eq('id', inviteId)
       .single();
 
@@ -38,7 +35,20 @@ serve(async (req) => {
       throw inviteError;
     }
 
+    // Get club owner profile details
+    const { data: ownerProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name, club_name')
+      .eq('user_id', invite.user_id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching owner profile:', profileError);
+      throw profileError;
+    }
+
     console.log('Invite details:', invite);
+    console.log('Owner profile:', ownerProfile);
 
     // Call the send-email function to send the club invite email
     const { error: emailError } = await supabase.functions.invoke('send-email', {
@@ -49,8 +59,8 @@ serve(async (req) => {
           firstName: invite.first_name,
           lastName: invite.last_name,
           email: invite.email,
-          clubName: invite.profiles.club_name,
-          inviterName: invite.profiles.full_name,
+          clubName: ownerProfile.club_name,
+          inviterName: ownerProfile.full_name,
           role: invite.role,
           expiresAt: invite.expires_at,
           registrationUrl: `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://fastclub.it'}/auth?invite=${invite.invite_token}`
