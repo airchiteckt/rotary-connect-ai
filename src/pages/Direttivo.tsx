@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Building, Plus, Search, Filter, ArrowLeft, Users, FileText, Calendar, Vote } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Direttivo() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('riunioni');
+  const [boardMembers, setBoardMembers] = useState<Record<string, any>>({});
+  const [loadingMembers, setLoadingMembers] = useState(true);
 
   if (loading) {
     return (
@@ -26,6 +29,39 @@ export default function Direttivo() {
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
+
+  useEffect(() => {
+    loadBoardMembers();
+  }, [user]);
+
+  const loadBoardMembers = async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingMembers(true);
+      const { data: members, error } = await supabase
+        .from('members')
+        .select('*')
+        .eq('user_id', user.id)
+        .not('current_position', 'is', null);
+
+      if (error) throw error;
+
+      // Group members by position
+      const membersByPosition: Record<string, any> = {};
+      members?.forEach(member => {
+        if (member.current_position) {
+          membersByPosition[member.current_position] = member;
+        }
+      });
+
+      setBoardMembers(membersByPosition);
+    } catch (error) {
+      console.error('Errore nel caricamento membri direttivo:', error);
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
 
   const boardStats = [
     { label: 'Membri Direttivo', value: 0, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Users },
@@ -162,19 +198,34 @@ export default function Direttivo() {
 
             {/* Board Positions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {['Presidente', 'Vice Presidente', 'Segretario', 'Tesoriere', 'Prefetto', 'Consigliere'].map((position) => (
-                <Card key={position}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">{position}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Non assegnato</p>
-                      <Button size="sm" className="w-full">Assegna</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {['Presidente', 'Vice Presidente', 'Segretario', 'Tesoriere', 'Prefetto', 'Consigliere'].map((position) => {
+                const assignedMember = boardMembers[position];
+                return (
+                  <Card key={position}>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">{position}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {loadingMembers ? (
+                          <p className="text-sm text-muted-foreground">Caricamento...</p>
+                        ) : assignedMember ? (
+                          <div>
+                            <p className="text-sm font-medium">{assignedMember.first_name} {assignedMember.last_name}</p>
+                            <p className="text-xs text-muted-foreground">{assignedMember.email}</p>
+                            <Badge variant="secondary" className="text-xs mt-1">Assegnato</Badge>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Non assegnato</p>
+                        )}
+                        <Button size="sm" className="w-full" variant={assignedMember ? "outline" : "default"}>
+                          {assignedMember ? 'Modifica' : 'Assegna'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             <Card>
@@ -185,11 +236,40 @@ export default function Direttivo() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessun membro assegnato</p>
-                  <p className="text-sm">Inizia assegnando i ruoli del direttivo</p>
-                </div>
+                {loadingMembers ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-muted-foreground">Caricamento membri...</p>
+                  </div>
+                ) : Object.keys(boardMembers).length > 0 ? (
+                  <div className="space-y-4">
+                    {Object.entries(boardMembers).map(([position, member]) => (
+                      <div key={position} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <Users className="w-5 h-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{member.first_name} {member.last_name}</p>
+                            <p className="text-sm text-muted-foreground">{position}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">{member.email}</p>
+                          <Badge variant="secondary" className="text-xs">
+                            Dal {new Date(member.membership_start_date).toLocaleDateString('it-IT')}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Nessun membro assegnato</p>
+                    <p className="text-sm">Inizia assegnando i ruoli del direttivo</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
