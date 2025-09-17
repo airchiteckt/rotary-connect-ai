@@ -19,9 +19,10 @@ interface ProjectFormProps {
   onCancel: () => void;
   presetStatus?: 'ideas' | 'to_organize' | 'organized' | 'completed';
   project?: any; // For editing existing projects
+  commissionId?: string; // For assigning to specific commission
 }
 
-export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, project }: ProjectFormProps) {
+export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, project, commissionId }: ProjectFormProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -36,7 +37,7 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
     assigned_to: project?.assigned_to || '',
     notes: project?.notes || '',
     progress: project?.progress || 0,
-    commission_id: project?.commission_id || 'none'
+    commission_id: project?.commission_id || commissionId || 'none'
   });
 
   useEffect(() => {

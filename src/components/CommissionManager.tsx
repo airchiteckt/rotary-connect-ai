@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Users, Edit, Trash2 } from "lucide-react";
+import { Plus, Users, Edit, Trash2, Kanban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { CommissionForm } from './CommissionForm';
+import CommissionKanban from './CommissionKanban';
 import { Tables } from "@/integrations/supabase/types";
 
 type Commission = Tables<"commissions">;
@@ -16,6 +17,8 @@ export const CommissionManager = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedCommission, setSelectedCommission] = useState<Commission | undefined>();
+  const [showKanban, setShowKanban] = useState(false);
+  const [kanbanCommission, setKanbanCommission] = useState<Commission | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -87,8 +90,26 @@ export const CommissionManager = () => {
     return projects.filter(project => project.commission_id === commissionId);
   };
 
+  const openKanban = (commission: Commission) => {
+    setKanbanCommission(commission);
+    setShowKanban(true);
+  };
+
   if (isLoading) {
     return <div>Caricamento...</div>;
+  }
+
+  if (showKanban && kanbanCommission) {
+    return (
+      <CommissionKanban
+        commission={kanbanCommission}
+        onBack={() => {
+          setShowKanban(false);
+          setKanbanCommission(undefined);
+          fetchData(); // Refresh data when returning from kanban
+        }}
+      />
+    );
   }
 
   return (
@@ -145,6 +166,14 @@ export const CommissionManager = () => {
                       )}
                     </div>
                     <div className="flex gap-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => openKanban(commission)}
+                      >
+                        <Kanban className="w-4 h-4 mr-1" />
+                        Kanban
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
