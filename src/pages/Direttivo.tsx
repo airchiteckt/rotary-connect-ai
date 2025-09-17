@@ -8,12 +8,21 @@ import { Badge } from '@/components/ui/badge';
 import { Building, Plus, Search, Filter, ArrowLeft, Users, FileText, Calendar, Vote } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
+import { CommissionManager } from '@/components/CommissionManager';
+import { BoardMeetingManager } from '@/components/BoardMeetingManager';
+import { BoardResolutionManager } from '@/components/BoardResolutionManager';
 
 export default function Direttivo() {
   const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('riunioni');
   const [boardMembers, setBoardMembers] = useState<Record<string, any>>({});
   const [loadingMembers, setLoadingMembers] = useState(true);
+  const [stats, setStats] = useState({
+    boardMembers: 0,
+    meetings: 0,
+    resolutions: 0,
+    commissions: 0
+  });
 
   if (loading) {
     return (
@@ -32,7 +41,29 @@ export default function Direttivo() {
 
   useEffect(() => {
     loadBoardMembers();
+    loadStats();
   }, [user]);
+
+  const loadStats = async () => {
+    if (!user) return;
+    
+    try {
+      // Get commissions count
+      const { data: commissions, error: commissionsError } = await supabase
+        .from('commissions')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (commissionsError) throw commissionsError;
+
+      setStats(prev => ({
+        ...prev,
+        commissions: commissions?.length || 0
+      }));
+    } catch (error) {
+      console.error('Errore nel caricamento statistiche:', error);
+    }
+  };
 
   const loadBoardMembers = async () => {
     if (!user) return;
@@ -56,6 +87,10 @@ export default function Direttivo() {
       });
 
       setBoardMembers(membersByPosition);
+      setStats(prev => ({
+        ...prev,
+        boardMembers: Object.keys(membersByPosition).length
+      }));
     } catch (error) {
       console.error('Errore nel caricamento membri direttivo:', error);
     } finally {
@@ -64,10 +99,10 @@ export default function Direttivo() {
   };
 
   const boardStats = [
-    { label: 'Membri Direttivo', value: 0, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Users },
-    { label: 'Riunioni Mensili', value: 0, color: 'text-green-600', bgColor: 'bg-green-100', icon: Calendar },
-    { label: 'Delibere', value: 0, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Vote },
-    { label: 'Commissioni', value: 0, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Building }
+    { label: 'Membri Direttivo', value: stats.boardMembers, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Users },
+    { label: 'Riunioni Mensili', value: stats.meetings, color: 'text-green-600', bgColor: 'bg-green-100', icon: Calendar },
+    { label: 'Delibere', value: stats.resolutions, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Vote },
+    { label: 'Commissioni', value: stats.commissions, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Building }
   ];
 
   return (
@@ -127,47 +162,7 @@ export default function Direttivo() {
           </TabsList>
 
           <TabsContent value="riunioni" className="space-y-6">
-            {/* Meeting Overview */}
-            <Card className="border-indigo-200 bg-gradient-to-r from-indigo-50 to-blue-50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-indigo-600" />
-                  Gestione Riunioni
-                </CardTitle>
-                <CardDescription>
-                  Organizza e monitora le riunioni del consiglio direttivo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <Button className="flex-1">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nuova Riunione
-                  </Button>
-                  <Button variant="outline">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Calendario
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Upcoming Meetings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Prossime Riunioni</CardTitle>
-                <CardDescription>
-                  Riunioni programmate del consiglio direttivo
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessuna riunione programmata</p>
-                  <p className="text-sm">Pianifica la prima riunione del direttivo</p>
-                </div>
-              </CardContent>
-            </Card>
+            <BoardMeetingManager />
           </TabsContent>
 
           <TabsContent value="membri" className="space-y-6">
@@ -275,39 +270,11 @@ export default function Direttivo() {
           </TabsContent>
 
           <TabsContent value="commissioni">
-            <Card>
-              <CardHeader>
-                <CardTitle>Commissioni Attive</CardTitle>
-                <CardDescription>
-                  Gestisci le commissioni e i gruppi di lavoro
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Building className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessuna commissione attiva</p>
-                  <p className="text-sm">Crea la prima commissione del club</p>
-                </div>
-              </CardContent>
-            </Card>
+            <CommissionManager />
           </TabsContent>
 
           <TabsContent value="delibere">
-            <Card>
-              <CardHeader>
-                <CardTitle>Delibere e Decisioni</CardTitle>
-                <CardDescription>
-                  Registra e monitora le delibere del consiglio
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Vote className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Nessuna delibera registrata</p>
-                  <p className="text-sm">Le delibere del direttivo appariranno qui</p>
-                </div>
-              </CardContent>
-            </Card>
+            <BoardResolutionManager />
           </TabsContent>
         </Tabs>
       </main>
