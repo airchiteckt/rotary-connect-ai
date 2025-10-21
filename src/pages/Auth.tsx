@@ -135,7 +135,7 @@ export default function Auth() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" className="w-full">Accedi</TabsTrigger>
-              <TabsTrigger value="signup" className="w-full">Registra nuova associazione</TabsTrigger>
+              <TabsTrigger value="signup" className="w-full">Registra nuovo club</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
