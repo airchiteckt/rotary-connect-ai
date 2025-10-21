@@ -120,14 +120,13 @@ export default function ClubInvite() {
     setIsLoading(true);
 
     try {
-      // Sign up the user
+      // Sign up the user (without club_name to avoid being treated as club owner)
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: inviteDetails.email,
         password: password,
         options: {
           data: {
             full_name: `${inviteDetails.first_name} ${inviteDetails.last_name}`,
-            club_name: inviteDetails.club_name,
           },
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
@@ -139,6 +138,9 @@ export default function ClubInvite() {
         throw new Error('Registrazione fallita');
       }
 
+      // Wait for session to be established
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Accept the invite automatically
       const { error: acceptError } = await supabase.rpc('accept_club_invite', {
         invite_token_param: inviteToken
@@ -146,6 +148,7 @@ export default function ClubInvite() {
 
       if (acceptError) {
         console.error('Error accepting invite:', acceptError);
+        throw new Error('Errore durante l\'accettazione dell\'invito');
       }
 
       toast({
