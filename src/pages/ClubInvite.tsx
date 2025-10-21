@@ -153,7 +153,7 @@ export default function ClubInvite() {
 
       toast({
         title: "Registrazione completata!",
-        description: `Benvenuto in ${inviteDetails.club_name}! Controlla la tua email per confermare l'account.`,
+        description: `Benvenuto in ${inviteDetails.club_name}! Accesso in corso...`,
       });
 
       // Redirect to dashboard

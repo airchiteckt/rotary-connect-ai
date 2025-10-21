@@ -91,18 +91,18 @@ export default function Auth() {
         if (referralResult) {
           toast({
             title: "Registrazione completata",
-            description: "Verifica la tua email per attivare l'account. Hai ottenuto 3 mesi bonus con il codice referral!",
+            description: "Hai ottenuto 3 mesi bonus con il codice referral! Inizia subito il tuo periodo di prova.",
           });
         } else {
           toast({
             title: "Registrazione completata",
-            description: "Verifica la tua email per attivare l'account. Codice referral non valido o già utilizzato.",
+            description: "Codice referral non valido o già utilizzato. Inizia comunque il tuo periodo di prova!",
           });
         }
       } else {
         toast({
           title: "Registrazione completata",
-          description: "Verifica la tua email per attivare l'account. Inizia il tuo mese di prova gratuito!",
+          description: "Inizia subito i tuoi 120 giorni di prova gratuita!",
         });
       }
     } catch (error: any) {
