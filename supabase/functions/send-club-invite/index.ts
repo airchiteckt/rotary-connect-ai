@@ -62,7 +62,7 @@ serve(async (req) => {
         inviterName: ownerProfile.full_name,
         role: invite.role,
         expiresAt: invite.expires_at,
-        registrationUrl: `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovableproject.com') || 'https://fastclub.it'}/auth?invite=${invite.invite_token}`
+        registrationUrl: `https://www.fastclub.it/auth?invite=${invite.invite_token}`
       }
     };
 
