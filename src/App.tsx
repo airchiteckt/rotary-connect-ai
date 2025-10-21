@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import HelpSupport from "@/components/HelpSupport";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth";
+import ClubInvite from "./pages/ClubInvite";
 import Dashboard from "./pages/Dashboard";
 import Segreteria from "./pages/Segreteria";
 import Tesoreria from "./pages/Tesoreria";
@@ -41,6 +42,7 @@ const App = () => (
               <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/club-invite" element={<ClubInvite />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/segreteria" element={<Segreteria />} />
               <Route path="/tesoreria" element={<Tesoreria />} />
