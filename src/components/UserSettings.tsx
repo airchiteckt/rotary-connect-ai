@@ -99,43 +99,57 @@ export default function UserSettings() {
       
       const clubOwnerId = ownerIdData || user.id;
 
-      // Load club members
+      // Load club members with their invites to get emails
       const { data: clubMembersData, error: membersError } = await supabase
         .from('club_members')
-        .select('id, user_id, role, status, joined_at')
+        .select(`
+          id, 
+          user_id, 
+          role, 
+          status, 
+          joined_at
+        `)
         .eq('club_owner_id', clubOwnerId)
         .eq('status', 'active');
 
       if (membersError) throw membersError;
 
-      // Load all accepted invites to get email information
-      const { data: acceptedInvites } = await supabase
-        .from('club_invites')
-        .select('email, first_name, last_name')
-        .eq('user_id', clubOwnerId)
-        .eq('status', 'accepted');
-
-      // Get profile data for each member
+      // Get profile data and email for each member
       const membersWithProfiles = await Promise.all(
         (clubMembersData || []).map(async (member) => {
+          // Get profile
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name, role')
             .eq('user_id', member.user_id)
             .maybeSingle();
 
-          // Try to match with accepted invite based on name
-          const matchedInvite = acceptedInvites?.find(invite => {
-            const inviteName = `${invite.first_name} ${invite.last_name}`.toLowerCase();
-            const profileName = profile?.full_name?.toLowerCase() || '';
-            return inviteName === profileName;
-          });
+          // Get invite to retrieve email
+          const { data: invite } = await supabase
+            .from('club_invites')
+            .select('email, first_name, last_name')
+            .eq('accepted_by_user_id', member.user_id)
+            .maybeSingle();
+
+          // Get email using RPC function as fallback
+          let userEmail = invite?.email;
+          if (!userEmail) {
+            const { data: emailData } = await supabase.rpc('get_user_email', {
+              user_uuid: member.user_id
+            });
+            userEmail = emailData;
+          }
+
+          const displayName = profile?.full_name || 
+                            (invite?.first_name && invite?.last_name 
+                              ? `${invite.first_name} ${invite.last_name}` 
+                              : 'Nome non disponibile');
 
           return {
             ...member,
             profiles: {
-              full_name: profile?.full_name || 'Nome non disponibile',
-              email: matchedInvite?.email || 'Email non disponibile',
+              full_name: displayName,
+              email: userEmail || 'Email non disponibile',
               role: profile?.role || 'member'
             }
           };

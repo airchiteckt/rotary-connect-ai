@@ -61,6 +61,7 @@ export type Database = {
       }
       club_invites: {
         Row: {
+          accepted_by_user_id: string | null
           created_at: string
           email: string
           expires_at: string
@@ -75,6 +76,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepted_by_user_id?: string | null
           created_at?: string
           email: string
           expires_at?: string
@@ -89,6 +91,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepted_by_user_id?: string | null
           created_at?: string
           email?: string
           expires_at?: string
@@ -1033,6 +1036,10 @@ export type Database = {
           luogo: string
           nome: string
         }[]
+      }
+      get_user_email: {
+        Args: { user_uuid: string }
+        Returns: string
       }
       handle_referral_signup: {
         Args: { new_user_id: string; referral_code_input: string }
