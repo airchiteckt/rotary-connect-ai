@@ -102,7 +102,6 @@ export default function CommissionKanban({ commission, onBack }: CommissionKanba
       const { data, error } = await supabase
         .from('presidency_projects')
         .select('*')
-        .eq('user_id', user.id)
         .eq('commission_id', commission.id)
         .order('created_at', { ascending: true });
 

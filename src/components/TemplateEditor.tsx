@@ -65,7 +65,6 @@ export const TemplateEditor = ({ onTemplateSaved }: TemplateEditorProps = {}) =>
       const { data, error } = await supabase
         .from('document_templates')
         .select('*')
-        .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -138,7 +137,6 @@ export const TemplateEditor = ({ onTemplateSaved }: TemplateEditorProps = {}) =>
       const { data: existingTemplate } = await supabase
         .from('document_templates')
         .select('id')
-        .eq('user_id', user.id)
         .eq('is_default', true)
         .maybeSingle();
 

@@ -69,7 +69,6 @@ export default function PositionHistoryManager({ isOpen, onClose, member, onPosi
         .from('position_history')
         .select('*')
         .eq('member_id', member.id)
-        .eq('user_id', user.id)
         .order('start_date', { ascending: false });
 
       if (error) throw error;

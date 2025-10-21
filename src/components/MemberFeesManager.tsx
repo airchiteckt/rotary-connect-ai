@@ -69,7 +69,6 @@ export default function MemberFeesManager({ onStatsUpdate }: MemberFeesManagerPr
       const { data: membersData, error: membersError } = await supabase
         .from('members')
         .select('*')
-        .eq('user_id', user.id)
         .eq('status', 'active')
         .order('first_name');
 
@@ -82,7 +81,6 @@ export default function MemberFeesManager({ onStatsUpdate }: MemberFeesManagerPr
           *,
           members!inner(first_name, last_name)
         `)
-        .eq('user_id', user.id)
         .order('due_date', { ascending: false });
 
       if (feesError) throw feesError;

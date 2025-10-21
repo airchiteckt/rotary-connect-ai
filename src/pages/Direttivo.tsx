@@ -51,8 +51,7 @@ export default function Direttivo() {
       // Get commissions count
       const { data: commissions, error: commissionsError } = await supabase
         .from('commissions')
-        .select('id')
-        .eq('user_id', user.id);
+        .select('id');
 
       if (commissionsError) throw commissionsError;
 
@@ -73,7 +72,6 @@ export default function Direttivo() {
       const { data: members, error } = await supabase
         .from('members')
         .select('*')
-        .eq('user_id', user.id)
         .not('current_position', 'is', null);
 
       if (error) throw error;

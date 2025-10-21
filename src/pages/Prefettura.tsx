@@ -44,20 +44,17 @@ export default function Prefettura() {
       // Load events and ceremonies
       const { data: events } = await supabase
         .from('prefecture_events')
-        .select('event_type, ceremony_type')
-        .eq('user_id', user.id);
+        .select('event_type, ceremony_type');
 
       // Load protocols
       const { data: protocols } = await supabase
         .from('protocols')
-        .select('id')
-        .eq('user_id', user.id);
+        .select('id');
 
       // Load VIP guests
       const { data: guests } = await supabase
         .from('vip_guests')
         .select('id')
-        .eq('user_id', user.id)
         .eq('status', 'active');
 
       const totalEvents = events?.length || 0;

@@ -137,7 +137,6 @@ export default function CreateDocument() {
       const { data, error } = await supabase
         .from('document_templates')
         .select('*')
-        .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;

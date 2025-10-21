@@ -43,7 +43,6 @@ export default function UpcomingCeremonies({ onStatsUpdate }: UpcomingCeremonies
       const { data, error } = await supabase
         .from('prefecture_events')
         .select('*')
-        .eq('user_id', user.id)
         .eq('event_type', 'ceremony')
         .gte('event_date', new Date().toISOString().split('T')[0])
         .order('event_date', { ascending: true })

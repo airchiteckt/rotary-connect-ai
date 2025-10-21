@@ -55,7 +55,6 @@ export const BoardMeetingManager = () => {
       const { data, error } = await supabase
         .from('prefecture_events')
         .select('*')
-        .eq('user_id', user.id)
         .eq('event_type', 'meeting')
         .order('event_date', { ascending: true });
 

@@ -38,8 +38,7 @@ export default function Presidenza() {
       // Load projects
       const { data: projects } = await supabase
         .from('presidency_projects')
-        .select('status')
-        .eq('user_id', user.id);
+        .select('status');
 
       const totalProjects = projects?.length || 0;
       const activeProjects = projects?.filter(p => p.status === 'organized' || p.status === 'to_organize').length || 0;

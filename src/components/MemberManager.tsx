@@ -83,7 +83,6 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
       const { data, error } = await supabase
         .from('members')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

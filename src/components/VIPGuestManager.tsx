@@ -55,7 +55,6 @@ export default function VIPGuestManager() {
       const { data, error } = await supabase
         .from('vip_guests')
         .select('*')
-        .eq('user_id', user.id)
         .order('name');
 
       if (error) throw error;

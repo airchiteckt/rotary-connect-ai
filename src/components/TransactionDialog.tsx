@@ -55,15 +55,14 @@ export default function TransactionDialog({
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data: membersData, error } = await supabase
         .from('members')
         .select('id, first_name, last_name')
-        .eq('user_id', user.id)
         .eq('status', 'active')
         .order('first_name');
 
       if (error) throw error;
-      setMembers(data || []);
+      setMembers(membersData || []);
     } catch (error) {
       console.error('Errore nel caricamento soci:', error);
     }

@@ -31,12 +31,10 @@ export const CommissionManager = () => {
         supabase
           .from('commissions')
           .select('*')
-          .eq('user_id', user.id)
           .order('name'),
         supabase
           .from('presidency_projects')
           .select('*')
-          .eq('user_id', user.id)
           .not('commission_id', 'is', null)
       ]);
 

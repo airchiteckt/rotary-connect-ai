@@ -88,7 +88,6 @@ export default function Tesoreria() {
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
         .order('transaction_date', { ascending: false })
         .limit(50);
 
@@ -101,7 +100,6 @@ export default function Tesoreria() {
           *,
           members!inner(first_name, last_name)
         `)
-        .eq('user_id', user.id)
         .order('due_date', { ascending: false });
 
       if (feesError) throw feesError;

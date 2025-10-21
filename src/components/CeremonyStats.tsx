@@ -35,7 +35,6 @@ export default function CeremonyStats({ stats, onCreateCeremony }: CeremonyStats
       const { data: ceremonies } = await supabase
         .from('prefecture_events')
         .select('ceremony_type')
-        .eq('user_id', user.id)
         .eq('event_type', 'ceremony');
 
       const statsCount = {

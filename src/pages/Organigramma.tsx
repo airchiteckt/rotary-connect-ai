@@ -58,7 +58,6 @@ export default function Organigramma() {
       const { data: membersData, error } = await supabase
         .from('members')
         .select('id, first_name, last_name, current_position, status')
-        .eq('user_id', user.id)
         .eq('status', 'active');
 
       if (error) throw error;

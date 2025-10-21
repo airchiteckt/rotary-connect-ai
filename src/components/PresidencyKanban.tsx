@@ -97,7 +97,6 @@ export default function PresidencyKanban({ onStatsUpdate }: PresidencyKanbanProp
       const { data, error } = await supabase
         .from('presidency_projects')
         .select('*')
-        .eq('user_id', user.id)
         .order('created_at', { ascending: true });
 
       if (error) throw error;

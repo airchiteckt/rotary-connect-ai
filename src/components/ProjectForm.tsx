@@ -48,7 +48,6 @@ export default function ProjectForm({ onProjectCreated, onCancel, presetStatus, 
         const { data } = await supabase
           .from('commissions')
           .select('*')
-          .eq('user_id', user.id)
           .order('name');
         
         if (data) setCommissions(data);

@@ -39,7 +39,6 @@ export default function PrefectureCalendar() {
       const { data, error } = await supabase
         .from('prefecture_events')
         .select('*')
-        .eq('user_id', user.id)
         .order('event_date', { ascending: true });
 
       if (error) throw error;
