@@ -93,37 +93,38 @@ export default function UserSettings() {
     if (!user) return;
 
     try {
-      // Load club members from club_members table
+      // Get the club owner ID
+      const { data: ownerIdData } = await supabase
+        .rpc('get_club_owner_id', { user_uuid: user.id });
+      
+      const clubOwnerId = ownerIdData || user.id;
+
+      // Load club members with profiles using a join
       const { data: clubMembersData, error: membersError } = await supabase
         .from('club_members')
-        .select('id, user_id, role, status, joined_at')
-        .eq('club_owner_id', user.id)
+        .select(`
+          id, 
+          user_id, 
+          role, 
+          status, 
+          joined_at,
+          profiles:user_id (
+            full_name,
+            role
+          )
+        `)
+        .eq('club_owner_id', clubOwnerId)
         .eq('status', 'active');
 
       if (membersError) throw membersError;
 
-      // Get profile data for each member
-      const membersWithProfiles = [];
-      for (const member of clubMembersData || []) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, role')
-          .eq('user_id', member.user_id)
-          .single();
-
-        membersWithProfiles.push({
-          ...member,
-          profiles: profile || { full_name: 'Nome non disponibile', role: 'member' }
-        });
-      }
-
-      setClubMembers(membersWithProfiles);
+      setClubMembers(clubMembersData || []);
 
       // Load pending invites
       const { data: invites, error: invitesError } = await supabase
         .from('club_invites')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', clubOwnerId)
         .eq('status', 'pending');
 
       if (invitesError) throw invitesError;
