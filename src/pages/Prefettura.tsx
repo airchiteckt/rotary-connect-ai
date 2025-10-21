@@ -179,10 +179,10 @@ export default function Prefettura() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="w-5 h-5 text-red-600" />
-                  Gestione Cerimoniale
+                  Gestione Cerimonie e Eventi
                 </CardTitle>
                 <CardDescription>
-                  Organizza cerimonie e eventi ufficiali del club
+                  Organizza cerimonie, eventi ufficiali e attività del club
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -206,6 +206,27 @@ export default function Prefettura() {
                           loadStats();
                         }}
                         onCancel={() => setShowCeremonyForm(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="flex-1">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Nuovo Evento
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Crea Nuovo Evento</DialogTitle>
+                        <DialogDescription>Compila i dettagli dell'evento.</DialogDescription>
+                      </DialogHeader>
+                      <EventForm 
+                        onEventCreated={() => {
+                          setShowEventForm(false);
+                          loadStats();
+                        }}
+                        onCancel={() => setShowEventForm(false)}
                       />
                     </DialogContent>
                   </Dialog>

@@ -82,7 +82,6 @@ export default function CeremonyKanban({ onStatsUpdate }: CeremonyKanbanProps) {
         .from('prefecture_events')
         .select('*')
         .eq('user_id', user.id)
-        .eq('event_type', 'ceremony')
         .order('event_date', { ascending: true });
 
       if (error) throw error;
@@ -214,9 +213,9 @@ export default function CeremonyKanban({ onStatsUpdate }: CeremonyKanbanProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Kanban Cerimonie</h3>
+          <h3 className="text-lg font-semibold">Kanban Cerimonie e Eventi</h3>
           <p className="text-sm text-muted-foreground">
-            Trascina le cerimonie tra le colonne per cambiare stato
+            Trascina cerimonie ed eventi tra le colonne per cambiare stato
           </p>
         </div>
         <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
@@ -282,13 +281,17 @@ export default function CeremonyKanban({ onStatsUpdate }: CeremonyKanbanProps) {
                             }`}
                           >
                             <CardHeader className="pb-2">
-                              <div className="flex items-start justify-between">
-                                <CardTitle className="text-sm font-medium">
+                              <div className="flex items-start justify-between gap-2">
+                                <CardTitle className="text-sm font-medium flex-1">
                                   {ceremony.title}
                                 </CardTitle>
-                                <Badge className={getCeremonyTypeColor(ceremony.ceremony_type)}>
-                                  {getCeremonyTypeLabel(ceremony.ceremony_type)}
-                                </Badge>
+                                <div className="flex flex-col gap-1">
+                                  {ceremony.ceremony_type && (
+                                    <Badge className={getCeremonyTypeColor(ceremony.ceremony_type)}>
+                                      {getCeremonyTypeLabel(ceremony.ceremony_type)}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </CardHeader>
                             <CardContent className="pt-0">
