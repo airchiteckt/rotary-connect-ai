@@ -1,1 +1,22 @@
 project_id = "ajgyrhddxljfauwneput"
+
+[functions]
+enabled = true
+
+[functions.generate-document-ai]
+verify_jwt = true
+
+[functions.generate-flyer-ai]
+verify_jwt = true
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.send-club-invite]
+verify_jwt = true
+
+[functions.send-confirmation-email]
+verify_jwt = false
+
+[functions.speech-to-text]
+verify_jwt = true
