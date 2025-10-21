@@ -179,7 +179,7 @@ export default function Auth() {
                   🏛️ Crea una nuova associazione
                 </p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                  Inizia la gestione della tua associazione con 30 giorni di prova gratuita
+                  Inizia la gestione della tua associazione con 120 giorni di prova gratuita
                 </p>
               </div>
               
@@ -252,7 +252,7 @@ export default function Auth() {
                 </div>
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Registrazione...' : 'Crea la tua associazione - Prova 30 giorni gratis'}
+                  {isLoading ? 'Registrazione...' : 'Crea la tua associazione - Prova 120 giorni gratis'}
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground">
