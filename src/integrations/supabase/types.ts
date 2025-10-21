@@ -984,6 +984,10 @@ export type Database = {
         Args: { invite_token_param: string }
         Returns: boolean
       }
+      auto_confirm_invited_user: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       calculate_club_price: {
         Args: { member_count: number }
         Returns: number
