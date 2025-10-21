@@ -14,7 +14,6 @@ import PrefectureCalendar from '@/components/PrefectureCalendar';
 import EventForm from '@/components/EventForm';
 import VIPGuestManager from '@/components/VIPGuestManager';
 import ProtocolManager from '@/components/ProtocolManager';
-import CeremonyStats from '@/components/CeremonyStats';
 import UpcomingCeremonies from '@/components/UpcomingCeremonies';
 import EventManager from '@/components/EventManager';
 import CeremonyKanban from '@/components/CeremonyKanban';
@@ -237,14 +236,6 @@ export default function Prefettura() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Ceremony Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <CeremonyStats 
-                stats={stats} 
-                onCreateCeremony={() => setShowEventForm(true)} 
-              />
-            </div>
 
             {/* Kanban Board for Ceremonies */}
             <CeremonyKanban onStatsUpdate={loadStats} />
