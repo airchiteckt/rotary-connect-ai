@@ -11,7 +11,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import HelpSupport from '@/components/HelpSupport';
 
 export default function Dashboard() {
-  const { user, loading, isTrialValid, profile, signOut, checkTrialStatus } = useAuth();
+  const { user, loading, isTrialValid, profile, clubOwnerProfile, signOut, checkTrialStatus } = useAuth();
   const { hasPermission } = usePermissions();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -39,15 +39,18 @@ export default function Dashboard() {
     return <Navigate to="/auth" replace />;
   }
 
-  // Show trial expired message only if subscription is trial (not active/premium)
-  if (!isTrialValid && profile?.subscription_type !== 'active') {
+  // Use club owner's subscription status
+  const subscriptionProfile = clubOwnerProfile || profile;
+
+  // Show trial expired message only if club subscription is trial (not active/premium)
+  if (!isTrialValid && subscriptionProfile?.subscription_type !== 'active') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
         <Card className="max-w-md text-center">
           <CardHeader>
-            <CardTitle className="text-red-600">Periodo di Prova Scaduto</CardTitle>
+            <CardTitle className="text-red-600">Periodo di Prova del Club Scaduto</CardTitle>
             <CardDescription>
-              Il tuo periodo di prova gratuito è terminato.
+              Il periodo di prova del club è terminato.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -151,8 +154,13 @@ export default function Dashboard() {
   // Filter menu items based on user permissions
   const accessibleMenuItems = menuItems.filter(item => hasPermission(item.section));
 
-  const daysRemaining = profile?.trial_start_date ? 
-    Math.max(0, 120 - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
+  // Calculate days remaining based on club owner's subscription
+  const trialStartDate = subscriptionProfile?.trial_start_date ? new Date(subscriptionProfile.trial_start_date) : new Date();
+  const totalTrialDays = 120; // 4 months
+  const bonusDays = (subscriptionProfile?.bonus_months || 0) * 30;
+  const totalDays = totalTrialDays + bonusDays;
+  const daysSinceStart = Math.floor((new Date().getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
+  const daysRemaining = Math.max(0, totalDays - daysSinceStart);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
@@ -173,7 +181,7 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
-              {profile?.subscription_type === 'trial' && (
+              {subscriptionProfile?.subscription_type === 'trial' && (
                 <Badge variant={daysRemaining > 7 ? "default" : "destructive"} className="text-xs sm:text-sm">
                   <span className="hidden sm:inline">{daysRemaining} giorni rimasti</span>
                   <span className="sm:hidden">{daysRemaining}g</span>
@@ -333,17 +341,22 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Trial Notice - Only show for trial accounts */}
-        {profile?.subscription_type === 'trial' && (
+        {/* Trial Notice - Only show for club trial subscriptions, not premium */}
+        {subscriptionProfile?.subscription_type === 'trial' && (
           <Card className="mt-6 sm:mt-8 border-amber-200 bg-amber-50/50">
             <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
               <div className="flex items-start sm:items-center space-x-3">
                 <Calendar className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 sm:mt-0" />
                 <div className="min-w-0">
-                  <p className="font-medium text-amber-800 text-sm sm:text-base">Periodo di Prova Attivo</p>
+                  <p className="font-medium text-amber-800 text-sm sm:text-base">Periodo di Prova del Club Attivo</p>
                   <p className="text-xs sm:text-sm text-amber-700 mt-1">
-                    Hai ancora {daysRemaining} giorni per testare tutte le funzionalità del gestionale.
+                    Al club rimangono {daysRemaining} giorni per testare tutte le funzionalità del gestionale.
                   </p>
+                  {profile?.role === 'admin' && (
+                    <Button variant="outline" size="sm" className="mt-2 text-amber-800 border-amber-300 hover:bg-amber-100" onClick={() => navigate("/dashboard")}>
+                      Attiva Abbonamento Premium
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>

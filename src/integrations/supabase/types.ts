@@ -1014,6 +1014,10 @@ export type Database = {
         Args: { club_owner_uuid: string }
         Returns: number
       }
+      get_club_owner_id: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       get_district_events_for_month: {
         Args: { target_month?: number; user_uuid: string }
         Returns: {

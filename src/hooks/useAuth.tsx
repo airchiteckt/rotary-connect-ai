@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   isTrialValid: boolean;
   profile: any | null;
+  clubOwnerProfile: any | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, userData: { full_name: string; club_name: string }) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isTrialValid, setIsTrialValid] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
+  const [clubOwnerProfile, setClubOwnerProfile] = useState<any | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -72,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (userId: string) => {
     try {
+      // Fetch user's own profile
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -80,6 +83,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) throw error;
       setProfile(data);
+
+      // Get club owner ID
+      const { data: ownerIdData, error: ownerError } = await supabase.rpc('get_club_owner_id', {
+        user_uuid: userId
+      });
+
+      if (ownerError) {
+        console.error('Error getting club owner ID:', ownerError);
+        setClubOwnerProfile(data); // Fallback to user's own profile
+        return;
+      }
+
+      // If user is not the owner, fetch club owner's profile
+      if (ownerIdData && ownerIdData !== userId) {
+        const { data: ownerProfile, error: ownerProfileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', ownerIdData)
+          .single();
+
+        if (ownerProfileError) {
+          console.error('Error fetching club owner profile:', ownerProfileError);
+          setClubOwnerProfile(data); // Fallback to user's own profile
+          return;
+        }
+        setClubOwnerProfile(ownerProfile);
+      } else {
+        // User is the owner, use their own profile
+        setClubOwnerProfile(data);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
@@ -148,6 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     isTrialValid,
     profile,
+    clubOwnerProfile,
     signIn,
     signUp,
     signOut,

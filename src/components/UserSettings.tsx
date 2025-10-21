@@ -22,7 +22,7 @@ import { type AppSection } from '@/hooks/usePermissions';
 import PublicPageManager from '@/components/PublicPageManager';
 
 export default function UserSettings() {
-  const { user, profile, signOut, isTrialValid } = useAuth();
+  const { user, profile, clubOwnerProfile, signOut, isTrialValid } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -369,9 +369,12 @@ export default function UserSettings() {
     }
   };
 
-  const totalTrialDays = 120 + ((profile?.bonus_months || 0) * 30);
-  const daysRemaining = profile?.trial_start_date ? 
-    Math.max(0, totalTrialDays - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
+  // Use club owner's subscription status
+  const subscriptionProfile = clubOwnerProfile || profile;
+  
+  const totalTrialDays = 120 + ((subscriptionProfile?.bonus_months || 0) * 30);
+  const daysRemaining = subscriptionProfile?.trial_start_date ? 
+    Math.max(0, totalTrialDays - Math.floor((Date.now() - new Date(subscriptionProfile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
   
   const copyReferralCode = () => {
     if (profile?.referral_code) {
@@ -446,15 +449,15 @@ export default function UserSettings() {
                         {profile?.role === 'treasurer' && '💰 '}
                         {profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || 'Membro'}
                       </Badge>
-                      {profile?.subscription_type === 'trial' && (
+                      {subscriptionProfile?.subscription_type === 'trial' && (
                         <Badge variant={daysRemaining > 7 ? "default" : "destructive"}>
-                          {daysRemaining} giorni di prova rimasti
+                          {daysRemaining} giorni del club rimasti
                         </Badge>
                       )}
-                      {profile?.bonus_months > 0 && (
+                      {subscriptionProfile?.bonus_months > 0 && (
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <Gift className="w-3 h-3" />
-                          +{profile.bonus_months} mesi bonus
+                          +{subscriptionProfile.bonus_months} mesi bonus
                         </Badge>
                       )}
                     </div>
@@ -540,9 +543,9 @@ export default function UserSettings() {
                     {profile?.created_at ? format(new Date(profile.created_at), 'dd MMMM yyyy', { locale: it }) : 'N/A'}
                   </span>
                 </div>
-                {profile?.subscription_type === 'trial' && (
+                {subscriptionProfile?.subscription_type === 'trial' && (
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Stato Account</span>
+                    <span className="text-sm font-medium">Stato Club</span>
                     <Badge variant={daysRemaining > 0 ? "default" : "destructive"}>
                       {daysRemaining > 0 ? 'Prova Attiva' : 'Prova Scaduta'}
                     </Badge>
@@ -582,17 +585,17 @@ export default function UserSettings() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="text-sm font-medium">Piano Attuale</span>
+                    <span className="text-sm font-medium">Piano del Club</span>
                     <p className="text-xs text-muted-foreground">
-                      {profile?.subscription_type === 'trial' ? 'Prova Gratuita' : 
-                       profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
+                      {subscriptionProfile?.subscription_type === 'trial' ? 'Prova Gratuita' : 
+                       subscriptionProfile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
                     </p>
                   </div>
-                  <Badge variant={profile?.subscription_type === 'active' ? "default" : 
-                                profile?.subscription_type === 'trial' ? "secondary" : "destructive"}>
-                    {profile?.subscription_type === 'active' && <Crown className="w-3 h-3 mr-1" />}
-                    {profile?.subscription_type === 'trial' ? 'Prova' : 
-                     profile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
+                  <Badge variant={subscriptionProfile?.subscription_type === 'active' ? "default" : 
+                                subscriptionProfile?.subscription_type === 'trial' ? "secondary" : "destructive"}>
+                    {subscriptionProfile?.subscription_type === 'active' && <Crown className="w-3 h-3 mr-1" />}
+                    {subscriptionProfile?.subscription_type === 'trial' ? 'Prova' : 
+                     subscriptionProfile?.subscription_type === 'active' ? 'Premium' : 'Scaduto'}
                   </Badge>
                 </div>
 
