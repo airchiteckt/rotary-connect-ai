@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { CommissionManager } from '@/components/CommissionManager';
 import { BoardMeetingManager } from '@/components/BoardMeetingManager';
 import { BoardResolutionManager } from '@/components/BoardResolutionManager';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Direttivo() {
   const { user, loading } = useAuth();
@@ -132,6 +133,8 @@ export default function Direttivo() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="direttivo" />
+        
         {/* Board Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {boardStats.map((stat, index) => (

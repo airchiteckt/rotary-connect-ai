@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { FlyerGenerator } from '@/components/FlyerGenerator';
 import { useComingSoonToast } from '@/components/ComingSoonToast';
 import HelpSupport from '@/components/HelpSupport';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Comunicazione() {
   const { user, loading } = useAuth();
@@ -95,6 +96,8 @@ export default function Comunicazione() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="comunicazione" />
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="locandine">Locandine AI</TabsTrigger>

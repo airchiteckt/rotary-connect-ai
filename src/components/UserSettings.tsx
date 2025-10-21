@@ -47,6 +47,7 @@ export default function UserSettings() {
     role: 'member'
   });
   const [selectedPermissions, setSelectedPermissions] = useState<AppSection[]>([]);
+  const [responsibleSections, setResponsibleSections] = useState<AppSection[]>([]);
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<any>(null);
 
@@ -282,6 +283,7 @@ export default function UserSettings() {
 
       setInviteForm({ email: '', first_name: '', last_name: '', role: 'member' });
       setSelectedPermissions([]);
+      setResponsibleSections([]);
       loadOrganizationData();
       
       toast({
@@ -947,6 +949,8 @@ export default function UserSettings() {
                         <SectionPermissionSelector
                           selectedPermissions={selectedPermissions}
                           onPermissionsChange={setSelectedPermissions}
+                          responsibleSections={responsibleSections}
+                          onResponsibleChange={setResponsibleSections}
                           title="Sezioni Accessibili"
                         />
                       )}

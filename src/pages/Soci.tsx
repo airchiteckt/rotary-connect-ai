@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useComingSoonToast } from '@/components/ComingSoonToast';
 import HelpSupport from '@/components/HelpSupport';
 import { useToast } from '@/hooks/use-toast';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Soci() {
   const { user, loading } = useAuth();
@@ -81,6 +82,8 @@ export default function Soci() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="soci" />
+        
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {displayStats.map((stat, index) => (

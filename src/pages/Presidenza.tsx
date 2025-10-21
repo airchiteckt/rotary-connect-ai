@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PresidencyKanban from '@/components/PresidencyKanban';
 import ProjectForm from '@/components/ProjectForm';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Presidenza() {
   const { user, loading } = useAuth();
@@ -126,6 +127,8 @@ export default function Presidenza() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="presidenza" />
+        
         {/* Presidential Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {presidentialStats.map((stat, index) => (

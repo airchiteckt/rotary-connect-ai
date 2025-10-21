@@ -17,6 +17,7 @@ import ProtocolManager from '@/components/ProtocolManager';
 import UpcomingCeremonies from '@/components/UpcomingCeremonies';
 import EventManager from '@/components/EventManager';
 import CeremonyKanban from '@/components/CeremonyKanban';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Prefettura() {
   const { user, loading } = useAuth();
@@ -141,6 +142,8 @@ export default function Prefettura() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="prefettura" />
+        
         {/* Protocol Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {protocolStats.map((stat, index) => (

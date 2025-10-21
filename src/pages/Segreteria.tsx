@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { TemplateEditor } from '@/components/TemplateEditor';
 import SegreteriAI from '@/components/SegreteriAI';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 interface Document {
   id: string;
@@ -225,6 +226,8 @@ export default function Segreteria() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="segreteria" />
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="documenti">Documenti</TabsTrigger>

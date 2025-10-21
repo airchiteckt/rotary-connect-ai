@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { CommissionManager } from '../components/CommissionManager';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 const Commissioni = () => {
   return (
@@ -23,6 +24,8 @@ const Commissioni = () => {
             </Button>
           </Link>
         </div>
+
+        <SectionResponsible section="commissioni" />
 
         <Card>
           <CardContent className="p-6">

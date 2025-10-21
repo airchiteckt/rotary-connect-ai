@@ -9,6 +9,7 @@ import { Users, Plus, Search, ArrowLeft, Crown, UserCheck, Building, User } from
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 interface Member {
   id: string;
@@ -180,6 +181,8 @@ export default function Organigramma() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="organigramma" />
+        
         {/* Statistics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {organigraphyStats.map((stat, index) => (

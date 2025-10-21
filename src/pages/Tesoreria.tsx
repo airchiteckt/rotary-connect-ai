@@ -15,6 +15,7 @@ import TransactionDialog from '@/components/TransactionDialog';
 import MemberFeesManager from '@/components/MemberFeesManager';
 import { useComingSoonToast } from '@/components/ComingSoonToast';
 import HelpSupport from '@/components/HelpSupport';
+import { SectionResponsible } from '@/components/SectionResponsible';
 
 interface Transaction {
   id: string;
@@ -247,6 +248,8 @@ export default function Tesoreria() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
+        <SectionResponsible section="tesoreria" />
+        
         {/* Financial Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {treasuryStats.map((stat, index) => (
