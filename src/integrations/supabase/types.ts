@@ -483,6 +483,7 @@ export type Database = {
           club_owner_id: string
           created_at: string
           id: string
+          is_responsible: boolean
           section: Database["public"]["Enums"]["app_section"]
           updated_at: string
           user_id: string
@@ -491,6 +492,7 @@ export type Database = {
           club_owner_id: string
           created_at?: string
           id?: string
+          is_responsible?: boolean
           section: Database["public"]["Enums"]["app_section"]
           updated_at?: string
           user_id: string
@@ -499,6 +501,7 @@ export type Database = {
           club_owner_id?: string
           created_at?: string
           id?: string
+          is_responsible?: boolean
           section?: Database["public"]["Enums"]["app_section"]
           updated_at?: string
           user_id?: string

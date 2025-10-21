@@ -28,6 +28,7 @@ export function MemberPermissionsManager({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [memberPermissions, setMemberPermissions] = useState<AppSection[]>([]);
+  const [responsibleSections, setResponsibleSections] = useState<AppSection[]>([]);
 
   useEffect(() => {
     if (isOpen && member) {
@@ -41,13 +42,18 @@ export function MemberPermissionsManager({
     try {
       const { data: permissions, error } = await supabase
         .from('member_permissions')
-        .select('section')
+        .select('section, is_responsible')
         .eq('user_id', member.user_id)
         .eq('club_owner_id', user?.id);
 
       if (error) throw error;
 
       setMemberPermissions(permissions.map(p => p.section as AppSection));
+      setResponsibleSections(
+        permissions
+          .filter(p => p.is_responsible)
+          .map(p => p.section as AppSection)
+      );
     } catch (error) {
       console.error('Error loading member permissions:', error);
       toast({
@@ -75,7 +81,8 @@ export function MemberPermissionsManager({
         const permissionsToInsert = memberPermissions.map(section => ({
           user_id: member.user_id,
           section: section,
-          club_owner_id: user.id
+          club_owner_id: user.id,
+          is_responsible: responsibleSections.includes(section)
         }));
 
         const { error: insertError } = await supabase
@@ -134,6 +141,8 @@ export function MemberPermissionsManager({
           <SectionPermissionSelector
             selectedPermissions={memberPermissions}
             onPermissionsChange={setMemberPermissions}
+            responsibleSections={responsibleSections}
+            onResponsibleChange={setResponsibleSections}
             title="Sezioni Accessibili"
           />
           
