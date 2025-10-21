@@ -367,59 +367,20 @@ export default function ClubInviteManager() {
         </CardContent>
       </Card>
 
-      {/* Active Members */}
-      {members.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Membri Attivi</CardTitle>
-            <CardDescription>Membri che hanno accettato l'invito al club</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Ruolo</TableHead>
-                  <TableHead>Data Adesione</TableHead>
-                  <TableHead>Stato</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">
-                      {member.profiles.full_name}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{member.role}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(member.joined_at), 'dd MMM yyyy', { locale: it })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={member.status === 'active' ? 'default' : 'secondary'}>
-                        {member.status === 'active' ? 'Attivo' : member.status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Pending Invites */}
+      {/* All Club Members - Active and Pending */}
       <Card>
         <CardHeader>
-          <CardTitle>Inviti Inviati</CardTitle>
-          <CardDescription>Gestisci gli inviti inviati ai nuovi membri</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Membri del Club ({members.length + invites.filter(i => i.status === 'pending').length})
+          </CardTitle>
+          <CardDescription>Tutti i membri del club inclusi inviti in attesa</CardDescription>
         </CardHeader>
         <CardContent>
-          {invites.length === 0 ? (
+          {members.length === 0 && invites.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <Mail className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Nessun invito inviato ancora</p>
+              <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>Nessun membro ancora</p>
               <p className="text-sm">Inizia invitando i membri del tuo club</p>
             </div>
           ) : (
@@ -430,14 +391,39 @@ export default function ClubInviteManager() {
                   <TableHead>Email</TableHead>
                   <TableHead>Ruolo</TableHead>
                   <TableHead>Stato</TableHead>
-                  <TableHead>Data Invito</TableHead>
-                  <TableHead>Scadenza</TableHead>
+                  <TableHead>Data</TableHead>
                   <TableHead>Azioni</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invites.map((invite) => (
-                  <TableRow key={invite.id}>
+                {/* Active Members */}
+                {members.map((member) => (
+                  <TableRow key={`member-${member.id}`}>
+                    <TableCell className="font-medium">
+                      {member.profiles.full_name}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">-</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{member.role}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <Badge variant="default">Attivo</Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(member.joined_at), 'dd MMM yyyy', { locale: it })}
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-muted-foreground text-sm">-</span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                
+                {/* Pending Invites */}
+                {invites.filter(i => i.status === 'pending').map((invite) => (
+                  <TableRow key={`invite-${invite.id}`}>
                     <TableCell className="font-medium">
                       {invite.first_name} {invite.last_name}
                     </TableCell>
@@ -447,26 +433,22 @@ export default function ClubInviteManager() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {getStatusIcon(invite.status)}
-                        {getStatusBadge(invite.status)}
+                        <Clock className="w-4 h-4 text-yellow-500" />
+                        <Badge variant="secondary">In attesa</Badge>
                       </div>
                     </TableCell>
                     <TableCell>
                       {format(new Date(invite.created_at), 'dd MMM yyyy', { locale: it })}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(invite.expires_at), 'dd MMM yyyy', { locale: it })}
-                    </TableCell>
-                    <TableCell>
-                      {invite.status === 'pending' && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteInvite(invite.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteInvite(invite.id)}
+                        title="Elimina invito"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
