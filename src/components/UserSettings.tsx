@@ -892,11 +892,14 @@ export default function UserSettings() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Users className="w-5 h-5" />
-                      Membri del Club ({clubMembers.length})
+                      Membri del Club ({clubMembers.length + pendingInvites.length})
                     </CardTitle>
+                    <CardDescription>
+                      Membri attivi e inviti in attesa
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {clubMembers.length === 0 ? (
+                    {clubMembers.length === 0 && pendingInvites.length === 0 ? (
                       <div className="text-center py-8 text-muted-foreground">
                         <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>Nessun membro ancora</p>
@@ -907,15 +910,19 @@ export default function UserSettings() {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Nome</TableHead>
+                            <TableHead>Email</TableHead>
                             <TableHead>Ruolo</TableHead>
-                            <TableHead>Data Iscrizione</TableHead>
+                            <TableHead>Stato</TableHead>
+                            <TableHead>Data</TableHead>
                             <TableHead className="min-w-[200px]">Azioni</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
+                          {/* Active Members */}
                           {clubMembers.map((member) => (
-                            <TableRow key={member.id}>
+                            <TableRow key={`member-${member.id}`}>
                               <TableCell>{member.profiles?.full_name || 'N/A'}</TableCell>
+                              <TableCell className="text-muted-foreground">-</TableCell>
                               <TableCell>
                                 <Badge 
                                   variant={getRoleColor(member.profiles?.role)} 
@@ -926,7 +933,13 @@ export default function UserSettings() {
                                   {member.profiles?.role || member.role}
                                 </Badge>
                               </TableCell>
-                              <TableCell>{new Date(member.joined_at).toLocaleDateString()}</TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                  <Badge variant="default">Attivo</Badge>
+                                </div>
+                              </TableCell>
+                              <TableCell>{new Date(member.joined_at).toLocaleDateString('it-IT')}</TableCell>
                               <TableCell>
                                 <div className="flex gap-2 flex-wrap">
                                   {member.profiles?.role !== 'admin' && (
@@ -955,6 +968,35 @@ export default function UserSettings() {
                                     Rimuovi
                                   </Button>
                                 </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                          
+                          {/* Pending Invites */}
+                          {pendingInvites.map((invite) => (
+                            <TableRow key={`invite-${invite.id}`}>
+                              <TableCell>{invite.first_name} {invite.last_name}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">{invite.email}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="capitalize">
+                                  {invite.role}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4 text-yellow-500" />
+                                  <Badge variant="secondary">In attesa</Badge>
+                                </div>
+                              </TableCell>
+                              <TableCell>{new Date(invite.created_at).toLocaleDateString('it-IT')}</TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => deleteInvite(invite.id)}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </TableCell>
                             </TableRow>
                           ))}
