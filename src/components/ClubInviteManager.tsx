@@ -10,9 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { UserPlus, Mail, Clock, CheckCircle, XCircle, Trash2, Users } from 'lucide-react';
+import { UserPlus, Mail, Clock, CheckCircle, XCircle, Trash2, Users, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { SectionPermissionSelector } from './SectionPermissionSelector';
+import { type AppSection } from '@/hooks/usePermissions';
 
 interface ClubInvite {
   id: string;
@@ -31,10 +33,8 @@ interface ClubMember {
   role: string;
   status: string;
   joined_at: string;
-  profiles: {
-    full_name: string;
-    email?: string;
-  };
+  full_name: string;
+  email: string;
 }
 
 export default function ClubInviteManager() {
@@ -46,6 +46,9 @@ export default function ClubInviteManager() {
   const [members, setMembers] = useState<ClubMember[]>([]);
   const [memberCount, setMemberCount] = useState(1);
   const [monthlyPrice, setMonthlyPrice] = useState(15);
+  const [selectedMember, setSelectedMember] = useState<ClubMember | null>(null);
+  const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
+  const [memberPermissions, setMemberPermissions] = useState<AppSection[]>([]);
   
   const [formData, setFormData] = useState({
     email: '',
@@ -83,33 +86,50 @@ export default function ClubInviteManager() {
     if (!user) return;
 
     try {
-      // Get club members with their user profiles
+      // Get club members with their profiles
       const { data: membersData, error } = await supabase
         .from('club_members')
-        .select('id, user_id, role, status, joined_at')
+        .select(`
+          id,
+          user_id,
+          role,
+          status,
+          joined_at
+        `)
         .eq('club_owner_id', user.id)
+        .eq('status', 'active')
         .order('joined_at', { ascending: false });
 
       if (error) throw error;
 
-      // Get profiles for each member
-      const membersWithProfiles = [];
-      for (const member of membersData || []) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('user_id', member.user_id)
-          .single();
+      // Get profiles and emails for each member  
+      const membersWithInfo = await Promise.all(
+        (membersData || []).map(async (member) => {
+          // Get profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('user_id', member.user_id)
+            .maybeSingle();
 
-        membersWithProfiles.push({
-          ...member,
-          profiles: {
-            full_name: profile?.full_name || 'Nome non disponibile'
-          }
-        });
-      }
+          // Get email from auth metadata via RPC or just show it's available
+          // Since we can't access auth.users directly, we'll fetch from invites or show placeholder
+          const { data: inviteData } = await supabase
+            .from('club_invites')
+            .select('email')
+            .eq('user_id', user.id)
+            .or(`email.eq.${profile?.full_name}`)
+            .maybeSingle();
 
-      setMembers(membersWithProfiles);
+          return {
+            ...member,
+            full_name: profile?.full_name || 'Nome non disponibile',
+            email: inviteData?.email || '(Email privata)'
+          };
+        })
+      );
+
+      setMembers(membersWithInfo);
     } catch (error) {
       console.error('Error loading members:', error);
     }
@@ -232,6 +252,66 @@ export default function ClubInviteManager() {
       toast({
         title: "Errore",
         description: "Impossibile eliminare l'invito",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadMemberPermissions = async (userId: string) => {
+    if (!user) return;
+
+    try {
+      const { data: permissions, error } = await supabase
+        .from('member_permissions')
+        .select('section')
+        .eq('user_id', userId)
+        .eq('club_owner_id', user.id);
+
+      if (error) throw error;
+      setMemberPermissions(permissions?.map(p => p.section as AppSection) || []);
+    } catch (error) {
+      console.error('Error loading permissions:', error);
+    }
+  };
+
+  const saveMemberPermissions = async () => {
+    if (!user || !selectedMember) return;
+
+    try {
+      // Delete existing permissions
+      await supabase
+        .from('member_permissions')
+        .delete()
+        .eq('user_id', selectedMember.user_id)
+        .eq('club_owner_id', user.id);
+
+      // Insert new permissions
+      if (memberPermissions.length > 0) {
+        const { error } = await supabase
+          .from('member_permissions')
+          .insert(
+            memberPermissions.map(section => ({
+              user_id: selectedMember.user_id,
+              club_owner_id: user.id,
+              section
+            }))
+          );
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Permessi aggiornati",
+        description: "I permessi del membro sono stati aggiornati con successo",
+      });
+
+      setIsPermissionsOpen(false);
+      setSelectedMember(null);
+    } catch (error: any) {
+      console.error('Error saving permissions:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile salvare i permessi",
         variant: "destructive",
       });
     }
@@ -409,11 +489,11 @@ export default function ClubInviteManager() {
                 {members.map((member) => (
                   <TableRow key={`member-${member.id}`}>
                     <TableCell className="font-medium">
-                      {member.profiles.full_name}
+                      {member.full_name}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">-</TableCell>
+                    <TableCell className="text-muted-foreground">{member.email}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{member.role}</Badge>
+                      <Badge variant="outline" className="capitalize">{member.role}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -422,10 +502,23 @@ export default function ClubInviteManager() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(member.joined_at), 'dd MMM yyyy', { locale: it })}
+                      {format(new Date(member.joined_at), 'dd/MM/yyyy', { locale: it })}
                     </TableCell>
                     <TableCell>
-                      <span className="text-muted-foreground text-sm">-</span>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            setSelectedMember(member);
+                            await loadMemberPermissions(member.user_id);
+                            setIsPermissionsOpen(true);
+                          }}
+                          title="Gestisci Permessi"
+                        >
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -466,6 +559,50 @@ export default function ClubInviteManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Permissions Manager Dialog */}
+      {selectedMember && (
+        <Dialog open={isPermissionsOpen} onOpenChange={(open) => {
+          setIsPermissionsOpen(open);
+          if (!open) {
+            setSelectedMember(null);
+            setMemberPermissions([]);
+          }
+        }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>
+                Gestisci Permessi - {selectedMember.full_name}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Seleziona le sezioni a cui {selectedMember.full_name} può accedere:
+              </p>
+              <SectionPermissionSelector
+                selectedPermissions={memberPermissions}
+                onPermissionsChange={setMemberPermissions}
+                showSelectAll={true}
+              />
+              <div className="flex gap-2 justify-end pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsPermissionsOpen(false);
+                    setSelectedMember(null);
+                    setMemberPermissions([]);
+                  }}
+                >
+                  Annulla
+                </Button>
+                <Button onClick={saveMemberPermissions}>
+                  Salva Permessi
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
