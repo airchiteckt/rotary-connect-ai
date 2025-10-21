@@ -70,6 +70,9 @@ export type Database = {
           invite_token: string
           last_name: string
           permissions: Database["public"]["Enums"]["app_section"][] | null
+          responsible_sections:
+            | Database["public"]["Enums"]["app_section"][]
+            | null
           role: string
           status: string
           updated_at: string
@@ -85,6 +88,9 @@ export type Database = {
           invite_token: string
           last_name: string
           permissions?: Database["public"]["Enums"]["app_section"][] | null
+          responsible_sections?:
+            | Database["public"]["Enums"]["app_section"][]
+            | null
           role?: string
           status?: string
           updated_at?: string
@@ -100,6 +106,9 @@ export type Database = {
           invite_token?: string
           last_name?: string
           permissions?: Database["public"]["Enums"]["app_section"][] | null
+          responsible_sections?:
+            | Database["public"]["Enums"]["app_section"][]
+            | null
           role?: string
           status?: string
           updated_at?: string

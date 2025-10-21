@@ -254,7 +254,8 @@ export default function UserSettings() {
           first_name: inviteForm.first_name,
           last_name: inviteForm.last_name,
           role: inviteForm.role,
-          permissions: selectedPermissions
+          permissions: selectedPermissions,
+          responsible_sections: responsibleSections
         } as any);
 
       if (error) throw error;
