@@ -42,6 +42,39 @@ export default function Dashboard() {
   // Use club owner's subscription status
   const subscriptionProfile = clubOwnerProfile || profile;
 
+  // If user has no club owner profile and is not an admin, show pending invite message
+  if (!clubOwnerProfile && profile?.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
+        <Card className="max-w-md text-center">
+          <CardHeader>
+            <CardTitle>Invito in Attesa</CardTitle>
+            <CardDescription>
+              Il tuo account non è ancora associato a un club.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Controlla la tua email per il link di invito e completare l'associazione al club.
+            </p>
+            <div className="space-y-2">
+              <Button variant="outline" onClick={() => {
+                signOut();
+                toast({
+                  title: "Logout effettuato",
+                  description: "A presto!",
+                });
+              }} className="w-full">
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   // Show trial expired message only if club subscription is trial (not active/premium)
   if (!isTrialValid && subscriptionProfile?.subscription_type !== 'active') {
     return (
