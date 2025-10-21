@@ -108,7 +108,14 @@ export default function UserSettings() {
 
       if (membersError) throw membersError;
 
-      // Get profile data for each member using maybeSingle to handle missing profiles
+      // Load all accepted invites to get email information
+      const { data: acceptedInvites } = await supabase
+        .from('club_invites')
+        .select('email, first_name, last_name')
+        .eq('user_id', clubOwnerId)
+        .eq('status', 'accepted');
+
+      // Get profile data for each member
       const membersWithProfiles = await Promise.all(
         (clubMembersData || []).map(async (member) => {
           const { data: profile } = await supabase
@@ -117,9 +124,20 @@ export default function UserSettings() {
             .eq('user_id', member.user_id)
             .maybeSingle();
 
+          // Try to match with accepted invite based on name
+          const matchedInvite = acceptedInvites?.find(invite => {
+            const inviteName = `${invite.first_name} ${invite.last_name}`.toLowerCase();
+            const profileName = profile?.full_name?.toLowerCase() || '';
+            return inviteName === profileName;
+          });
+
           return {
             ...member,
-            profiles: profile || { full_name: 'Nome non disponibile', role: 'member' }
+            profiles: {
+              full_name: profile?.full_name || 'Nome non disponibile',
+              email: matchedInvite?.email || 'Email non disponibile',
+              role: profile?.role || 'member'
+            }
           };
         })
       );
@@ -936,7 +954,7 @@ export default function UserSettings() {
                           {clubMembers.map((member) => (
                             <TableRow key={`member-${member.id}`}>
                               <TableCell>{member.profiles?.full_name || 'N/A'}</TableCell>
-                              <TableCell className="text-muted-foreground">-</TableCell>
+                              <TableCell className="text-muted-foreground">{member.profiles?.email || '-'}</TableCell>
                               <TableCell>
                                 <Badge 
                                   variant={getRoleColor(member.profiles?.role)} 
