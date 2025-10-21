@@ -124,51 +124,65 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold flex items-center justify-center">
-            <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt={t('auth.title')} className="h-8" />
+            <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8" />
           </CardTitle>
-          <CardDescription>
-            {t('auth.description')}
+          <CardDescription className="text-base">
+            Gestisci il tuo club Rotary con l'AI
           </CardDescription>
         </CardHeader>
         
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin" className="w-full">{t('auth.login')}</TabsTrigger>
-              <TabsTrigger value="signup" className="w-full">{t('auth.register')}</TabsTrigger>
+              <TabsTrigger value="signin" className="w-full">Accedi</TabsTrigger>
+              <TabsTrigger value="signup" className="w-full">Registra nuovo club</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">{t('auth.email')}</Label>
+                  <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder={t('auth.emailPlaceholder')}
+                    placeholder="nome@esempio.it"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="password">{t('auth.password')}</Label>
+                  <Label htmlFor="password">Password</Label>
                   <Input
                     id="password"
                     name="password"
                     type="password"
-                    placeholder={t('auth.passwordPlaceholder')}
+                    placeholder="••••••••"
                     required
                   />
                 </div>
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? t('auth.loggingIn') : t('auth.login')}
+                  {isLoading ? 'Accesso in corso...' : 'Accedi'}
                 </Button>
+                
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  Sei stato invitato a un club?{' '}
+                  <span className="text-primary font-medium">Controlla la tua email</span> per il link di registrazione personalizzato.
+                </p>
               </form>
             </TabsContent>
             
             <TabsContent value="signup">
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
+                <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                  🏛️ Crea un nuovo club Rotary
+                </p>
+                <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                  Inizia la gestione del tuo club con 30 giorni di prova gratuita
+                </p>
+              </div>
+              
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="full_name">Nome Completo</Label>
@@ -176,7 +190,7 @@ export default function Auth() {
                     id="full_name"
                     name="full_name"
                     type="text"
-                    placeholder="Il tuo nome completo"
+                    placeholder="Mario Rossi"
                     required
                   />
                 </div>
@@ -187,57 +201,58 @@ export default function Auth() {
                     id="club_name"
                     name="club_name"
                     type="text"
-                    placeholder="Nome del tuo club"
+                    placeholder="Rotary Club Roma"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="referral_code" className="text-green-700 font-medium">
+                  <Label htmlFor="referral_code" className="text-green-700 dark:text-green-400 font-medium">
                     🎁 Codice Referral (opzionale)
                   </Label>
                   <Input
                     id="referral_code"
                     name="referral_code"
                     type="text"
-                    placeholder="Inserisci il codice di invito"
-                    className="font-mono uppercase border-green-200 focus:border-green-400 bg-green-50"
+                    placeholder="ROT12345"
+                    className="font-mono uppercase border-green-200 focus:border-green-400 bg-green-50 dark:bg-green-950/20"
                     onChange={(e) => e.target.value = e.target.value.toUpperCase()}
                   />
-                  <div className="bg-green-100 border border-green-200 rounded-lg p-2">
-                    <p className="text-xs text-green-700 font-medium flex items-center gap-1">
+                  <div className="bg-green-100 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-2">
+                    <p className="text-xs text-green-700 dark:text-green-300 font-medium flex items-center gap-1">
                       💡 <strong>Bonus speciale:</strong> Con un codice referral ottieni 3 mesi gratuiti aggiuntivi!
                     </p>
-                    <p className="text-xs text-green-600 mt-1">
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                       Il club che ti ha invitato riceverà anche 3 mesi bonus.
                     </p>
                   </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup_email">{t('auth.email')}</Label>
+                  <Label htmlFor="signup_email">Email</Label>
                   <Input
                     id="signup_email"
                     name="email"
                     type="email"
-                    placeholder={t('auth.emailPlaceholder')}
+                    placeholder="nome@esempio.it"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup_password">{t('auth.password')}</Label>
+                  <Label htmlFor="signup_password">Password</Label>
                   <Input
                     id="signup_password"
                     name="password"
                     type="password"
-                    placeholder={t('auth.passwordPlaceholder')}
+                    placeholder="Almeno 6 caratteri"
                     required
+                    minLength={6}
                   />
                 </div>
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Registrazione...' : 'Registrati - Prova Gratuita 30 giorni'}
+                  {isLoading ? 'Registrazione...' : 'Crea il tuo club - Prova 30 giorni gratis'}
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground">
