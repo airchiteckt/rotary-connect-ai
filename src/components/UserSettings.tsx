@@ -108,14 +108,14 @@ export default function UserSettings() {
 
       if (membersError) throw membersError;
 
-      // Get profile data for each member
+      // Get profile data for each member using maybeSingle to handle missing profiles
       const membersWithProfiles = await Promise.all(
         (clubMembersData || []).map(async (member) => {
           const { data: profile } = await supabase
             .from('profiles')
             .select('full_name, role')
             .eq('user_id', member.user_id)
-            .single();
+            .maybeSingle();
 
           return {
             ...member,
