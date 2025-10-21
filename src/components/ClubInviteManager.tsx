@@ -161,23 +161,32 @@ export default function ClubInviteManager() {
       // Send invite email
       if (insertedInvite?.id) {
         console.log('Sending invite email for ID:', insertedInvite.id);
-        const { error: emailError } = await supabase.functions.invoke('send-club-invite', {
-          body: { inviteId: insertedInvite.id }
-        });
+        
+        try {
+          const { data: emailData, error: emailError } = await supabase.functions.invoke('send-club-invite', {
+            body: { inviteId: insertedInvite.id }
+          });
 
-        if (emailError) {
-          console.error('Error sending invite email:', emailError);
+          console.log('Email function response:', { emailData, emailError });
+
+          if (emailError) {
+            console.error('Error sending invite email:', emailError);
+            throw new Error(`Email error: ${emailError.message || JSON.stringify(emailError)}`);
+          }
+          
+          console.log('Invite email sent successfully');
+        } catch (emailErr: any) {
+          console.error('Exception sending email:', emailErr);
           toast({
             title: "Invito salvato",
-            description: `L'invito è stato creato ma potrebbe esserci stato un problema con l'invio dell'email. Controlla i log.`,
+            description: `L'invito è stato creato ma c'è stato un errore nell'invio dell'email: ${emailErr.message}`,
             variant: "destructive",
           });
-        } else {
-          console.log('Invite email sent successfully');
-          toast({
-            title: "Invito inviato",
-            description: `L'invito è stato inviato a ${formData.email}`,
-          });
+          loadInvites();
+          setFormData({ email: '', first_name: '', last_name: '', role: 'member' });
+          setIsOpen(false);
+          setIsLoading(false);
+          return;
         }
       } else {
         throw new Error('Impossibile recuperare l\'ID dell\'invito creato');
