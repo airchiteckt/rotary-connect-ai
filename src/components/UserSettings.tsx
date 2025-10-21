@@ -114,6 +114,18 @@ export default function UserSettings() {
 
       if (membersError) throw membersError;
 
+      // Get club owner profile to add to the list
+      const { data: ownerProfile } = await supabase
+        .from('profiles')
+        .select('full_name, role, created_at')
+        .eq('user_id', clubOwnerId)
+        .single();
+
+      // Get club owner email
+      const { data: ownerEmail } = await supabase.rpc('get_user_email', {
+        user_uuid: clubOwnerId
+      });
+
       // Get profile data and email for each member
       const membersWithProfiles = await Promise.all(
         (clubMembersData || []).map(async (member) => {
@@ -156,7 +168,21 @@ export default function UserSettings() {
         })
       );
 
-      setClubMembers(membersWithProfiles);
+      // Add club owner as the first member
+      const clubOwnerMember = {
+        id: clubOwnerId,
+        user_id: clubOwnerId,
+        role: 'admin',
+        status: 'active',
+        joined_at: ownerProfile?.created_at || new Date().toISOString(),
+        profiles: {
+          full_name: ownerProfile?.full_name || 'Admin',
+          email: ownerEmail || 'Email non disponibile',
+          role: ownerProfile?.role || 'admin'
+        }
+      };
+
+      setClubMembers([clubOwnerMember, ...membersWithProfiles]);
 
       // Load pending invites
       const { data: invites, error: invitesError } = await supabase
