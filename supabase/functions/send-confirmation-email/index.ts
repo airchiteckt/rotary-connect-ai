@@ -100,7 +100,7 @@ const handler = async (req: Request): Promise<Response> => {
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
           FastClub - La piattaforma AI per la gestione completa del tuo club<br>
-          Email: support@fastclub.it | Web: fastclub.it<br>
+          Email: info@fastclub.it | Web: www.fastclub.it<br>
           Hai ricevuto questa email perché ti sei registrato su FastClub.
         </p>
       </div>

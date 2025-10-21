@@ -61,7 +61,7 @@ const emailTemplates = {
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
           FastClub - La piattaforma AI per la gestione completa del tuo club<br>
-          Email: support@fastclub.lovableproject.com | Web: fastclub.lovableproject.com<br>
+          Email: info@fastclub.it | Web: www.fastclub.it<br>
           Hai ricevuto questa email perché ti sei iscritto alla waiting list di FastClub.
         </p>
       </div>
@@ -171,7 +171,7 @@ const emailTemplates = {
         
         <p style="font-size: 14px; color: #6b7280; text-align: center;">
           FastClub - La piattaforma AI per la gestione completa del tuo club<br>
-          Email: support@fastclub.lovableproject.com | Web: fastclub.lovableproject.com<br>
+          Email: info@fastclub.it | Web: www.fastclub.it<br>
           Hai ricevuto questa email perché sei stato invitato a unirti a ${data.clubName || 'un club'} su FastClub.
         </p>
       </div>
