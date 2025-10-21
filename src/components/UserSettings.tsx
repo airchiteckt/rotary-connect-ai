@@ -99,26 +99,32 @@ export default function UserSettings() {
       
       const clubOwnerId = ownerIdData || user.id;
 
-      // Load club members with profiles using a join
+      // Load club members
       const { data: clubMembersData, error: membersError } = await supabase
         .from('club_members')
-        .select(`
-          id, 
-          user_id, 
-          role, 
-          status, 
-          joined_at,
-          profiles:user_id (
-            full_name,
-            role
-          )
-        `)
+        .select('id, user_id, role, status, joined_at')
         .eq('club_owner_id', clubOwnerId)
         .eq('status', 'active');
 
       if (membersError) throw membersError;
 
-      setClubMembers(clubMembersData || []);
+      // Get profile data for each member
+      const membersWithProfiles = await Promise.all(
+        (clubMembersData || []).map(async (member) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, role')
+            .eq('user_id', member.user_id)
+            .single();
+
+          return {
+            ...member,
+            profiles: profile || { full_name: 'Nome non disponibile', role: 'member' }
+          };
+        })
+      );
+
+      setClubMembers(membersWithProfiles);
 
       // Load pending invites
       const { data: invites, error: invitesError } = await supabase
