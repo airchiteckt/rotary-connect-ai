@@ -127,7 +127,7 @@ export default function Auth() {
             <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-8" />
           </CardTitle>
           <CardDescription className="text-base">
-            Gestisci il tuo club Rotary con l'AI
+            Gestisci la tua associazione con l'AI
           </CardDescription>
         </CardHeader>
         
@@ -135,7 +135,7 @@ export default function Auth() {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" className="w-full">Accedi</TabsTrigger>
-              <TabsTrigger value="signup" className="w-full">Registra nuovo club</TabsTrigger>
+              <TabsTrigger value="signup" className="w-full">Registra nuova associazione</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -167,7 +167,7 @@ export default function Auth() {
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground mt-4">
-                  Sei stato invitato a un club?{' '}
+                  Sei stato invitato a un'associazione?{' '}
                   <span className="text-primary font-medium">Controlla la tua email</span> per il link di registrazione personalizzato.
                 </p>
               </form>
@@ -176,10 +176,10 @@ export default function Auth() {
             <TabsContent value="signup">
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mb-4">
                 <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
-                  🏛️ Crea un nuovo club Rotary
+                  🏛️ Crea una nuova associazione
                 </p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-                  Inizia la gestione del tuo club con 30 giorni di prova gratuita
+                  Inizia la gestione della tua associazione con 30 giorni di prova gratuita
                 </p>
               </div>
               
@@ -196,12 +196,12 @@ export default function Auth() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="club_name">Nome Club</Label>
+                  <Label htmlFor="club_name">Nome Associazione</Label>
                   <Input
                     id="club_name"
                     name="club_name"
                     type="text"
-                    placeholder="Rotary Club Roma"
+                    placeholder="Associazione Culturale Roma"
                     required
                   />
                 </div>
@@ -214,7 +214,7 @@ export default function Auth() {
                     id="referral_code"
                     name="referral_code"
                     type="text"
-                    placeholder="ROT12345"
+                    placeholder="ABC12345"
                     className="font-mono uppercase border-green-200 focus:border-green-400 bg-green-50 dark:bg-green-950/20"
                     onChange={(e) => e.target.value = e.target.value.toUpperCase()}
                   />
@@ -223,7 +223,7 @@ export default function Auth() {
                       💡 <strong>Bonus speciale:</strong> Con un codice referral ottieni 3 mesi gratuiti aggiuntivi!
                     </p>
                     <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                      Il club che ti ha invitato riceverà anche 3 mesi bonus.
+                      L'associazione che ti ha invitato riceverà anche 3 mesi bonus.
                     </p>
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function Auth() {
                 </div>
                 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Registrazione...' : 'Crea il tuo club - Prova 30 giorni gratis'}
+                  {isLoading ? 'Registrazione...' : 'Crea la tua associazione - Prova 30 giorni gratis'}
                 </Button>
                 
                 <p className="text-xs text-center text-muted-foreground">
