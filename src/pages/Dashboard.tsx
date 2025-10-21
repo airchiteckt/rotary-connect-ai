@@ -39,15 +39,15 @@ export default function Dashboard() {
     return <Navigate to="/auth" replace />;
   }
 
-  // Show trial expired message
-  if (!isTrialValid) {
+  // Show trial expired message only if subscription is trial (not active/premium)
+  if (!isTrialValid && profile?.subscription_type !== 'active') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
         <Card className="max-w-md text-center">
           <CardHeader>
             <CardTitle className="text-red-600">Periodo di Prova Scaduto</CardTitle>
             <CardDescription>
-              Il tuo periodo di prova gratuito di 30 giorni è terminato.
+              Il tuo periodo di prova gratuito è terminato.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -152,7 +152,7 @@ export default function Dashboard() {
   const accessibleMenuItems = menuItems.filter(item => hasPermission(item.section));
 
   const daysRemaining = profile?.trial_start_date ? 
-    Math.max(0, 30 - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
+    Math.max(0, 120 - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
@@ -173,10 +173,12 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
-              <Badge variant={daysRemaining > 7 ? "default" : "destructive"} className="text-xs sm:text-sm">
-                <span className="hidden sm:inline">{daysRemaining} giorni rimasti</span>
-                <span className="sm:hidden">{daysRemaining}g</span>
-              </Badge>
+              {profile?.subscription_type === 'trial' && (
+                <Badge variant={daysRemaining > 7 ? "default" : "destructive"} className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">{daysRemaining} giorni rimasti</span>
+                  <span className="sm:hidden">{daysRemaining}g</span>
+                </Badge>
+              )}
               <div className="text-right hidden md:block">
                 <p className="font-medium text-sm truncate max-w-[120px]">{profile?.full_name}</p>
                 <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
@@ -331,20 +333,22 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Trial Notice */}
-        <Card className="mt-6 sm:mt-8 border-amber-200 bg-amber-50/50">
-          <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
-            <div className="flex items-start sm:items-center space-x-3">
-              <Calendar className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-              <div className="min-w-0">
-                <p className="font-medium text-amber-800 text-sm sm:text-base">Periodo di Prova Attivo</p>
-                <p className="text-xs sm:text-sm text-amber-700 mt-1">
-                  Hai ancora {daysRemaining} giorni per testare tutte le funzionalità del gestionale.
-                </p>
+        {/* Trial Notice - Only show for trial accounts */}
+        {profile?.subscription_type === 'trial' && (
+          <Card className="mt-6 sm:mt-8 border-amber-200 bg-amber-50/50">
+            <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
+              <div className="flex items-start sm:items-center space-x-3">
+                <Calendar className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 sm:mt-0" />
+                <div className="min-w-0">
+                  <p className="font-medium text-amber-800 text-sm sm:text-base">Periodo di Prova Attivo</p>
+                  <p className="text-xs sm:text-sm text-amber-700 mt-1">
+                    Hai ancora {daysRemaining} giorni per testare tutte le funzionalità del gestionale.
+                  </p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </main>
       
       {/* Help Support Button */}

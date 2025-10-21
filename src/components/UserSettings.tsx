@@ -369,7 +369,7 @@ export default function UserSettings() {
     }
   };
 
-  const totalTrialDays = 30 + ((profile?.bonus_months || 0) * 30);
+  const totalTrialDays = 120 + ((profile?.bonus_months || 0) * 30);
   const daysRemaining = profile?.trial_start_date ? 
     Math.max(0, totalTrialDays - Math.floor((Date.now() - new Date(profile.trial_start_date).getTime()) / (1000 * 60 * 60 * 24))) : 0;
   
@@ -446,9 +446,11 @@ export default function UserSettings() {
                         {profile?.role === 'treasurer' && '💰 '}
                         {profile?.role?.charAt(0).toUpperCase() + profile?.role?.slice(1) || 'Membro'}
                       </Badge>
-                      <Badge variant={daysRemaining > 7 ? "default" : "destructive"}>
-                        {daysRemaining} giorni di prova rimasti
-                      </Badge>
+                      {profile?.subscription_type === 'trial' && (
+                        <Badge variant={daysRemaining > 7 ? "default" : "destructive"}>
+                          {daysRemaining} giorni di prova rimasti
+                        </Badge>
+                      )}
                       {profile?.bonus_months > 0 && (
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <Gift className="w-3 h-3" />
@@ -538,12 +540,14 @@ export default function UserSettings() {
                     {profile?.created_at ? format(new Date(profile.created_at), 'dd MMMM yyyy', { locale: it }) : 'N/A'}
                   </span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">Stato Account</span>
-                  <Badge variant={daysRemaining > 0 ? "default" : "destructive"}>
-                    {daysRemaining > 0 ? 'Prova Attiva' : 'Prova Scaduta'}
-                  </Badge>
-                </div>
+                {profile?.subscription_type === 'trial' && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Stato Account</span>
+                    <Badge variant={daysRemaining > 0 ? "default" : "destructive"}>
+                      {daysRemaining > 0 ? 'Prova Attiva' : 'Prova Scaduta'}
+                    </Badge>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
