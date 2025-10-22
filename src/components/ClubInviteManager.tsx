@@ -260,13 +260,13 @@ export default function ClubInviteManager() {
       }
 
       toast({
-        title: "Invito inviato",
-        description: `L'invito è stato inviato a ${formData.email}`,
+        title: "✅ Invito inviato!",
+        description: `Email di invito inviata a ${formData.email}. L'invito appare ora nella tabella "Membri del Club" qui sotto con stato "In attesa".`,
       });
 
       setFormData({ email: '', first_name: '', last_name: '', role: 'member' });
       setIsOpen(false);
-      loadInvites();
+      await loadInvites();
     } catch (error: any) {
       console.error('Error sending invite:', error);
       toast({

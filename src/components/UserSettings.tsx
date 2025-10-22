@@ -282,15 +282,17 @@ export default function UserSettings() {
         }
       }
 
+      toast({
+        title: "✅ Invito inviato!",
+        description: `Email di invito inviata a ${inviteForm.email}. L'invito appare ora nella tabella "Membri del Club" qui sotto con stato "In attesa".`,
+      });
+
       setInviteForm({ email: '', first_name: '', last_name: '', role: 'member' });
       setSelectedPermissions([]);
       setResponsibleSections([]);
-      loadOrganizationData();
       
-      toast({
-        title: "Invito inviato con email!",
-        description: `L'invito email è stato inviato a ${inviteForm.email}`,
-      });
+      // Reload data to show the new invite
+      await loadOrganizationData();
     } catch (error) {
       console.error('Error sending invite:', error);
       toast({
