@@ -64,12 +64,17 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', clubOwnerId);
 
-      // Get upcoming events count (future events)
+      // Get current month events count
+      const now = new Date();
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+      
       const { count: upcomingCount } = await supabase
         .from('prefecture_events')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', clubOwnerId)
-        .gte('event_date', new Date().toISOString().split('T')[0]);
+        .gte('event_date', firstDayOfMonth)
+        .lte('event_date', lastDayOfMonth);
 
       // Get commissions count
       const { count: commissionsCount } = await supabase
@@ -380,7 +385,7 @@ export default function Dashboard() {
             <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
                 <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Calendario</p>
+                <p className="text-xs font-medium text-muted-foreground">Questo Mese</p>
                 <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.upcomingEvents}</p>
               </div>
             </CardContent>
