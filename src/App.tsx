@@ -26,8 +26,6 @@ import NotFound from "./pages/NotFound";
 import ClubPage from "./pages/ClubPage";
 import SimpleTestClub from "./pages/SimpleTestClub";
 
-const Organigramma = lazy(() => import("./pages/Organigramma"));
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -47,7 +45,6 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/segreteria" element={<Segreteria />} />
               <Route path="/tesoreria" element={<Tesoreria />} />
-              <Route path="/organigramma" element={<Organigramma />} />
               <Route path="/presidenza" element={<Presidenza />} />
               <Route path="/prefettura" element={<Prefettura />} />
               <Route path="/direttivo" element={<Direttivo />} />

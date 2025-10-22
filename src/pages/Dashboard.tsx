@@ -249,14 +249,6 @@ export default function Dashboard() {
       section: "tesoreria" as const
     },
     {
-      title: "Organigramma", 
-      description: "Struttura sociale e organizzativa del club",
-      icon: Building,
-      href: "/organigramma",
-      color: "bg-blue-600",
-      section: "organigramma" as const
-    },
-    {
       title: "Presidenza",
       description: "Strumenti per la governance e coordinamento club",
       icon: Crown,
@@ -289,8 +281,8 @@ export default function Dashboard() {
       section: "comunicazione" as const
     },
     {
-      title: "Soci",
-      description: "Anagrafica soci, presenze e gestione membri",
+      title: "Soci e Organigramma",
+      description: "Anagrafica soci, cariche e struttura organizzativa",
       icon: Users,
       href: "/soci",
       color: "bg-orange-600",
