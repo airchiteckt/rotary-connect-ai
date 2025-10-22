@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Plus, Search, Filter, ArrowLeft, Settings, Calendar, Edit, Eye, Trash2, Mic } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { TemplateEditor } from '@/components/TemplateEditor';
@@ -22,6 +24,7 @@ interface Document {
   document_number: string;
   created_at: string;
   updated_at: string;
+  approved: boolean;
 }
 
 export default function Segreteria() {
@@ -72,7 +75,8 @@ export default function Segreteria() {
         status: doc.status as 'draft' | 'published' | 'archived',
         document_number: doc.document_number || '',
         created_at: doc.created_at,
-        updated_at: doc.updated_at
+        updated_at: doc.updated_at,
+        approved: doc.approved || false
       })));
     } catch (error) {
       console.error('Error loading documents:', error);
@@ -225,6 +229,38 @@ export default function Segreteria() {
     return typeMap[type as keyof typeof typeMap] || type;
   };
 
+  const toggleApproved = async (documentId: string, currentApproved: boolean) => {
+    try {
+      const { data: ownerIdData } = await supabase.rpc('get_club_owner_id', { 
+        user_uuid: user?.id 
+      });
+      
+      const clubOwnerId = ownerIdData || user?.id;
+
+      const { error } = await supabase
+        .from('documents')
+        .update({ approved: !currentApproved })
+        .eq('id', documentId)
+        .eq('user_id', clubOwnerId);
+
+      if (error) throw error;
+
+      toast({
+        title: !currentApproved ? "Documento approvato" : "Approvazione rimossa",
+        description: `Il documento è stato ${!currentApproved ? 'approvato' : 'rimosso dall\'approvazione'} con successo`,
+      });
+      
+      loadDocuments();
+    } catch (error) {
+      console.error('Error toggling approval:', error);
+      toast({
+        title: "Errore",
+        description: "Errore nell'aggiornamento dello stato di approvazione",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Header */}
@@ -332,7 +368,7 @@ export default function Segreteria() {
                           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                             <FileText className="w-5 h-5 text-primary" />
                           </div>
-                          <div>
+                          <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <h4 className="font-medium">{doc.title}</h4>
                               {getStatusBadge(doc.status)}
@@ -344,6 +380,21 @@ export default function Segreteria() {
                               <span>•</span>
                               <span>{formatDate(doc.updated_at)}</span>
                             </div>
+                            {(doc.type === 'verbali' || doc.type === 'programmi') && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <Checkbox 
+                                  id={`approved-${doc.id}`}
+                                  checked={doc.approved}
+                                  onCheckedChange={() => toggleApproved(doc.id, doc.approved)}
+                                />
+                                <Label 
+                                  htmlFor={`approved-${doc.id}`}
+                                  className="text-sm font-medium cursor-pointer"
+                                >
+                                  Approvato
+                                </Label>
+                              </div>
+                            )}
                           </div>
                         </div>
                          <div className="flex items-center space-x-2">

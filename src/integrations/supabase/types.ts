@@ -356,6 +356,7 @@ export type Database = {
       documents: {
         Row: {
           ai_summary: string | null
+          approved: boolean
           background_template: string | null
           content: Json
           created_at: string
@@ -373,6 +374,7 @@ export type Database = {
         }
         Insert: {
           ai_summary?: string | null
+          approved?: boolean
           background_template?: string | null
           content: Json
           created_at?: string
@@ -390,6 +392,7 @@ export type Database = {
         }
         Update: {
           ai_summary?: string | null
+          approved?: boolean
           background_template?: string | null
           content?: Json
           created_at?: string
