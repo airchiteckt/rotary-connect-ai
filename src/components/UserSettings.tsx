@@ -20,6 +20,7 @@ import { SectionPermissionSelector } from './SectionPermissionSelector';
 import { MemberPermissionsManager } from './MemberPermissionsManager';
 import { type AppSection } from '@/hooks/usePermissions';
 import PublicPageManager from '@/components/PublicPageManager';
+import { AdminActivityLog } from './AdminActivityLog';
 
 export default function UserSettings() {
   const { user, profile, clubOwnerProfile, signOut, isTrialValid } = useAuth();
@@ -475,13 +476,19 @@ export default function UserSettings() {
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${profile?.role === 'admin' ? 'grid-cols-5' : 'grid-cols-4'}`}>
             <TabsTrigger value="profile">Profilo</TabsTrigger>
             <TabsTrigger value="club">Pagina Club</TabsTrigger>
             <TabsTrigger value="subscription">Abbonamento</TabsTrigger>
             <TabsTrigger value="organization" disabled={!isPremium}>
               Organizzazione {!isPremium && <Badge variant="outline" className="ml-1 text-xs">Premium</Badge>}
             </TabsTrigger>
+            {profile?.role === 'admin' && (
+              <TabsTrigger value="admin">
+                <Shield className="w-4 h-4 mr-2" />
+                Admin
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6 mt-6">
@@ -1139,6 +1146,12 @@ export default function UserSettings() {
               </div>
             )}
           </TabsContent>
+
+          {profile?.role === 'admin' && (
+            <TabsContent value="admin" className="space-y-6 mt-6">
+              <AdminActivityLog />
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
       

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action_type: string
+          admin_id: string
+          club_owner_id: string
+          created_at: string
+          description: string | null
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          club_owner_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name: string
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          club_owner_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string
+        }
+        Relationships: []
+      }
       budgets: {
         Row: {
           allocated_amount: number
@@ -215,6 +254,33 @@ export type Database = {
           notes?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      data_snapshots: {
+        Row: {
+          club_owner_id: string
+          created_at: string
+          id: string
+          record_id: string
+          snapshot_data: Json
+          table_name: string
+        }
+        Insert: {
+          club_owner_id: string
+          created_at?: string
+          id?: string
+          record_id: string
+          snapshot_data: Json
+          table_name: string
+        }
+        Update: {
+          club_owner_id?: string
+          created_at?: string
+          id?: string
+          record_id?: string
+          snapshot_data?: Json
+          table_name?: string
         }
         Relationships: []
       }
@@ -1225,6 +1291,7 @@ export type Database = {
           meeting_type: string
         }[]
       }
+      cleanup_old_snapshots: { Args: never; Returns: undefined }
       generate_club_slug: { Args: { club_name_input: string }; Returns: string }
       generate_document_number: {
         Args: { doc_type: string; user_uuid: string }
