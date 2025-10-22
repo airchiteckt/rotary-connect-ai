@@ -159,7 +159,7 @@ export default function Organigramma() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Direttivo() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('riunioni');
   const [boardMembers, setBoardMembers] = useState<Record<string, any>>({});
   const [loadingMembers, setLoadingMembers] = useState(true);
@@ -111,7 +112,7 @@ export default function Direttivo() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">

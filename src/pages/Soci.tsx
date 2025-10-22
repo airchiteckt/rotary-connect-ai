@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -11,6 +11,7 @@ import MemberManager from '@/components/MemberManager';
 
 export default function Soci() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('anagrafica');
   const [memberStats, setMemberStats] = useState({
     active: 0,
@@ -48,7 +49,7 @@ export default function Soci() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => window.history.back()}>
+              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="w-10 h-10 bg-orange-600 rounded-full flex items-center justify-center">
