@@ -323,7 +323,6 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
                 <SelectValue placeholder="Nessuna commissione (opzionale)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nessuna commissione</SelectItem>
                 {commissions.map((commission) => (
                   <SelectItem key={commission.id} value={commission.id}>
                     {commission.name}
