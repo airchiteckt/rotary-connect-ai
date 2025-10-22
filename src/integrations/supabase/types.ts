@@ -427,6 +427,42 @@ export type Database = {
         }
         Relationships: []
       }
+      goals: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          progress: number | null
+          status: string
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          progress?: number | null
+          status?: string
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          progress?: number | null
+          status?: string
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       member_fees: {
         Row: {
           amount: number
@@ -562,6 +598,53 @@ export type Database = {
         }
         Relationships: []
       }
+      milestones: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          goal_id: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          goal_id?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          goal_id?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "milestones_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       position_history: {
         Row: {
           created_at: string
@@ -647,6 +730,36 @@ export type Database = {
           protocol_document_url?: string | null
           status?: string
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      presidency_notes: {
+        Row: {
+          content: string
+          created_at: string
+          created_by_user_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by_user_id: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by_user_id?: string
+          id?: string
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -989,7 +1102,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_club_info: {
+        Row: {
+          club_name: string | null
+          club_slug: string | null
+          default_footer_data: string | null
+          default_location: string | null
+          default_logo_url: string | null
+          header_text: string | null
+          president_name: string | null
+          secretary_name: string | null
+        }
+        Insert: {
+          club_name?: string | null
+          club_slug?: string | null
+          default_footer_data?: string | null
+          default_location?: string | null
+          default_logo_url?: string | null
+          header_text?: string | null
+          president_name?: string | null
+          secretary_name?: string | null
+        }
+        Update: {
+          club_name?: string | null
+          club_slug?: string | null
+          default_footer_data?: string | null
+          default_location?: string | null
+          default_logo_url?: string | null
+          header_text?: string | null
+          president_name?: string | null
+          secretary_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accept_club_invite: {

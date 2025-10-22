@@ -1,22 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Crown, Plus, Search, Filter, ArrowLeft, Target, Calendar, Users, FileText } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Crown, Plus, ArrowLeft, Target, Users, Calendar, Search, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PresidencyKanban from '@/components/PresidencyKanban';
 import ProjectForm from '@/components/ProjectForm';
 import { SectionResponsible } from '@/components/SectionResponsible';
+import GoalsMilestonesManager from '@/components/GoalsMilestonesManager';
+import PresidencyNotes from '@/components/PresidencyNotes';
+import { CommissionManager } from '@/components/CommissionManager';
 
 export default function Presidenza() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('progetti');
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [stats, setStats] = useState({
@@ -149,10 +152,8 @@ export default function Presidenza() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="progetti">Progetti</TabsTrigger>
-            <TabsTrigger value="membri">Membri</TabsTrigger>
-            <TabsTrigger value="governance">Governance</TabsTrigger>
             <TabsTrigger value="pianificazione">Pianificazione</TabsTrigger>
             <TabsTrigger value="commissioni">Commissioni</TabsTrigger>
           </TabsList>
@@ -189,144 +190,15 @@ export default function Presidenza() {
 
             {/* Kanban Board for Projects */}
             <PresidencyKanban onStatsUpdate={loadStats} />
-
-            {/* Active Projects List - Optional additional view */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Progetti per Priorità</CardTitle>
-                <CardDescription>
-                  Panoramica dei progetti organizzati per importanza
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-4 text-muted-foreground">
-                  <p className="text-sm">Utilizza il Kanban sopra per gestire i progetti</p>
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
 
-          <TabsContent value="membri" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Gestione Membri
-                </CardTitle>
-                <CardDescription>
-                  La gestione dei membri è ora disponibile nelle impostazioni utente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">Gestione Membri Spostata</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Ora puoi gestire i membri del tuo club direttamente dalle impostazioni del tuo account, 
-                    attivando il piano Premium.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Clicca sul pulsante Impostazioni nella barra superiore per accedere alla gestione completa dell'organizzazione.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="governance" className="space-y-6">
-            {/* Governance Tools */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Consiglio Direttivo</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">Riunioni programmate</p>
-                    <Button size="sm" className="w-full">Gestisci</Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Decisioni</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">In sospeso</p>
-                    <Button size="sm" className="w-full">Visualizza</Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">Votazioni</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-xs text-muted-foreground">Attive</p>
-                    <Button size="sm" className="w-full">Crea</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Sistema di Governance</CardTitle>
-                <CardDescription>
-                  Strumenti per la gestione democratica del club
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Crown className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Sistema governance in preparazione</p>
-                  <p className="text-sm">Strumenti di votazione e decisioni in arrivo</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="pianificazione">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pianificazione Strategica</CardTitle>
-                <CardDescription>
-                  Pianifica obiettivi e strategie del club
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Strumenti di pianificazione in arrivo</p>
-                  <p className="text-sm">Sistema di pianificazione strategica in preparazione</p>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="pianificazione" className="space-y-6">
+            <GoalsMilestonesManager />
+            <PresidencyNotes />
           </TabsContent>
 
           <TabsContent value="commissioni">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestione Commissioni</CardTitle>
-                <CardDescription>
-                  Coordina le commissioni e i gruppi di lavoro
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Sistema commissioni in preparazione</p>
-                  <p className="text-sm">Gestione gruppi di lavoro in arrivo</p>
-                </div>
-              </CardContent>
-            </Card>
+            <CommissionManager />
           </TabsContent>
         </Tabs>
       </main>
