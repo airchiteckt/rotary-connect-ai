@@ -881,7 +881,7 @@ export default function UserSettings() {
                           <Button 
                             size="sm" 
                             variant="outline"
-                            onClick={() => window.open(`/club/${profile.club_slug}`, '_blank')}
+                            onClick={() => window.open(`https://fastclub.it/club/${profile.club_slug}`, '_blank')}
                           >
                             <Globe className="w-4 h-4 mr-1" />
                             Visualizza
@@ -890,7 +890,7 @@ export default function UserSettings() {
                             size="sm" 
                             variant="outline"
                             onClick={() => {
-                              navigator.clipboard.writeText(`${window.location.origin}/club/${profile.club_slug}`);
+                              navigator.clipboard.writeText(`https://fastclub.it/club/${profile.club_slug}`);
                               toast({
                                 title: "URL copiato!",
                                 description: "Il link della pagina pubblica è stato copiato negli appunti.",
