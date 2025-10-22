@@ -43,10 +43,17 @@ export default function Segreteria() {
 
   const loadDocuments = async () => {
     try {
+      // Get club owner ID first
+      const { data: ownerIdData } = await supabase.rpc('get_club_owner_id', { 
+        user_uuid: user?.id 
+      });
+      
+      const clubOwnerId = ownerIdData || user?.id;
+
       const { data, error } = await supabase
         .from('documents')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', clubOwnerId)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -74,10 +81,17 @@ export default function Segreteria() {
 
   const loadTemplates = async () => {
     try {
+      // Get club owner ID first
+      const { data: ownerIdData } = await supabase.rpc('get_club_owner_id', { 
+        user_uuid: user?.id 
+      });
+      
+      const clubOwnerId = ownerIdData || user?.id;
+
       const { data, error } = await supabase
         .from('document_templates')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', clubOwnerId)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -97,11 +111,18 @@ export default function Segreteria() {
 
   const deleteDocument = async (documentId: string, documentTitle: string) => {
     try {
+      // Get club owner ID first
+      const { data: ownerIdData } = await supabase.rpc('get_club_owner_id', { 
+        user_uuid: user?.id 
+      });
+      
+      const clubOwnerId = ownerIdData || user?.id;
+
       const { error } = await supabase
         .from('documents')
         .delete()
         .eq('id', documentId)
-        .eq('user_id', user?.id);
+        .eq('user_id', clubOwnerId);
 
       if (error) throw error;
 
