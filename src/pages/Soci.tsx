@@ -2,20 +2,15 @@ import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Search, Filter, ArrowLeft, UserPlus, Calendar, Award } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { useComingSoonToast } from '@/components/ComingSoonToast';
+import { Users, ArrowLeft, Calendar, Award } from 'lucide-react';
 import HelpSupport from '@/components/HelpSupport';
-import { useToast } from '@/hooks/use-toast';
 import { SectionResponsible } from '@/components/SectionResponsible';
+import MemberManager from '@/components/MemberManager';
 
 export default function Soci() {
   const { user, loading } = useAuth();
-  const { showComingSoon } = useComingSoonToast();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('anagrafica');
   const [memberStats, setMemberStats] = useState({
     active: 0,
@@ -46,13 +41,6 @@ export default function Soci() {
     { label: 'Ospiti', value: memberStats.guest, color: 'text-orange-600', bgColor: 'bg-orange-100' }
   ];
 
-  const memberCategories = [
-    { id: 'active', name: 'Soci Attivi', count: memberStats.active, color: 'bg-green-100 text-green-800' },
-    { id: 'honorary', name: 'Soci Onorari', count: memberStats.honorary, color: 'bg-purple-100 text-purple-800' },
-    { id: 'emeritus', name: 'Soci Emeriti', count: memberStats.emeritus, color: 'bg-blue-100 text-blue-800' },
-    { id: 'guest', name: 'Ospiti', count: memberStats.guest, color: 'bg-orange-100 text-orange-800' }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100">
       {/* Header */}
@@ -71,11 +59,6 @@ export default function Soci() {
                 <p className="text-sm text-muted-foreground">Anagrafica e gestione membri del club</p>
               </div>
             </div>
-            
-            <Button onClick={() => toast({ title: "Funzione spostata", description: "La gestione soci è ora nelle impostazioni utente con il piano Premium." })}>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Nuovo Socio
-            </Button>
           </div>
         </div>
       </header>
@@ -109,50 +92,7 @@ export default function Soci() {
           </TabsList>
 
           <TabsContent value="anagrafica" className="space-y-6">
-            {/* Member Categories */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {memberCategories.map((category) => (
-                <Card key={category.id} className="cursor-pointer hover:shadow-lg transition-all duration-200">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium">{category.name}</CardTitle>
-                      <Badge className={category.color}>{category.count}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Button className="w-full" variant="outline" size="sm">
-                      Visualizza
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Members Manager */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Gestione Soci
-                </CardTitle>
-                <CardDescription>
-                  La gestione dei soci è ora disponibile nelle impostazioni utente
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold mb-2">Gestione Soci Spostata</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Per una migliore esperienza utente, la gestione completa dei soci è stata spostata 
-                    nelle impostazioni del tuo account con il piano Premium.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Attiva il piano Premium dalle impostazioni per accedere alla gestione completa dell'organizzazione.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <MemberManager onStatsUpdate={setMemberStats} />
           </TabsContent>
 
           <TabsContent value="presenze">
@@ -164,11 +104,10 @@ export default function Soci() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Sistema Presenze", "Presto potrai tracciare le presenze automaticamente")}>
+                <div className="text-center py-8 text-muted-foreground">
                   <Calendar className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Sistema presenze in preparazione</p>
                   <p className="text-sm">Presto potrai tracciare le presenze automaticamente</p>
-                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -183,11 +122,10 @@ export default function Soci() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Gestione Quote", "Sistema di pagamenti in preparazione")}>
+                <div className="text-center py-8 text-muted-foreground">
                   <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Gestione quote in arrivo</p>
                   <p className="text-sm">Sistema di pagamenti in preparazione</p>
-                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
@@ -202,11 +140,10 @@ export default function Soci() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8 text-muted-foreground cursor-pointer hover:bg-muted/50 rounded-lg transition-colors" onClick={() => showComingSoon("Sistema Riconoscimenti", "Traccia premi e distintivi dei soci")}>
+                <div className="text-center py-8 text-muted-foreground">
                   <Award className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>Sistema riconoscimenti in arrivo</p>
                   <p className="text-sm">Traccia premi e distintivi dei soci</p>
-                  <Button variant="outline" className="mt-4">Clicca per info</Button>
                 </div>
               </CardContent>
             </Card>
