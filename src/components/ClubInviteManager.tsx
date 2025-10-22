@@ -220,23 +220,30 @@ export default function ClubInviteManager() {
 
       // Send invite email
       if (insertedInvite?.id) {
-        console.log('Sending invite email for ID:', insertedInvite.id);
+        console.log('=== SENDING INVITE EMAIL ===');
+        console.log('Invite ID:', insertedInvite.id);
+        console.log('Supabase URL:', 'https://ajgyrhddxljfauwneput.supabase.co');
         
         try {
+          console.log('Invoking send-club-invite function...');
           const { data: emailData, error: emailError } = await supabase.functions.invoke('send-club-invite', {
             body: { inviteId: insertedInvite.id }
           });
 
-          console.log('Email function response:', { emailData, emailError });
+          console.log('=== EMAIL FUNCTION RESPONSE ===');
+          console.log('Data:', emailData);
+          console.log('Error:', emailError);
 
           if (emailError) {
             console.error('Error sending invite email:', emailError);
+            console.error('Error details:', JSON.stringify(emailError, null, 2));
             throw new Error(`Email error: ${emailError.message || JSON.stringify(emailError)}`);
           }
           
-          console.log('Invite email sent successfully');
+          console.log('✅ Invite email sent successfully');
         } catch (emailErr: any) {
-          console.error('Exception sending email:', emailErr);
+          console.error('❌ Exception sending email:', emailErr);
+          console.error('Error stack:', emailErr.stack);
           toast({
             title: "Invito salvato",
             description: `L'invito è stato creato ma c'è stato un errore nell'invio dell'email: ${emailErr.message}`,

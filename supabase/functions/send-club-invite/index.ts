@@ -8,15 +8,29 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('=== SEND-CLUB-INVITE FUNCTION STARTED ===');
+  console.log('Method:', req.method);
+  console.log('Headers:', Object.fromEntries(req.headers.entries()));
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { inviteId } = await req.json();
+    console.log('Reading request body...');
+    const body = await req.json();
+    console.log('Request body:', body);
     
-    console.log('Processing invite:', inviteId);
+    const { inviteId } = body;
+    
+    if (!inviteId) {
+      console.error('❌ No inviteId provided in request');
+      throw new Error('inviteId is required');
+    }
+    
+    console.log('✅ Processing invite:', inviteId);
     
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
