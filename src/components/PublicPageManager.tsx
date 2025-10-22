@@ -52,7 +52,8 @@ export default function PublicPageManager() {
 
   const copyPublicUrl = () => {
     if (profile?.club_slug) {
-      const url = `${window.location.origin}/club/${profile.club_slug}`;
+      // Use fastclub.it as the production domain
+      const url = `https://fastclub.it/club/${profile.club_slug}`;
       navigator.clipboard.writeText(url);
       toast({
         title: "URL copiato!",
@@ -63,7 +64,9 @@ export default function PublicPageManager() {
 
   const openPublicPage = () => {
     if (profile?.club_slug) {
-      window.open(`/club/${profile.club_slug}`, '_blank');
+      // Use fastclub.it as the production domain
+      const url = `https://fastclub.it/club/${profile.club_slug}`;
+      window.open(url, '_blank');
     }
   };
 
