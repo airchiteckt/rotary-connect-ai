@@ -1171,10 +1171,7 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
-      calculate_club_price: {
-        Args: { member_count: number }
-        Returns: number
-      }
+      calculate_club_price: { Args: { member_count: number }; Returns: number }
       calculate_next_meeting_dates: {
         Args: { months_ahead?: number; user_uuid: string }
         Returns: {
@@ -1184,30 +1181,18 @@ export type Database = {
           meeting_type: string
         }[]
       }
-      generate_club_slug: {
-        Args: { club_name_input: string }
-        Returns: string
-      }
+      generate_club_slug: { Args: { club_name_input: string }; Returns: string }
       generate_document_number: {
         Args: { doc_type: string; user_uuid: string }
         Returns: string
       }
-      generate_invite_token: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_referral_code: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
+      generate_invite_token: { Args: never; Returns: string }
+      generate_referral_code: { Args: { user_uuid: string }; Returns: string }
       get_club_member_count: {
         Args: { club_owner_uuid: string }
         Returns: number
       }
-      get_club_owner_id: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
+      get_club_owner_id: { Args: { user_uuid: string }; Returns: string }
       get_district_events_for_month: {
         Args: { target_month?: number; user_uuid: string }
         Returns: {
@@ -1217,26 +1202,14 @@ export type Database = {
           nome: string
         }[]
       }
-      get_user_email: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
+      get_user_email: { Args: { user_uuid: string }; Returns: string }
       handle_referral_signup: {
         Args: { new_user_id: string; referral_code_input: string }
         Returns: boolean
       }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      is_trial_valid: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
-      is_user_admin: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
+      is_current_user_admin: { Args: never; Returns: boolean }
+      is_trial_valid: { Args: { user_uuid: string }; Returns: boolean }
+      is_user_admin: { Args: { user_uuid: string }; Returns: boolean }
       user_has_section_permission: {
         Args: {
           club_owner_uuid: string
