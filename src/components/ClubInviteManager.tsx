@@ -62,6 +62,46 @@ export default function ClubInviteManager() {
       loadInvites();
       loadMembers();
       loadMemberCount();
+
+      // Setup real-time subscription for invites
+      const invitesChannel = supabase
+        .channel('club-invites-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'club_invites',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            loadInvites();
+          }
+        )
+        .subscribe();
+
+      // Setup real-time subscription for members
+      const membersChannel = supabase
+        .channel('club-members-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'club_members',
+            filter: `club_owner_id=eq.${user.id}`
+          },
+          () => {
+            loadMembers();
+            loadMemberCount();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(invitesChannel);
+        supabase.removeChannel(membersChannel);
+      };
     }
   }, [user]);
 
