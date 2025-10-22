@@ -64,17 +64,65 @@ export default function Dashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', clubOwnerId);
 
-      // Get current month events count
+      // Get current month events count (including all calendar sources)
       const now = new Date();
       const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
       
-      const { count: upcomingCount } = await supabase
+      let totalMonthEvents = 0;
+
+      // Count prefecture events
+      const { count: prefectureCount } = await supabase
         .from('prefecture_events')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', clubOwnerId)
         .gte('event_date', firstDayOfMonth)
         .lte('event_date', lastDayOfMonth);
+
+      totalMonthEvents += prefectureCount || 0;
+
+      // Count events from monthly programs documents
+      const { data: programDocs } = await supabase
+        .from('documents')
+        .select('content')
+        .eq('user_id', clubOwnerId)
+        .eq('type', 'programmi')
+        .in('status', ['published', 'archived']);
+
+      if (programDocs) {
+        programDocs.forEach(doc => {
+          if (doc.content && typeof doc.content === 'object' && !Array.isArray(doc.content)) {
+            const content = doc.content as any;
+            
+            // Count calendario_incontri
+            if (content.calendario_incontri && Array.isArray(content.calendario_incontri)) {
+              content.calendario_incontri.forEach((meeting: any) => {
+                if (meeting.data && meeting.data >= firstDayOfMonth && meeting.data <= lastDayOfMonth) {
+                  totalMonthEvents++;
+                }
+              });
+            }
+
+            // Count attivita_servizio
+            if (content.attivita_servizio && Array.isArray(content.attivita_servizio)) {
+              content.attivita_servizio.forEach((activity: any) => {
+                if (activity.data && activity.data >= firstDayOfMonth && activity.data <= lastDayOfMonth) {
+                  totalMonthEvents++;
+                }
+              });
+            }
+
+            // Count agenda_distrettuale
+            if (content.agenda_distrettuale && Array.isArray(content.agenda_distrettuale)) {
+              content.agenda_distrettuale.forEach((event: any) => {
+                if (event.data && event.data >= firstDayOfMonth && event.data <= lastDayOfMonth) {
+                  totalMonthEvents++;
+                }
+              });
+            }
+          }
+        });
+      }
 
       // Get commissions count
       const { count: commissionsCount } = await supabase
@@ -87,7 +135,7 @@ export default function Dashboard() {
         projects: projectsCount || 0,
         events: eventsCount || 0,
         commissions: commissionsCount || 0,
-        upcomingEvents: upcomingCount || 0
+        upcomingEvents: totalMonthEvents
       });
     } catch (error) {
       console.error('Error loading dashboard stats:', error);
