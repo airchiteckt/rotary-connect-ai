@@ -24,6 +24,8 @@ interface Member {
   current_position?: string;
   notes?: string;
   status: string;
+  responsible_commission_id?: string;
+  responsible_sections?: string[];
 }
 
 interface MemberFormProps {
@@ -37,6 +39,7 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [commissions, setCommissions] = useState<Array<{ id: string; name: string }>>([]);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -44,8 +47,14 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
     membership_start_date: new Date(),
     current_position: '',
     notes: '',
-    status: 'active'
+    status: 'active',
+    responsible_commission_id: '',
+    responsible_sections: [] as string[]
   });
+
+  useEffect(() => {
+    loadCommissions();
+  }, [user]);
 
   useEffect(() => {
     if (member) {
@@ -56,7 +65,9 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         membership_start_date: new Date(member.membership_start_date),
         current_position: member.current_position || '',
         notes: member.notes || '',
-        status: member.status
+        status: member.status,
+        responsible_commission_id: member.responsible_commission_id || '',
+        responsible_sections: member.responsible_sections || []
       });
     } else {
       setFormData({
@@ -66,10 +77,25 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         membership_start_date: new Date(),
         current_position: '',
         notes: '',
-        status: 'active'
+        status: 'active',
+        responsible_commission_id: '',
+        responsible_sections: []
       });
     }
   }, [member]);
+
+  const loadCommissions = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase
+        .from('commissions')
+        .select('id, name')
+        .order('name');
+      setCommissions(data || []);
+    } catch (error) {
+      console.error('Errore nel caricamento delle commissioni:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +111,11 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         membership_start_date: format(formData.membership_start_date, 'yyyy-MM-dd'),
         current_position: formData.current_position.trim() || null,
         notes: formData.notes.trim() || null,
-        status: formData.status
+        status: formData.status,
+        responsible_commission_id: formData.responsible_commission_id || null,
+        responsible_sections: formData.responsible_sections.length > 0 
+          ? formData.responsible_sections as any 
+          : []
       };
 
       if (member) {
@@ -140,6 +170,26 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
     'Socio Onorario',
     'Socio Emerito'
   ];
+
+  const sections = [
+    { value: 'presidenza', label: 'Presidenza' },
+    { value: 'segreteria', label: 'Segreteria' },
+    { value: 'tesoreria', label: 'Tesoreria' },
+    { value: 'soci', label: 'Soci' },
+    { value: 'prefettura', label: 'Prefettura' },
+    { value: 'direttivo', label: 'Direttivo' },
+    { value: 'commissioni', label: 'Commissioni' },
+    { value: 'comunicazione', label: 'Comunicazione' }
+  ];
+
+  const toggleSection = (sectionValue: string) => {
+    setFormData(prev => ({
+      ...prev,
+      responsible_sections: prev.responsible_sections.includes(sectionValue)
+        ? prev.responsible_sections.filter(s => s !== sectionValue)
+        : [...prev.responsible_sections, sectionValue]
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -251,6 +301,46 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
                 <SelectItem value="inactive">Non Attivo</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="responsible_commission">Responsabile Commissione</Label>
+            <Select
+              value={formData.responsible_commission_id || undefined}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, responsible_commission_id: value || '' }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Nessuna commissione (opzionale)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Nessuna commissione</SelectItem>
+                {commissions.map((commission) => (
+                  <SelectItem key={commission.id} value={commission.id}>
+                    {commission.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Responsabile Sezioni Gestionale</Label>
+            <div className="grid grid-cols-2 gap-2 p-3 border rounded-md">
+              {sections.map((section) => (
+                <div key={section.value} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={`section-${section.value}`}
+                    checked={formData.responsible_sections.includes(section.value)}
+                    onChange={() => toggleSection(section.value)}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor={`section-${section.value}`} className="text-sm font-normal cursor-pointer">
+                    {section.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">

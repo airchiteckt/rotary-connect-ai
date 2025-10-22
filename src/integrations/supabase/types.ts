@@ -566,6 +566,10 @@ export type Database = {
           last_name: string
           membership_start_date: string
           notes: string | null
+          responsible_commission_id: string | null
+          responsible_sections:
+            | Database["public"]["Enums"]["app_section"][]
+            | null
           status: string
           updated_at: string
           user_id: string
@@ -579,6 +583,10 @@ export type Database = {
           last_name: string
           membership_start_date: string
           notes?: string | null
+          responsible_commission_id?: string | null
+          responsible_sections?:
+            | Database["public"]["Enums"]["app_section"][]
+            | null
           status?: string
           updated_at?: string
           user_id: string
@@ -592,11 +600,23 @@ export type Database = {
           last_name?: string
           membership_start_date?: string
           notes?: string | null
+          responsible_commission_id?: string | null
+          responsible_sections?:
+            | Database["public"]["Enums"]["app_section"][]
+            | null
           status?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "members_responsible_commission_id_fkey"
+            columns: ["responsible_commission_id"]
+            isOneToOne: false
+            referencedRelation: "commissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       milestones: {
         Row: {

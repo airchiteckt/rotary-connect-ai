@@ -24,6 +24,8 @@ interface Member {
   notes?: string;
   status: string;
   created_at: string;
+  responsible_commission_id?: string;
+  responsible_sections?: string[];
 }
 
 interface ClubInvite {
