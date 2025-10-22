@@ -1218,6 +1218,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_is_section_responsible: {
+        Args: {
+          club_owner_uuid: string
+          section_name: string
+          user_uuid: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_section:
