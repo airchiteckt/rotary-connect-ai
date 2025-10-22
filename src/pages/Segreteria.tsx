@@ -237,9 +237,15 @@ export default function Segreteria() {
       
       const clubOwnerId = ownerIdData || user?.id;
 
+      // Quando approvi, passa a published; quando disapprovi, torna a draft
+      const newStatus = !currentApproved ? 'published' : 'draft';
+
       const { error } = await supabase
         .from('documents')
-        .update({ approved: !currentApproved })
+        .update({ 
+          approved: !currentApproved,
+          status: newStatus
+        })
         .eq('id', documentId)
         .eq('user_id', clubOwnerId);
 
@@ -247,7 +253,9 @@ export default function Segreteria() {
 
       toast({
         title: !currentApproved ? "Documento approvato" : "Approvazione rimossa",
-        description: `Il documento è stato ${!currentApproved ? 'approvato' : 'rimosso dall\'approvazione'} con successo`,
+        description: !currentApproved 
+          ? "Il documento è stato approvato e pubblicato" 
+          : "Il documento è tornato in bozza",
       });
       
       loadDocuments();
