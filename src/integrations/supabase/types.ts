@@ -558,6 +558,7 @@ export type Database = {
       }
       members: {
         Row: {
+          awards: string | null
           created_at: string
           current_position: string | null
           email: string
@@ -566,6 +567,7 @@ export type Database = {
           last_name: string
           membership_start_date: string
           notes: string | null
+          profession: string | null
           responsible_commission_id: string | null
           responsible_sections:
             | Database["public"]["Enums"]["app_section"][]
@@ -575,6 +577,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          awards?: string | null
           created_at?: string
           current_position?: string | null
           email: string
@@ -583,6 +586,7 @@ export type Database = {
           last_name: string
           membership_start_date: string
           notes?: string | null
+          profession?: string | null
           responsible_commission_id?: string | null
           responsible_sections?:
             | Database["public"]["Enums"]["app_section"][]
@@ -592,6 +596,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          awards?: string | null
           created_at?: string
           current_position?: string | null
           email?: string
@@ -600,6 +605,7 @@ export type Database = {
           last_name?: string
           membership_start_date?: string
           notes?: string | null
+          profession?: string | null
           responsible_commission_id?: string | null
           responsible_sections?:
             | Database["public"]["Enums"]["app_section"][]

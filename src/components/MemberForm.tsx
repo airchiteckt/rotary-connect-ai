@@ -26,6 +26,8 @@ interface Member {
   status: string;
   responsible_commission_id?: string;
   responsible_sections?: string[];
+  profession?: string;
+  awards?: string;
 }
 
 interface MemberFormProps {
@@ -49,7 +51,9 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
     notes: '',
     status: 'active',
     responsible_commission_id: '',
-    responsible_sections: [] as string[]
+    responsible_sections: [] as string[],
+    profession: '',
+    awards: ''
   });
 
   useEffect(() => {
@@ -67,7 +71,9 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         notes: member.notes || '',
         status: member.status,
         responsible_commission_id: member.responsible_commission_id || '',
-        responsible_sections: member.responsible_sections || []
+        responsible_sections: member.responsible_sections || [],
+        profession: member.profession || '',
+        awards: member.awards || ''
       });
     } else {
       setFormData({
@@ -79,7 +85,9 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         notes: '',
         status: 'active',
         responsible_commission_id: '',
-        responsible_sections: []
+        responsible_sections: [],
+        profession: '',
+        awards: ''
       });
     }
   }, [member]);
@@ -115,7 +123,9 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         responsible_commission_id: formData.responsible_commission_id || null,
         responsible_sections: formData.responsible_sections.length > 0 
           ? formData.responsible_sections as any 
-          : []
+          : [],
+        profession: formData.profession.trim() || null,
+        awards: formData.awards.trim() || null
       };
 
       if (member) {
@@ -341,6 +351,27 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="profession">Professione</Label>
+            <Input
+              id="profession"
+              value={formData.profession}
+              onChange={(e) => setFormData(prev => ({ ...prev, profession: e.target.value }))}
+              placeholder="Es: Ingegnere, Medico, Avvocato..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="awards">Riconoscimenti</Label>
+            <Textarea
+              id="awards"
+              value={formData.awards}
+              onChange={(e) => setFormData(prev => ({ ...prev, awards: e.target.value }))}
+              placeholder="Elenca premi, distintivi e riconoscimenti ricevuti..."
+              rows={2}
+            />
           </div>
 
           <div className="space-y-2">
