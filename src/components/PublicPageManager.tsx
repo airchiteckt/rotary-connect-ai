@@ -52,8 +52,8 @@ export default function PublicPageManager() {
 
   const copyPublicUrl = () => {
     if (profile?.club_slug) {
-      // Use fastclub.it as the production domain
-      const url = `https://fastclub.it/club/${profile.club_slug}`;
+      // Use current domain (works both in dev and production)
+      const url = `${window.location.origin}/club/${profile.club_slug}`;
       navigator.clipboard.writeText(url);
       toast({
         title: "URL copiato!",
@@ -64,9 +64,7 @@ export default function PublicPageManager() {
 
   const openPublicPage = () => {
     if (profile?.club_slug) {
-      // Use fastclub.it as the production domain
-      const url = `https://fastclub.it/club/${profile.club_slug}`;
-      window.open(url, '_blank');
+      window.open(`/club/${profile.club_slug}`, '_blank');
     }
   };
 
@@ -110,7 +108,7 @@ export default function PublicPageManager() {
               <div>
                 <h3 className="font-semibold">URL della Pagina Pubblica</h3>
                 <code className="text-sm bg-white px-2 py-1 rounded border mt-1 inline-block">
-                  fastclub.it/club/{profile.club_slug}
+                  {window.location.hostname}/club/{profile.club_slug}
                 </code>
               </div>
               <div className="flex gap-2">
