@@ -21,6 +21,7 @@ import {
   X, 
   User, 
   ArrowLeft,
+  Home,
   Upload,
   Loader2,
   Download
@@ -1842,9 +1843,13 @@ export default function CreateDocument() {
         <div className="container mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/segreteria')} className="flex-shrink-0">
-                <ArrowLeft className="w-4 h-4" />
-                <span className="sr-only">Torna indietro</span>
+              <Button variant="outline" size="sm" onClick={() => navigate('/segreteria')} className="flex-shrink-0">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Indietro
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')} className="flex-shrink-0">
+                <Home className="w-4 h-4 mr-2" />
+                Dashboard
               </Button>
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                 {currentDocType?.icon && <currentDocType.icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />}

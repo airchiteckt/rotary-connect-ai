@@ -224,8 +224,13 @@ export default function Tesoreria() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-                <ArrowLeft className="w-4 h-4" />
+              <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Indietro
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+                <DollarSign className="w-4 h-4 mr-2" />
+                Dashboard
               </Button>
               <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center">
                 <DollarSign className="w-5 h-5 text-white" />

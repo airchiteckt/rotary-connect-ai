@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import { SectionResponsible } from '@/components/SectionResponsible';
 
 export default function Prefettura() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('cerimoniale');
   const [showEventForm, setShowEventForm] = useState(false);
@@ -101,10 +102,13 @@ export default function Prefettura() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/dashboard">
-                  <ArrowLeft className="w-4 h-4" />
-                </Link>
+              <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Indietro
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
+                <Shield className="w-4 h-4 mr-2" />
+                Dashboard
               </Button>
               <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
                 <Shield className="w-5 h-5 text-white" />
