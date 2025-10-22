@@ -223,6 +223,29 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
     }
   };
 
+  const resendInvite = async (inviteId: string) => {
+    try {
+      // Chiama l'edge function per reinviare l'email
+      const { error: emailError } = await supabase.functions.invoke('send-club-invite', {
+        body: { inviteId }
+      });
+
+      if (emailError) throw emailError;
+
+      toast({
+        title: "Email inviata",
+        description: "L'email di invito è stata reinviata con successo.",
+      });
+    } catch (error) {
+      console.error('Errore nel reinvio dell\'email:', error);
+      toast({
+        title: "Errore",
+        description: "Si è verificato un errore nel reinvio dell'email di invito.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -410,28 +433,38 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
                       </TableCell>
                       <TableCell>
                         {invite.status === 'pending' && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Conferma eliminazione invito</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Sei sicuro di voler eliminare l'invito per {invite.first_name} {invite.last_name}? 
-                                  Questa azione non può essere annullata.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Annulla</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteInvite(invite.id)}>
-                                  Elimina
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => resendInvite(invite.id)}
+                              title="Reinvia email di invito"
+                            >
+                              <Mail className="w-4 h-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="sm" title="Elimina invito">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Conferma eliminazione invito</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Sei sicuro di voler eliminare l'invito per {invite.first_name} {invite.last_name}? 
+                                    Questa azione non può essere annullata.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annulla</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => deleteInvite(invite.id)}>
+                                    Elimina
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
