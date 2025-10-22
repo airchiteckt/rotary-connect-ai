@@ -5,6 +5,7 @@ import { ArrowLeft, Home } from "lucide-react";
 import { Link } from 'react-router-dom';
 import { CommissionManager } from '../components/CommissionManager';
 import { SectionResponsible } from '@/components/SectionResponsible';
+import { SectionRequests } from '@/components/SectionRequests';
 
 const Commissioni = () => {
   return (
@@ -32,6 +33,8 @@ const Commissioni = () => {
             <CommissionManager />
           </CardContent>
         </Card>
+
+        <SectionRequests section="commissioni" />
       </div>
     </div>
   );

@@ -1000,6 +1000,50 @@ export type Database = {
         }
         Relationships: []
       }
+      section_requests: {
+        Row: {
+          club_owner_id: string
+          content: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          section: Database["public"]["Enums"]["app_section"]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          club_owner_id: string
+          content: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          section: Database["public"]["Enums"]["app_section"]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          club_owner_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          section?: Database["public"]["Enums"]["app_section"]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "section_requests_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "section_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
