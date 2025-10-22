@@ -268,16 +268,14 @@ const handler = async (req: Request): Promise<Response> => {
     const recipients = Array.isArray(to) ? to : [to];
 
     // Send emails (Resend supports bulk sending)
-    // Using onboarding@resend.dev as fallback if custom domain is not verified
     const emailResponse = await resend.emails.send({
-      from: "FastClub <onboarding@resend.dev>",
+      from: "FastClub <info@fastclub.it>",
       to: recipients,
       subject: emailSubject,
       html: emailHtml,
-      reply_to: "info@fastclub.it"
     });
 
-    console.log("✅ Email sent successfully:", emailResponse);
+    console.log("Email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
       success: true, 

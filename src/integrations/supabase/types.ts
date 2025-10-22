@@ -427,42 +427,6 @@ export type Database = {
         }
         Relationships: []
       }
-      goals: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          progress: number | null
-          status: string
-          target_date: string | null
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          progress?: number | null
-          status?: string
-          target_date?: string | null
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          progress?: number | null
-          status?: string
-          target_date?: string | null
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       member_fees: {
         Row: {
           amount: number
@@ -558,7 +522,6 @@ export type Database = {
       }
       members: {
         Row: {
-          awards: string | null
           created_at: string
           current_position: string | null
           email: string
@@ -567,17 +530,11 @@ export type Database = {
           last_name: string
           membership_start_date: string
           notes: string | null
-          profession: string | null
-          responsible_commission_id: string | null
-          responsible_sections:
-            | Database["public"]["Enums"]["app_section"][]
-            | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          awards?: string | null
           created_at?: string
           current_position?: string | null
           email: string
@@ -586,17 +543,11 @@ export type Database = {
           last_name: string
           membership_start_date: string
           notes?: string | null
-          profession?: string | null
-          responsible_commission_id?: string | null
-          responsible_sections?:
-            | Database["public"]["Enums"]["app_section"][]
-            | null
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          awards?: string | null
           created_at?: string
           current_position?: string | null
           email?: string
@@ -605,71 +556,11 @@ export type Database = {
           last_name?: string
           membership_start_date?: string
           notes?: string | null
-          profession?: string | null
-          responsible_commission_id?: string | null
-          responsible_sections?:
-            | Database["public"]["Enums"]["app_section"][]
-            | null
           status?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "members_responsible_commission_id_fkey"
-            columns: ["responsible_commission_id"]
-            isOneToOne: false
-            referencedRelation: "commissions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      milestones: {
-        Row: {
-          completed: boolean | null
-          completed_at: string | null
-          created_at: string
-          description: string | null
-          due_date: string | null
-          goal_id: string | null
-          id: string
-          title: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          completed?: boolean | null
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          goal_id?: string | null
-          id?: string
-          title: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          completed?: boolean | null
-          completed_at?: string | null
-          created_at?: string
-          description?: string | null
-          due_date?: string | null
-          goal_id?: string | null
-          id?: string
-          title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "milestones_goal_id_fkey"
-            columns: ["goal_id"]
-            isOneToOne: false
-            referencedRelation: "goals"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       position_history: {
         Row: {
@@ -756,36 +647,6 @@ export type Database = {
           protocol_document_url?: string | null
           status?: string
           title?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      presidency_notes: {
-        Row: {
-          content: string
-          created_at: string
-          created_by_user_id: string
-          id: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string
-          created_by_user_id: string
-          id?: string
-          status?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string
-          created_by_user_id?: string
-          id?: string
-          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -1128,39 +989,7 @@ export type Database = {
       }
     }
     Views: {
-      public_club_info: {
-        Row: {
-          club_name: string | null
-          club_slug: string | null
-          default_footer_data: string | null
-          default_location: string | null
-          default_logo_url: string | null
-          header_text: string | null
-          president_name: string | null
-          secretary_name: string | null
-        }
-        Insert: {
-          club_name?: string | null
-          club_slug?: string | null
-          default_footer_data?: string | null
-          default_location?: string | null
-          default_logo_url?: string | null
-          header_text?: string | null
-          president_name?: string | null
-          secretary_name?: string | null
-        }
-        Update: {
-          club_name?: string | null
-          club_slug?: string | null
-          default_footer_data?: string | null
-          default_location?: string | null
-          default_logo_url?: string | null
-          header_text?: string | null
-          president_name?: string | null
-          secretary_name?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       accept_club_invite: {
@@ -1171,7 +1000,10 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: boolean
       }
-      calculate_club_price: { Args: { member_count: number }; Returns: number }
+      calculate_club_price: {
+        Args: { member_count: number }
+        Returns: number
+      }
       calculate_next_meeting_dates: {
         Args: { months_ahead?: number; user_uuid: string }
         Returns: {
@@ -1181,18 +1013,30 @@ export type Database = {
           meeting_type: string
         }[]
       }
-      generate_club_slug: { Args: { club_name_input: string }; Returns: string }
+      generate_club_slug: {
+        Args: { club_name_input: string }
+        Returns: string
+      }
       generate_document_number: {
         Args: { doc_type: string; user_uuid: string }
         Returns: string
       }
-      generate_invite_token: { Args: never; Returns: string }
-      generate_referral_code: { Args: { user_uuid: string }; Returns: string }
+      generate_invite_token: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_referral_code: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       get_club_member_count: {
         Args: { club_owner_uuid: string }
         Returns: number
       }
-      get_club_owner_id: { Args: { user_uuid: string }; Returns: string }
+      get_club_owner_id: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       get_district_events_for_month: {
         Args: { target_month?: number; user_uuid: string }
         Returns: {
@@ -1202,14 +1046,26 @@ export type Database = {
           nome: string
         }[]
       }
-      get_user_email: { Args: { user_uuid: string }; Returns: string }
+      get_user_email: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
       handle_referral_signup: {
         Args: { new_user_id: string; referral_code_input: string }
         Returns: boolean
       }
-      is_current_user_admin: { Args: never; Returns: boolean }
-      is_trial_valid: { Args: { user_uuid: string }; Returns: boolean }
-      is_user_admin: { Args: { user_uuid: string }; Returns: boolean }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_trial_valid: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
+      is_user_admin: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
       user_has_section_permission: {
         Args: {
           club_owner_uuid: string
