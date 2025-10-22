@@ -143,6 +143,22 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
         });
       } else {
         // Nuovo socio - crea invito e invia email
+        // Prima controlla se esiste già un invito per questa email
+        const { data: existingInvites } = await supabase
+          .from('club_invites')
+          .select('id, status')
+          .eq('user_id', user.id)
+          .eq('email', formData.email.trim());
+
+        // Se esiste un invito già accettato o scaduto, eliminalo
+        if (existingInvites && existingInvites.length > 0) {
+          const invitesToDelete = existingInvites.map(inv => inv.id);
+          await supabase
+            .from('club_invites')
+            .delete()
+            .in('id', invitesToDelete);
+        }
+
         const permissions = formData.responsible_sections.length > 0 
           ? formData.responsible_sections as any 
           : null;

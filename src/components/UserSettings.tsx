@@ -235,6 +235,22 @@ export default function UserSettings() {
 
     setIsLoading(true);
     try {
+      // Prima controlla se esiste già un invito per questa email
+      const { data: existingInvites } = await supabase
+        .from('club_invites')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('email', inviteForm.email);
+
+      // Se esiste un invito già accettato o scaduto, eliminalo
+      if (existingInvites && existingInvites.length > 0) {
+        const invitesToDelete = existingInvites.map(inv => inv.id);
+        await supabase
+          .from('club_invites')
+          .delete()
+          .in('id', invitesToDelete);
+      }
+
       const { error } = await supabase
         .from('club_invites')
         .insert({
