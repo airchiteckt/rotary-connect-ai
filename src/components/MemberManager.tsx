@@ -71,6 +71,7 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
         .from('club_invites')
         .select('*')
         .eq('user_id', user.id)
+        .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -362,7 +363,7 @@ export default function MemberManager({ onStatsUpdate }: MemberManagerProps) {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <UserPlus className="w-5 h-5" />
-              <span>Membri Invitati ({invites.filter(i => i.status === 'pending').length})</span>
+              <span>Membri Invitati ({invites.length})</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
