@@ -49,12 +49,19 @@ export default function Segreteria() {
       });
       
       const clubOwnerId = ownerIdData || user?.id;
+      const isOwner = clubOwnerId === user?.id;
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('documents')
         .select('*')
-        .eq('user_id', clubOwnerId)
-        .order('updated_at', { ascending: false });
+        .eq('user_id', clubOwnerId);
+
+      // Se non sei il proprietario, mostra solo documenti pubblicati/archiviati
+      if (!isOwner) {
+        query = query.in('status', ['published', 'archived']);
+      }
+
+      const { data, error } = await query.order('updated_at', { ascending: false });
 
       if (error) throw error;
       
