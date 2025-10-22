@@ -61,23 +61,69 @@ export default function Calendario() {
 
       if (documents) {
         documents.forEach(doc => {
-          // Extract calendar_incontri from content
           if (doc.content && typeof doc.content === 'object' && !Array.isArray(doc.content)) {
-            const meetingsData = (doc.content as any).calendario_incontri;
+            const content = doc.content as any;
+            
+            // Extract calendario_incontri (club meetings)
+            const meetingsData = content.calendario_incontri;
             if (meetingsData && Array.isArray(meetingsData)) {
               meetingsData.forEach((meeting: any) => {
                 if (meeting.data) {
                   const meetingDate = parseISO(meeting.data);
                   if (meetingDate >= monthStart && meetingDate <= monthEnd) {
                     allEvents.push({
-                      id: `doc-${doc.id}-${meeting.data}`,
-                      title: meeting.tipo || 'Riunione',
+                      id: `meeting-${doc.id}-${meeting.data}`,
+                      title: meeting.nome || 'Riunione',
                       date: meetingDate,
-                      time: meeting.ora,
+                      time: meeting.orario,
                       location: meeting.luogo,
                       type: 'document',
                       description: meeting.descrizione,
-                      source: 'Programma Mensile'
+                      source: 'Riunioni di Club'
+                    });
+                  }
+                }
+              });
+            }
+
+            // Extract attivita_servizio (service activities)
+            const serviceActivities = content.attivita_servizio;
+            if (serviceActivities && Array.isArray(serviceActivities)) {
+              serviceActivities.forEach((activity: any) => {
+                if (activity.data) {
+                  const activityDate = parseISO(activity.data);
+                  if (activityDate >= monthStart && activityDate <= monthEnd) {
+                    allEvents.push({
+                      id: `service-${doc.id}-${activity.data}`,
+                      title: activity.testo || 'Attività di Servizio',
+                      date: activityDate,
+                      time: activity.orario,
+                      location: activity.luogo,
+                      type: 'document',
+                      description: activity.descrizione,
+                      source: 'Attività di Servizio'
+                    });
+                  }
+                }
+              });
+            }
+
+            // Extract agenda_distrettuale (district events)
+            const districtAgenda = content.agenda_distrettuale;
+            if (districtAgenda && Array.isArray(districtAgenda)) {
+              districtAgenda.forEach((districtEvent: any) => {
+                if (districtEvent.data) {
+                  const eventDate = parseISO(districtEvent.data);
+                  if (eventDate >= monthStart && eventDate <= monthEnd) {
+                    allEvents.push({
+                      id: `district-${doc.id}-${districtEvent.data}`,
+                      title: districtEvent.testo || 'Evento Distrettuale',
+                      date: eventDate,
+                      time: districtEvent.orario,
+                      location: districtEvent.luogo,
+                      type: 'document',
+                      description: districtEvent.descrizione,
+                      source: 'Agenda Distrettuale'
                     });
                   }
                 }
