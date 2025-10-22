@@ -100,7 +100,7 @@ export default function UserSettings() {
       
       const clubOwnerId = ownerIdData || user.id;
 
-      // Load club members with their invites to get emails
+      // Load club members
       const { data: clubMembersData, error: membersError } = await supabase
         .from('club_members')
         .select(`
@@ -122,12 +122,7 @@ export default function UserSettings() {
         .eq('user_id', clubOwnerId)
         .single();
 
-      // Get club owner email
-      const { data: ownerEmail } = await supabase.rpc('get_user_email', {
-        user_uuid: clubOwnerId
-      });
-
-      // Get profile data and email for each member
+      // Get profile data for each member
       const membersWithProfiles = await Promise.all(
         (clubMembersData || []).map(async (member) => {
           // Get profile
@@ -137,21 +132,12 @@ export default function UserSettings() {
             .eq('user_id', member.user_id)
             .maybeSingle();
 
-          // Get invite to retrieve email
+          // Get invite to retrieve email (most reliable source)
           const { data: invite } = await supabase
             .from('club_invites')
             .select('email, first_name, last_name')
             .eq('accepted_by_user_id', member.user_id)
             .maybeSingle();
-
-          // Get email using RPC function as fallback
-          let userEmail = invite?.email;
-          if (!userEmail) {
-            const { data: emailData } = await supabase.rpc('get_user_email', {
-              user_uuid: member.user_id
-            });
-            userEmail = emailData;
-          }
 
           const displayName = profile?.full_name || 
                             (invite?.first_name && invite?.last_name 
@@ -162,7 +148,7 @@ export default function UserSettings() {
             ...member,
             profiles: {
               full_name: displayName,
-              email: userEmail || 'Email non disponibile',
+              email: invite?.email || 'Email non disponibile',
               role: profile?.role || 'member'
             }
           };
@@ -178,7 +164,7 @@ export default function UserSettings() {
         joined_at: ownerProfile?.created_at || new Date().toISOString(),
         profiles: {
           full_name: ownerProfile?.full_name || 'Admin',
-          email: ownerEmail || 'Email non disponibile',
+          email: '(Proprietario)',
           role: ownerProfile?.role || 'admin'
         }
       };
@@ -196,6 +182,8 @@ export default function UserSettings() {
       setPendingInvites(invites || []);
     } catch (error) {
       console.error('Error loading organization data:', error);
+      // Don't block the component if loading fails
+      setPendingInvites([]);
     }
   };
 
@@ -291,8 +279,11 @@ export default function UserSettings() {
       setSelectedPermissions([]);
       setResponsibleSections([]);
       
-      // Reload data to show the new invite
-      await loadOrganizationData();
+      // Reload data to show the new invite (don't await to avoid blocking)
+      loadOrganizationData().catch(err => {
+        console.error('Error reloading data:', err);
+        // Silently fail - the invite was created successfully
+      });
     } catch (error) {
       console.error('Error sending invite:', error);
       toast({
