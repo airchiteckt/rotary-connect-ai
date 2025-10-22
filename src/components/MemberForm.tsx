@@ -111,24 +111,25 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
 
     setLoading(true);
     try {
-      const memberData = {
-        user_id: user.id,
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
-        email: formData.email.trim(),
-        membership_start_date: format(formData.membership_start_date, 'yyyy-MM-dd'),
-        current_position: formData.current_position.trim() || null,
-        notes: formData.notes.trim() || null,
-        status: formData.status,
-        responsible_commission_id: formData.responsible_commission_id || null,
-        responsible_sections: formData.responsible_sections.length > 0 
-          ? formData.responsible_sections as any 
-          : [],
-        profession: formData.profession.trim() || null,
-        awards: formData.awards.trim() || null
-      };
-
       if (member) {
+        // Modifica socio esistente
+        const memberData = {
+          user_id: user.id,
+          first_name: formData.first_name.trim(),
+          last_name: formData.last_name.trim(),
+          email: formData.email.trim(),
+          membership_start_date: format(formData.membership_start_date, 'yyyy-MM-dd'),
+          current_position: formData.current_position.trim() || null,
+          notes: formData.notes.trim() || null,
+          status: formData.status,
+          responsible_commission_id: formData.responsible_commission_id || null,
+          responsible_sections: formData.responsible_sections.length > 0 
+            ? formData.responsible_sections as any 
+            : [],
+          profession: formData.profession.trim() || null,
+          awards: formData.awards.trim() || null
+        };
+
         const { error } = await supabase
           .from('members')
           .update(memberData)
@@ -141,15 +142,46 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
           description: "I dati del socio sono stati aggiornati con successo.",
         });
       } else {
-        const { error } = await supabase
-          .from('members')
-          .insert([memberData]);
+        // Nuovo socio - crea invito e invia email
+        const permissions = formData.responsible_sections.length > 0 
+          ? formData.responsible_sections as any 
+          : null;
+
+        const { data: inviteData, error: inviteError } = await supabase
+          .from('club_invites')
+          .insert({
+            user_id: user.id,
+            email: formData.email.trim(),
+            first_name: formData.first_name.trim(),
+            last_name: formData.last_name.trim(),
+            role: 'member',
+            permissions: permissions,
+            responsible_sections: [] as any
+          } as any)
+          .select('id')
+          .single();
         
-        if (error) throw error;
+        if (inviteError) throw inviteError;
+
+        // Invia email di invito
+        if (inviteData) {
+          try {
+            const { error: emailError } = await supabase.functions.invoke('send-club-invite', {
+              body: { inviteId: inviteData.id }
+            });
+
+            if (emailError) {
+              console.error('Error sending invite email:', emailError);
+              // Non blocchiamo l'operazione se l'email fallisce
+            }
+          } catch (emailError) {
+            console.error('Error sending invite email:', emailError);
+          }
+        }
         
         toast({
-          title: "Socio aggiunto",
-          description: "Il nuovo socio è stato aggiunto con successo.",
+          title: "Invito inviato",
+          description: `Email di invito inviata a ${formData.email}. Il socio potrà registrarsi e accedere al club.`,
         });
       }
 
@@ -159,7 +191,9 @@ export default function MemberForm({ isOpen, onClose, member, onSuccess }: Membe
       console.error('Errore nel salvare il socio:', error);
       toast({
         title: "Errore",
-        description: "Si è verificato un errore nel salvare i dati del socio.",
+        description: member 
+          ? "Si è verificato un errore nell'aggiornamento del socio." 
+          : "Si è verificato un errore nell'invio dell'invito.",
         variant: "destructive",
       });
     } finally {
