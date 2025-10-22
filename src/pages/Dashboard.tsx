@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -9,18 +9,87 @@ import { FileText, Mail, Image, Users, Calendar, Settings, LogOut, Crown, Dollar
 import UserSettings from '@/components/UserSettings';
 import { usePermissions } from '@/hooks/usePermissions';
 import HelpSupport from '@/components/HelpSupport';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, clubOwnerProfile, signOut, checkTrialStatus } = useAuth();
   const { hasPermission } = usePermissions();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const [stats, setStats] = useState({
+    activeMembers: 0,
+    projects: 0,
+    events: 0,
+    commissions: 0,
+    upcomingEvents: 0
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
     if (user) {
       checkTrialStatus();
+      loadDashboardStats();
     }
   }, [user, checkTrialStatus]);
+
+  const loadDashboardStats = async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingStats(true);
+      
+      // Get club owner ID
+      const { data: ownerIdData } = await supabase.rpc('get_club_owner_id', { 
+        user_uuid: user.id 
+      });
+      const clubOwnerId = ownerIdData || user.id;
+
+      // Get active members count
+      const { count: membersCount } = await supabase
+        .from('members')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', clubOwnerId)
+        .eq('status', 'active');
+
+      // Get projects count
+      const { count: projectsCount } = await supabase
+        .from('presidency_projects')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', clubOwnerId);
+
+      // Get events count (all prefecture events)
+      const { count: eventsCount } = await supabase
+        .from('prefecture_events')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', clubOwnerId);
+
+      // Get upcoming events count (future events)
+      const { count: upcomingCount } = await supabase
+        .from('prefecture_events')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', clubOwnerId)
+        .gte('event_date', new Date().toISOString().split('T')[0]);
+
+      // Get commissions count
+      const { count: commissionsCount } = await supabase
+        .from('commissions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', clubOwnerId);
+
+      setStats({
+        activeMembers: membersCount || 0,
+        projects: projectsCount || 0,
+        events: eventsCount || 0,
+        commissions: commissionsCount || 0,
+        upcomingEvents: upcomingCount || 0
+      });
+    } catch (error) {
+      console.error('Error loading dashboard stats:', error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   // Show loading state
   if (loading) {
@@ -251,83 +320,68 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-4 mb-6 sm:mb-8">
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <FileText className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Documenti</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Budget</p>
-                <p className="text-sm sm:text-lg font-bold">€0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Building className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Cariche</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Progetti</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-red-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Eventi</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Building className="w-4 h-4 sm:w-6 sm:h-6 text-indigo-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Commissioni</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Megaphone className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Campagne</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 mb-6 sm:mb-8">
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => hasPermission('soci') && navigate('/soci')}
+          >
             <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
               <div className="text-center">
                 <Users className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600 mx-auto mb-1" />
                 <p className="text-xs font-medium text-muted-foreground">Soci Attivi</p>
-                <p className="text-sm sm:text-lg font-bold">0</p>
+                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.activeMembers}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => hasPermission('presidenza') && navigate('/presidenza')}
+          >
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
+              <div className="text-center">
+                <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Progetti</p>
+                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.projects}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => hasPermission('prefettura') && navigate('/prefettura')}
+          >
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
+              <div className="text-center">
+                <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-red-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Eventi</p>
+                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.events}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => hasPermission('commissioni') && navigate('/commissioni')}
+          >
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
+              <div className="text-center">
+                <Building className="w-4 h-4 sm:w-6 sm:h-6 text-indigo-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Commissioni</p>
+                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.commissions}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200"
+            onClick={() => navigate('/calendario')}
+          >
+            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
+              <div className="text-center">
+                <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1" />
+                <p className="text-xs font-medium text-muted-foreground">Calendario</p>
+                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.upcomingEvents}</p>
               </div>
             </CardContent>
           </Card>

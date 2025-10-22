@@ -18,6 +18,7 @@ import Prefettura from "./pages/Prefettura";
 import Direttivo from "./pages/Direttivo";
 import Comunicazione from "./pages/Comunicazione";
 import Soci from "./pages/Soci";
+import Calendario from "./pages/Calendario";
 import CreateDocument from "./pages/CreateDocument";
 import Commissioni from "./pages/Commissioni";
 import RecurringMeetingsSettings from "./components/RecurringMeetingsSettings";
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="/comunicazione" element={<Comunicazione />} />
               <Route path="/soci" element={<Soci />} />
               <Route path="/commissioni" element={<Commissioni />} />
+              <Route path="/calendario" element={<Calendario />} />
               <Route path="/create-document" element={<CreateDocument />} />
               <Route path="/document/:id" element={<CreateDocument />} />
               <Route path="/document/:id/edit" element={<CreateDocument />} />
