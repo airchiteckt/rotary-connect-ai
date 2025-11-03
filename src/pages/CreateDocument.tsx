@@ -84,6 +84,7 @@ export default function CreateDocument() {
     },
     programmi: {
       sections: [
+        { key: 'mese', label: 'Mese di Riferimento', type: 'month-select', required: true },
         { key: 'anno_sociale', label: 'Anno Sociale', type: 'social-year', required: false },
         { key: 'messaggio_presidente', label: 'Messaggio del Presidente', type: 'president-message', required: false },
         { key: 'calendario_incontri', label: 'Calendario degli incontri e attività', type: 'club-meetings', required: true },
@@ -326,13 +327,13 @@ export default function CreateDocument() {
   // Auto-set title when document type changes
   useEffect(() => {
     if (formData.type === 'programmi' && !documentId) {
-      const currentMonth = 'settembre'; // Default to September for social year
+      const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' });
       setFormData(prev => ({
         ...prev,
         title: 'Programma mensile',
         content: {
           ...prev.content,
-          mese: currentMonth
+          mese: prev.content.mese || currentMonth
         }
       }));
     }
@@ -554,16 +555,26 @@ export default function CreateDocument() {
           />
         );
       case 'month-select':
-        const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' });
-        if (!value) {
-          updateContent(section.key, currentMonth);
-        }
+        const months = [
+          'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno',
+          'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'
+        ];
         return (
-          <div className="bg-muted p-3 rounded-md flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            <span className="font-medium capitalize">{currentMonth}</span>
-            <span className="text-xs text-muted-foreground ml-auto">Mese Corrente</span>
-          </div>
+          <Select
+            value={value || ''}
+            onValueChange={(selectedValue) => updateContent(section.key, selectedValue)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Seleziona mese" />
+            </SelectTrigger>
+            <SelectContent>
+              {months.map((month) => (
+                <SelectItem key={month} value={month} className="capitalize">
+                  {month}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         );
       case 'rotary-year':
         const currentDate = new Date();
