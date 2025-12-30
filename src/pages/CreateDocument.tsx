@@ -1500,6 +1500,40 @@ export default function CreateDocument() {
                   </div>
                 </div>
               `;
+            } else if (section.type === 'club-communications' && Array.isArray(value)) {
+              const tipoLabels: Record<string, string> = {
+                'compleanni': 'Compleanni Soci',
+                'anniversari': 'Anniversari',
+                'nuovi_ingressi': 'Nuovi Ingressi',
+                'comunicazioni_direttivo': 'Comunicazioni del Direttivo',
+                'scadenze': 'Scadenze Importanti'
+              };
+              pdfContent += `
+                <div style="margin-bottom: 20px;">
+                  <h3 style="font-weight: 600; font-size: 18px; margin-bottom: 12px; color: #1f2937;">${section.label}</h3>
+                  <div>
+                    ${value.map((communication, index) => `
+                      <div style="background-color: #f9fafb; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e5e7eb;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px;">
+                          <div style="font-size: 14px; font-weight: 500;">
+                            ${communication.titolo || `Comunicazione ${index + 1}`}
+                          </div>
+                          ${communication.tipo ? `
+                            <span style="font-size: 11px; background-color: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 4px;">
+                              ${tipoLabels[communication.tipo] || communication.tipo}
+                            </span>
+                          ` : ''}
+                        </div>
+                        ${communication.contenuto ? `
+                          <div style="font-size: 13px; color: #374151; white-space: pre-wrap;">
+                            ${communication.contenuto}
+                          </div>
+                        ` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
             } else if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
               pdfContent += `
                 <div style="margin-bottom: 20px;">
