@@ -1739,6 +1739,42 @@ export default function CreateDocument() {
       );
     }
 
+    // Handle club-communications display
+    if (section.type === 'club-communications' && Array.isArray(value)) {
+      const tipoLabels: Record<string, string> = {
+        'compleanni': 'Compleanni Soci',
+        'anniversari': 'Anniversari',
+        'nuovi_ingressi': 'Nuovi Ingressi',
+        'comunicazioni_direttivo': 'Comunicazioni del Direttivo',
+        'scadenze': 'Scadenze Importanti'
+      };
+      
+      return (
+        <div key={section.key} className="space-y-3">
+          <h3 className="font-semibold text-lg">{section.label}</h3>
+          <div className="space-y-2">
+            {value.map((communication, index) => (
+              <div key={index} className="bg-gray-50 p-3 rounded-lg border">
+                <div className="flex items-start justify-between mb-1">
+                  <div className="font-medium text-sm">
+                    {communication.titolo || `Comunicazione ${index + 1}`}
+                  </div>
+                  {communication.tipo && (
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                      {tipoLabels[communication.tipo] || communication.tipo}
+                    </span>
+                  )}
+                </div>
+                {communication.contenuto && (
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{communication.contenuto}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     // Handle agenda_distrettuale display with new format
     if ((section.type === 'district-agenda' || section.type === 'agenda_distrettuale') && Array.isArray(value)) {
       return (
