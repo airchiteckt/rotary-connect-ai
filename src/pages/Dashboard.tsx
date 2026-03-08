@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LogOut } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import HelpSupport from '@/components/HelpSupport';
+
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import DashboardQuickStats from '@/components/dashboard/DashboardQuickStats';
 import DashboardMenuGrid from '@/components/dashboard/DashboardMenuGrid';
