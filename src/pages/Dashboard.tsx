@@ -130,7 +130,6 @@ export default function Dashboard() {
         )}
       </main>
 
-      <HelpSupport />
     </div>
   );
 }
