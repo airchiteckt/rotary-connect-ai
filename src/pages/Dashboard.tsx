@@ -1,226 +1,87 @@
-import { useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Mail, Image, Users, Calendar, Settings, LogOut, Crown, DollarSign, Shield, UserCheck, Megaphone, Building } from 'lucide-react';
-import UserSettings from '@/components/UserSettings';
+import { LogOut } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 import HelpSupport from '@/components/HelpSupport';
-import { supabase } from '@/integrations/supabase/client';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardQuickStats from '@/components/dashboard/DashboardQuickStats';
+import DashboardMenuGrid from '@/components/dashboard/DashboardMenuGrid';
+import TrialNotice from '@/components/dashboard/TrialNotice';
 
 export default function Dashboard() {
   const { user, loading, isTrialValid, profile, clubOwnerProfile, signOut, checkTrialStatus } = useAuth();
   const { hasPermission } = usePermissions();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  
-  const [stats, setStats] = useState({
-    activeMembers: 0,
-    projects: 0,
-    events: 0,
-    commissions: 0,
-    upcomingEvents: 0
-  });
-  const [loadingStats, setLoadingStats] = useState(true);
+  const { stats, loading: loadingStats } = useDashboardStats(user);
 
   useEffect(() => {
-    if (user) {
-      checkTrialStatus();
-      loadDashboardStats();
-    }
+    if (user) checkTrialStatus();
   }, [user, checkTrialStatus]);
 
-  const loadDashboardStats = async () => {
-    if (!user) return;
-    
-    try {
-      setLoadingStats(true);
-      
-      // Get club owner ID
-      const { data: ownerIdData } = await supabase.rpc('get_club_owner_id', { 
-        user_uuid: user.id 
-      });
-      const clubOwnerId = ownerIdData || user.id;
-
-      // Get active members count
-      const { count: membersCount } = await supabase
-        .from('members')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', clubOwnerId)
-        .eq('status', 'active');
-
-      // Get projects count
-      const { count: projectsCount } = await supabase
-        .from('presidency_projects')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', clubOwnerId);
-
-      // Get events count (all prefecture events)
-      const { count: eventsCount } = await supabase
-        .from('prefecture_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', clubOwnerId);
-
-      // Get current month events count (including all calendar sources)
-      const now = new Date();
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
-      
-      let totalMonthEvents = 0;
-
-      // Count prefecture events
-      const { count: prefectureCount } = await supabase
-        .from('prefecture_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', clubOwnerId)
-        .gte('event_date', firstDayOfMonth)
-        .lte('event_date', lastDayOfMonth);
-
-      totalMonthEvents += prefectureCount || 0;
-
-      // Count events from monthly programs documents
-      const { data: programDocs } = await supabase
-        .from('documents')
-        .select('content')
-        .eq('user_id', clubOwnerId)
-        .eq('type', 'programmi')
-        .in('status', ['published', 'archived']);
-
-      if (programDocs) {
-        programDocs.forEach(doc => {
-          if (doc.content && typeof doc.content === 'object' && !Array.isArray(doc.content)) {
-            const content = doc.content as any;
-            
-            // Count calendario_incontri
-            if (content.calendario_incontri && Array.isArray(content.calendario_incontri)) {
-              content.calendario_incontri.forEach((meeting: any) => {
-                if (meeting.data && meeting.data >= firstDayOfMonth && meeting.data <= lastDayOfMonth) {
-                  totalMonthEvents++;
-                }
-              });
-            }
-
-            // Count attivita_servizio
-            if (content.attivita_servizio && Array.isArray(content.attivita_servizio)) {
-              content.attivita_servizio.forEach((activity: any) => {
-                if (activity.data && activity.data >= firstDayOfMonth && activity.data <= lastDayOfMonth) {
-                  totalMonthEvents++;
-                }
-              });
-            }
-
-            // Count agenda_distrettuale
-            if (content.agenda_distrettuale && Array.isArray(content.agenda_distrettuale)) {
-              content.agenda_distrettuale.forEach((event: any) => {
-                if (event.data && event.data >= firstDayOfMonth && event.data <= lastDayOfMonth) {
-                  totalMonthEvents++;
-                }
-              });
-            }
-          }
-        });
-      }
-
-      // Get commissions count
-      const { count: commissionsCount } = await supabase
-        .from('commissions')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', clubOwnerId);
-
-      setStats({
-        activeMembers: membersCount || 0,
-        projects: projectsCount || 0,
-        events: eventsCount || 0,
-        commissions: commissionsCount || 0,
-        upcomingEvents: totalMonthEvents
-      });
-    } catch (error) {
-      console.error('Error loading dashboard stats:', error);
-    } finally {
-      setLoadingStats(false);
-    }
+  const handleLogout = () => {
+    signOut();
+    toast({ title: 'Logout effettuato', description: 'A presto!' });
   };
 
-  // Show loading state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Caricamento...</p>
         </div>
       </div>
     );
   }
 
-  // Redirect if not logged in
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  if (!user) return <Navigate to="/auth" replace />;
 
-  // Use club owner's subscription status
   const subscriptionProfile = clubOwnerProfile || profile;
 
-  // If user has no club owner profile and is not an admin, show pending invite message
   if (!clubOwnerProfile && profile?.role !== 'admin') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
         <Card className="max-w-md text-center">
           <CardHeader>
             <CardTitle>Invito in Attesa</CardTitle>
-            <CardDescription>
-              Il tuo account non è ancora associato a un club.
-            </CardDescription>
+            <CardDescription>Il tuo account non è ancora associato a un club.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="mb-4 text-sm text-muted-foreground">
               Controlla la tua email per il link di invito e completare l'associazione al club.
             </p>
-            <div className="space-y-2">
-              <Button variant="outline" onClick={() => {
-                signOut();
-                toast({
-                  title: "Logout effettuato",
-                  description: "A presto!",
-                });
-              }} className="w-full">
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </div>
+            <Button variant="outline" onClick={handleLogout} className="w-full">
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Show trial expired message only if club subscription is trial (not active/premium)
   if (!isTrialValid && subscriptionProfile?.subscription_type !== 'active') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center p-4">
         <Card className="max-w-md text-center">
           <CardHeader>
-            <CardTitle className="text-red-600">Periodo di Prova del Club Scaduto</CardTitle>
-            <CardDescription>
-              Il periodo di prova del club è terminato.
-            </CardDescription>
+            <CardTitle className="text-destructive">Periodo di Prova del Club Scaduto</CardTitle>
+            <CardDescription>Il periodo di prova del club è terminato.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="mb-4 text-sm text-muted-foreground flex items-center gap-1">
-              Per continuare ad utilizzare <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />, contatta il nostro team per attivare l'abbonamento.
+              Per continuare ad utilizzare{' '}
+              <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-4" />
+              , contatta il nostro team per attivare l'abbonamento.
             </p>
             <div className="space-y-2">
               <Button className="w-full">Contatta il Team</Button>
-              <Button variant="outline" onClick={() => {
-                signOut();
-                toast({
-                  title: "Logout effettuato",
-                  description: "A presto!",
-                });
-              }} className="w-full">
+              <Button variant="outline" onClick={handleLogout} className="w-full">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
               </Button>
@@ -231,272 +92,44 @@ export default function Dashboard() {
     );
   }
 
-  const menuItems = [
-    {
-      title: "Segreteria",
-      description: "Documenti, verbali, programmi mensili e comunicazioni ufficiali",
-      icon: FileText,
-      href: "/segreteria",
-      color: "bg-blue-600",
-      section: "segreteria" as const
-    },
-    {
-      title: "Tesoreria", 
-      description: "Gestione finanziaria, bilanci e quote soci",
-      icon: DollarSign,
-      href: "/tesoreria",
-      color: "bg-emerald-600",
-      section: "tesoreria" as const
-    },
-    {
-      title: "Presidenza",
-      description: "Strumenti per la governance e coordinamento club",
-      icon: Crown,
-      href: "/presidenza", 
-      color: "bg-amber-600",
-      section: "presidenza" as const
-    },
-    {
-      title: "Prefettura",
-      description: "Cerimoniale, protocollo e organizzazione eventi",
-      icon: Shield,
-      href: "/prefettura",
-      color: "bg-red-600",
-      section: "prefettura" as const
-    },
-    {
-      title: "Direttivo",
-      description: "Coordinamento consiglio direttivo e commissioni",
-      icon: Building,
-      href: "/direttivo",
-      color: "bg-indigo-600",
-      section: "direttivo" as const
-    },
-    {
-      title: "Comunicazione",
-      description: "Locandine, social media e comunicazione esterna",
-      icon: Megaphone,
-      href: "/comunicazione",
-      color: "bg-purple-600",
-      section: "comunicazione" as const
-    },
-    {
-      title: "Soci e Organigramma",
-      description: "Anagrafica soci, cariche e struttura organizzativa",
-      icon: Users,
-      href: "/soci",
-      color: "bg-orange-600",
-      section: "soci" as const
-    },
-    {
-      title: "Commissioni",
-      description: "Gestione commissioni e assegnazione progetti",
-      icon: UserCheck,
-      href: "/commissioni",
-      color: "bg-pink-600",
-      section: "commissioni" as const
-    }
-  ];
-
-  // Filter menu items based on user permissions
-  const accessibleMenuItems = menuItems.filter(item => hasPermission(item.section));
-
-  // Calculate days remaining based on club owner's subscription
-  const trialStartDate = subscriptionProfile?.trial_start_date ? new Date(subscriptionProfile.trial_start_date) : new Date();
-  const totalTrialDays = 120; // 4 months
-  const bonusDays = (subscriptionProfile?.bonus_months || 0) * 30;
-  const totalDays = totalTrialDays + bonusDays;
-  const daysSinceStart = Math.floor((new Date().getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24));
+  const trialStartDate = subscriptionProfile?.trial_start_date
+    ? new Date(subscriptionProfile.trial_start_date)
+    : new Date();
+  const totalDays = 120 + (subscriptionProfile?.bonus_months || 0) * 30;
+  const daysSinceStart = Math.floor(
+    (new Date().getTime() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
   const daysRemaining = Math.max(0, totalDays - daysSinceStart);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-sm sm:text-lg font-bold text-primary-foreground">F</span>
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold truncate flex items-center">
-                  <img src="/lovable-uploads/fc293183-4946-4f6f-9562-6509947cf52e.png" alt="FastClub" className="h-5 sm:h-6" />
-                </h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile?.club_name || 'Il tuo Club'}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
-              {subscriptionProfile?.subscription_type === 'trial' && (
-                <Badge variant={daysRemaining > 7 ? "default" : "destructive"} className="text-xs sm:text-sm">
-                  <span className="hidden sm:inline">{daysRemaining} giorni rimasti</span>
-                  <span className="sm:hidden">{daysRemaining}g</span>
-                </Badge>
-              )}
-              <div className="text-right hidden md:block">
-                <p className="font-medium text-sm truncate max-w-[120px]">{profile?.full_name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{profile?.role}</p>
-              </div>
-              <UserSettings />
-              <Button variant="ghost" size="sm" onClick={() => {
-                signOut();
-                toast({
-                  title: "Logout effettuato",
-                  description: "A presto!",
-                });
-              }} className="p-2">
-                <LogOut className="w-4 h-4" />
-                <span className="sr-only">Logout</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <DashboardHeader
+        clubName={profile?.club_name}
+        fullName={profile?.full_name}
+        role={profile?.role}
+        subscriptionType={subscriptionProfile?.subscription_type}
+        daysRemaining={daysRemaining}
+        onLogout={handleLogout}
+      />
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
-        {/* Welcome Section */}
         <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-2">Benvenuto, {profile?.full_name?.split(' ')[0] || 'Amico'}!</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">
+            Benvenuto, {profile?.full_name?.split(' ')[0] || 'Amico'}!
+          </h2>
           <p className="text-sm sm:text-base text-muted-foreground">
             Automatizza e ottimizza la gestione del tuo club con AI avanzata e automazioni intelligenti.
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 mb-6 sm:mb-8">
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => hasPermission('soci') && navigate('/soci')}
-          >
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Users className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Soci Attivi</p>
-                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.activeMembers}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => hasPermission('presidenza') && navigate('/presidenza')}
-          >
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Crown className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Progetti</p>
-                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.projects}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => hasPermission('prefettura') && navigate('/prefettura')}
-          >
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Shield className="w-4 h-4 sm:w-6 sm:h-6 text-red-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Eventi</p>
-                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.events}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => hasPermission('commissioni') && navigate('/commissioni')}
-          >
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Building className="w-4 h-4 sm:w-6 sm:h-6 text-indigo-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Commissioni</p>
-                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.commissions}</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200"
-            onClick={() => navigate('/calendario')}
-          >
-            <CardContent className="pt-2 sm:pt-4 pb-2 sm:pb-4">
-              <div className="text-center">
-                <Calendar className="w-4 h-4 sm:w-6 sm:h-6 text-green-600 mx-auto mb-1" />
-                <p className="text-xs font-medium text-muted-foreground">Questo Mese</p>
-                <p className="text-sm sm:text-lg font-bold">{loadingStats ? '...' : stats.upcomingEvents}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <DashboardQuickStats stats={stats} loading={loadingStats} hasPermission={hasPermission} />
+        <DashboardMenuGrid hasPermission={hasPermission} />
 
-        {/* Main Menu */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {accessibleMenuItems.length > 0 ? accessibleMenuItems.map((item) => (
-            <Card key={item.title} className="cursor-pointer hover:shadow-lg transition-all duration-200 group">
-              <CardHeader>
-                <div className="flex items-center space-x-3">
-                  <div className={`p-3 rounded-lg ${item.color} text-white`}>
-                    <item.icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <CardTitle className="group-hover:text-primary transition-colors">
-                      {item.title}
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      {item.description}
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Button className="w-full" variant="outline" onClick={() => navigate(item.href)}>
-                  Accedi a {item.title}
-                </Button>
-              </CardContent>
-            </Card>
-          )) : (
-            <Card className="col-span-full">
-              <CardContent className="pt-6 text-center">
-                <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Accesso Limitato</h3>
-                <p className="text-muted-foreground mb-4">
-                  Non hai ancora i permessi per accedere alle sezioni dell'app.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Contatta l'amministratore del tuo club per richiedere l'accesso alle sezioni di cui hai bisogno.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Trial Notice - Only show for club trial subscriptions, not premium */}
         {subscriptionProfile?.subscription_type === 'trial' && (
-          <Card className="mt-6 sm:mt-8 border-amber-200 bg-amber-50/50">
-            <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-6">
-              <div className="flex items-start sm:items-center space-x-3">
-                <Calendar className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5 sm:mt-0" />
-                <div className="min-w-0">
-                  <p className="font-medium text-amber-800 text-sm sm:text-base">Periodo di Prova del Club Attivo</p>
-                  <p className="text-xs sm:text-sm text-amber-700 mt-1">
-                    Al club rimangono {daysRemaining} giorni per testare tutte le funzionalità del gestionale.
-                  </p>
-                  {profile?.role === 'admin' && (
-                    <Button variant="outline" size="sm" className="mt-2 text-amber-800 border-amber-300 hover:bg-amber-100" onClick={() => navigate("/dashboard")}>
-                      Attiva Abbonamento Premium
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <TrialNotice daysRemaining={daysRemaining} isAdmin={profile?.role === 'admin'} />
         )}
       </main>
-      
-      {/* Help Support Button */}
+
       <HelpSupport />
     </div>
   );
