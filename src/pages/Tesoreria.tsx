@@ -295,10 +295,10 @@ function TesoreriaContent({ user }: { user: { id: string } }) {
       </main>
 
       <TransactionDialog
-        open={isTransactionDialogOpen}
-        onOpenChange={setIsTransactionDialogOpen}
+        isOpen={isTransactionDialogOpen}
+        onClose={() => setIsTransactionDialogOpen(false)}
         transactionType={transactionType}
-        onTransactionSaved={fetchFinancialData}
+        onSuccess={fetchFinancialData}
       />
     </>
   );
