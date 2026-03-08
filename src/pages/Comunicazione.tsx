@@ -29,7 +29,7 @@ function ComunicazioneContent() {
         icon={Megaphone}
         iconColor="bg-purple-600"
         actions={
-          <Button size="sm">
+          <Button size="sm" onClick={() => showComingSoon("Campagne Email", "Presto potrai creare e gestire campagne email")}>
             <Plus className="w-4 h-4 sm:mr-2" />
             <span className="hidden sm:inline">Nuova Campagna</span>
           </Button>

@@ -122,11 +122,9 @@ function PrefetturaContent({ user }: { user: { id: string } }) {
                       <EventForm presetType="ceremony" onEventCreated={() => { setShowCeremonyForm(false); loadStats(); }} onCancel={() => setShowCeremonyForm(false)} />
                     </DialogContent>
                   </Dialog>
-                  <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="flex-1" size="sm"><Plus className="w-4 h-4 mr-2" />Nuovo Evento</Button>
-                    </DialogTrigger>
-                  </Dialog>
+                  <Button variant="outline" className="flex-1" size="sm" onClick={() => setShowEventForm(true)}>
+                    <Plus className="w-4 h-4 mr-2" />Nuovo Evento
+                  </Button>
                   <Button variant="outline" size="sm" className="flex-1" onClick={() => setActiveTab('protocollo')}>
                     <BookOpen className="w-4 h-4 mr-2" />
                     Protocolli

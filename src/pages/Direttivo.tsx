@@ -34,8 +34,17 @@ function DirettivoContent({ user }: { user: { id: string } }) {
 
   const loadStats = async () => {
     try {
-      const { data: commissions } = await supabase.from('commissions').select('id');
-      setStats(prev => ({ ...prev, commissions: commissions?.length || 0 }));
+      const [{ data: commissions }, { data: events }, { data: docs }] = await Promise.all([
+        supabase.from('commissions').select('id'),
+        supabase.from('prefecture_events').select('id').eq('event_type', 'meeting'),
+        supabase.from('documents').select('id').eq('type', 'verbali'),
+      ]);
+      setStats(prev => ({
+        ...prev,
+        commissions: commissions?.length || 0,
+        meetings: events?.length || 0,
+        resolutions: docs?.length || 0,
+      }));
     } catch (error) { console.error('Errore nel caricamento statistiche:', error); }
   };
 
