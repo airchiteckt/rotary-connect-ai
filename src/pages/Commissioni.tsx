@@ -1,43 +1,28 @@
-import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Home } from "lucide-react";
-import { Link } from 'react-router-dom';
+import { UserCheck } from "lucide-react";
 import { CommissionManager } from '../components/CommissionManager';
 import { SectionResponsible } from '@/components/SectionResponsible';
 import { SectionRequests } from '@/components/SectionRequests';
+import SectionPageLayout from '@/components/shared/SectionPageLayout';
+import SectionPageHeader from '@/components/shared/SectionPageHeader';
 
-const Commissioni = () => {
+export default function Commissioni() {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Link to="/dashboard">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Indietro
-            </Button>
-          </Link>
-          <Link to="/dashboard">
-            <Button variant="outline" size="sm">
-              <Home className="w-4 h-4 mr-2" />
-              Dashboard
-            </Button>
-          </Link>
-        </div>
-
-        <SectionResponsible section="commissioni" />
-
-        <Card>
-          <CardContent className="p-6">
+    <SectionPageLayout bgGradient="bg-gradient-to-br from-pink-50 to-rose-100">
+      {() => (
+        <>
+          <SectionPageHeader
+            title="Commissioni"
+            subtitle="Gestione commissioni e assegnazione progetti"
+            icon={UserCheck}
+            iconColor="bg-pink-600"
+          />
+          <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+            <SectionResponsible section="commissioni" />
             <CommissionManager />
-          </CardContent>
-        </Card>
-
-        <SectionRequests section="commissioni" />
-      </div>
-    </div>
+            <SectionRequests section="commissioni" />
+          </main>
+        </>
+      )}
+    </SectionPageLayout>
   );
-};
-
-export default Commissioni;
+}
