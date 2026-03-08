@@ -1,15 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Shield, Plus, Search, Filter, ArrowLeft, Calendar, Award, BookOpen, Users } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Shield, Plus, Calendar, Award, BookOpen, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import PrefectureCalendar from '@/components/PrefectureCalendar';
 import EventForm from '@/components/EventForm';
 import VIPGuestManager from '@/components/VIPGuestManager';
@@ -18,233 +13,128 @@ import UpcomingCeremonies from '@/components/UpcomingCeremonies';
 import EventManager from '@/components/EventManager';
 import CeremonyKanban from '@/components/CeremonyKanban';
 import { SectionResponsible } from '@/components/SectionResponsible';
+import SectionPageLayout from '@/components/shared/SectionPageLayout';
+import SectionPageHeader from '@/components/shared/SectionPageHeader';
+import SectionStatsGrid from '@/components/shared/SectionStatsGrid';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 export default function Prefettura() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  return (
+    <SectionPageLayout bgGradient="bg-gradient-to-br from-red-50 to-pink-100">
+      {(user) => <PrefetturaContent user={user} />}
+    </SectionPageLayout>
+  );
+}
+
+function PrefetturaContent({ user }: { user: { id: string } }) {
   const [activeTab, setActiveTab] = useState('cerimoniale');
   const [showEventForm, setShowEventForm] = useState(false);
   const [showCeremonyForm, setShowCeremonyForm] = useState(false);
-  const [stats, setStats] = useState({
-    totalEvents: 0,
-    ceremonies: 0,
-    protocols: 0,
-    vipGuests: 0
-  });
+  const [stats, setStats] = useState({ totalEvents: 0, ceremonies: 0, protocols: 0, vipGuests: 0 });
 
-  useEffect(() => {
-    if (user) {
-      loadStats();
-    }
-  }, [user]);
+  useEffect(() => { loadStats(); }, [user]);
 
   const loadStats = async () => {
-    if (!user) return;
-
     try {
-      // Load events and ceremonies
-      const { data: events } = await supabase
-        .from('prefecture_events')
-        .select('event_type, ceremony_type');
-
-      // Load protocols
-      const { data: protocols } = await supabase
-        .from('protocols')
-        .select('id');
-
-      // Load VIP guests
-      const { data: guests } = await supabase
-        .from('vip_guests')
-        .select('id')
-        .eq('status', 'active');
-
-      const totalEvents = events?.length || 0;
-      const ceremonies = events?.filter(e => e.event_type === 'ceremony').length || 0;
-
+      const [{ data: events }, { data: protocols }, { data: guests }] = await Promise.all([
+        supabase.from('prefecture_events').select('event_type, ceremony_type'),
+        supabase.from('protocols').select('id'),
+        supabase.from('vip_guests').select('id').eq('status', 'active'),
+      ]);
       setStats({
-        totalEvents,
-        ceremonies,
+        totalEvents: events?.length || 0,
+        ceremonies: events?.filter(e => e.event_type === 'ceremony').length || 0,
         protocols: protocols?.length || 0,
-        vipGuests: guests?.length || 0
+        vipGuests: guests?.length || 0,
       });
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    }
+    } catch (error) { console.error('Error loading stats:', error); }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Caricamento...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
   const protocolStats = [
-    { label: 'Eventi Organizzati', value: stats.totalEvents, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Calendar },
+    { label: 'Eventi', value: stats.totalEvents, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Calendar },
     { label: 'Cerimonie', value: stats.ceremonies, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Award },
-    { label: 'Protocolli Attivi', value: stats.protocols, color: 'text-green-600', bgColor: 'bg-green-100', icon: BookOpen },
-    { label: 'Ospiti VIP', value: stats.vipGuests, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Users }
+    { label: 'Protocolli', value: stats.protocols, color: 'text-green-600', bgColor: 'bg-green-100', icon: BookOpen },
+    { label: 'Ospiti VIP', value: stats.vipGuests, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Users },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Indietro
+    <>
+      <SectionPageHeader
+        title="Prefettura"
+        subtitle="Cerimoniale, protocollo e organizzazione eventi"
+        icon={Shield}
+        iconColor="bg-red-600"
+        actions={
+          <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Nuovo Evento</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
-                <Shield className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
-              <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Prefettura</h1>
-                <p className="text-sm text-muted-foreground">Cerimoniale, protocollo e organizzazione eventi</p>
-              </div>
-            </div>
-            
-            <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nuovo Evento
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Crea Nuovo Evento</DialogTitle>
-                  <DialogDescription>Compila i dettagli dell'evento.</DialogDescription>
-                </DialogHeader>
-                <EventForm 
-                  onEventCreated={() => {
-                    setShowEventForm(false);
-                    loadStats();
-                  }}
-                  onCancel={() => setShowEventForm(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      </header>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Crea Nuovo Evento</DialogTitle>
+                <DialogDescription>Compila i dettagli dell'evento.</DialogDescription>
+              </DialogHeader>
+              <EventForm onEventCreated={() => { setShowEventForm(false); loadStats(); }} onCancel={() => setShowEventForm(false)} />
+            </DialogContent>
+          </Dialog>
+        }
+      />
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <SectionResponsible section="prefettura" />
-        
-        {/* Protocol Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {protocolStats.map((stat, index) => (
-            <Card key={index}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                  </div>
-                  <div className={`p-2 ${stat.bgColor} rounded-full`}>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <SectionStatsGrid stats={protocolStats} />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="cerimoniale">Cerimoniale</TabsTrigger>
-            <TabsTrigger value="eventi">Eventi</TabsTrigger>
-            <TabsTrigger value="calendario">Calendario</TabsTrigger>
-            <TabsTrigger value="protocollo">Protocollo</TabsTrigger>
-            <TabsTrigger value="ospiti">Ospiti</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <ScrollArea className="w-full">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-5">
+              <TabsTrigger value="cerimoniale" className="text-xs sm:text-sm">Cerimoniale</TabsTrigger>
+              <TabsTrigger value="eventi" className="text-xs sm:text-sm">Eventi</TabsTrigger>
+              <TabsTrigger value="calendario" className="text-xs sm:text-sm">Calendario</TabsTrigger>
+              <TabsTrigger value="protocollo" className="text-xs sm:text-sm">Protocollo</TabsTrigger>
+              <TabsTrigger value="ospiti" className="text-xs sm:text-sm">Ospiti</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
-          <TabsContent value="cerimoniale" className="space-y-6">
-            {/* Ceremonial Overview */}
+          <TabsContent value="cerimoniale" className="space-y-4 sm:space-y-6">
             <Card className="border-red-200 bg-gradient-to-r from-red-50 to-pink-50">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                   <Shield className="w-5 h-5 text-red-600" />
                   Gestione Cerimonie e Eventi
                 </CardTitle>
-                <CardDescription>
-                  Organizza cerimonie, eventi ufficiali e attività del club
-                </CardDescription>
+                <CardDescription>Organizza cerimonie, eventi ufficiali e attività</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-3">
                   <Dialog open={showCeremonyForm} onOpenChange={setShowCeremonyForm}>
                     <DialogTrigger asChild>
-                      <Button className="flex-1">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Nuova Cerimonia
-                      </Button>
+                      <Button className="flex-1" size="sm"><Plus className="w-4 h-4 mr-2" />Nuova Cerimonia</Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Crea Nuova Cerimonia</DialogTitle>
                         <DialogDescription>Inserisci i dettagli della cerimonia.</DialogDescription>
                       </DialogHeader>
-                      <EventForm 
-                        presetType="ceremony"
-                        onEventCreated={() => {
-                          setShowCeremonyForm(false);
-                          loadStats();
-                        }}
-                        onCancel={() => setShowCeremonyForm(false)}
-                      />
+                      <EventForm presetType="ceremony" onEventCreated={() => { setShowCeremonyForm(false); loadStats(); }} onCancel={() => setShowCeremonyForm(false)} />
                     </DialogContent>
                   </Dialog>
                   <Dialog open={showEventForm} onOpenChange={setShowEventForm}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="flex-1">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Nuovo Evento
-                      </Button>
+                      <Button variant="outline" className="flex-1" size="sm"><Plus className="w-4 h-4 mr-2" />Nuovo Evento</Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Crea Nuovo Evento</DialogTitle>
-                        <DialogDescription>Compila i dettagli dell'evento.</DialogDescription>
-                      </DialogHeader>
-                      <EventForm 
-                        onEventCreated={() => {
-                          setShowEventForm(false);
-                          loadStats();
-                        }}
-                        onCancel={() => setShowEventForm(false)}
-                      />
-                    </DialogContent>
                   </Dialog>
-                  <Button variant="outline" onClick={() => setActiveTab('protocollo')}>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => setActiveTab('protocollo')}>
                     <BookOpen className="w-4 h-4 mr-2" />
                     Protocolli
                   </Button>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Kanban Board for Ceremonies */}
             <CeremonyKanban onStatsUpdate={loadStats} />
-
-            {/* Upcoming Ceremonies List */}
             <UpcomingCeremonies onStatsUpdate={loadStats} />
           </TabsContent>
 
@@ -265,6 +155,6 @@ export default function Prefettura() {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </>
   );
 }

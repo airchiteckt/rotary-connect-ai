@@ -1,45 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Building, Plus, Search, Filter, ArrowLeft, Users, FileText, Calendar, Vote } from 'lucide-react';
+import { Building, Plus, Search, Filter, Users, Calendar, Vote } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
-import { CommissionManager } from '@/components/CommissionManager';
 import { BoardMeetingManager } from '@/components/BoardMeetingManager';
 import { BoardResolutionManager } from '@/components/BoardResolutionManager';
 import { SectionResponsible } from '@/components/SectionResponsible';
+import SectionPageLayout from '@/components/shared/SectionPageLayout';
+import SectionPageHeader from '@/components/shared/SectionPageHeader';
+import SectionStatsGrid from '@/components/shared/SectionStatsGrid';
 
 export default function Direttivo() {
-  const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  return (
+    <SectionPageLayout bgGradient="bg-gradient-to-br from-indigo-50 to-blue-100">
+      {(user) => <DirettivoContent user={user} />}
+    </SectionPageLayout>
+  );
+}
+
+function DirettivoContent({ user }: { user: { id: string } }) {
   const [activeTab, setActiveTab] = useState('riunioni');
   const [boardMembers, setBoardMembers] = useState<Record<string, any>>({});
   const [loadingMembers, setLoadingMembers] = useState(true);
-  const [stats, setStats] = useState({
-    boardMembers: 0,
-    meetings: 0,
-    resolutions: 0,
-    commissions: 0
-  });
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Caricamento...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
+  const [stats, setStats] = useState({ boardMembers: 0, meetings: 0, resolutions: 0, commissions: 0 });
 
   useEffect(() => {
     loadBoardMembers();
@@ -47,183 +33,103 @@ export default function Direttivo() {
   }, [user]);
 
   const loadStats = async () => {
-    if (!user) return;
-    
     try {
-      // Get commissions count
-      const { data: commissions, error: commissionsError } = await supabase
-        .from('commissions')
-        .select('id');
-
-      if (commissionsError) throw commissionsError;
-
-      setStats(prev => ({
-        ...prev,
-        commissions: commissions?.length || 0
-      }));
-    } catch (error) {
-      console.error('Errore nel caricamento statistiche:', error);
-    }
+      const { data: commissions } = await supabase.from('commissions').select('id');
+      setStats(prev => ({ ...prev, commissions: commissions?.length || 0 }));
+    } catch (error) { console.error('Errore nel caricamento statistiche:', error); }
   };
 
   const loadBoardMembers = async () => {
-    if (!user) return;
-    
     try {
       setLoadingMembers(true);
-      const { data: members, error } = await supabase
-        .from('members')
-        .select('*')
-        .not('current_position', 'is', null);
-
+      const { data: members, error } = await supabase.from('members').select('*').not('current_position', 'is', null);
       if (error) throw error;
-
-      // Group members by position
       const membersByPosition: Record<string, any> = {};
-      members?.forEach(member => {
-        if (member.current_position) {
-          membersByPosition[member.current_position] = member;
-        }
-      });
-
+      members?.forEach(m => { if (m.current_position) membersByPosition[m.current_position] = m; });
       setBoardMembers(membersByPosition);
-      setStats(prev => ({
-        ...prev,
-        boardMembers: Object.keys(membersByPosition).length
-      }));
-    } catch (error) {
-      console.error('Errore nel caricamento membri direttivo:', error);
-    } finally {
-      setLoadingMembers(false);
-    }
+      setStats(prev => ({ ...prev, boardMembers: Object.keys(membersByPosition).length }));
+    } catch (error) { console.error('Errore nel caricamento membri direttivo:', error); }
+    finally { setLoadingMembers(false); }
   };
 
   const boardStats = [
     { label: 'Membri Direttivo', value: stats.boardMembers, color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Users },
-    { label: 'Riunioni Mensili', value: stats.meetings, color: 'text-green-600', bgColor: 'bg-green-100', icon: Calendar },
+    { label: 'Riunioni', value: stats.meetings, color: 'text-green-600', bgColor: 'bg-green-100', icon: Calendar },
     { label: 'Delibere', value: stats.resolutions, color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Vote },
-    { label: 'Commissioni', value: stats.commissions, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Building }
+    { label: 'Commissioni', value: stats.commissions, color: 'text-orange-600', bgColor: 'bg-orange-100', icon: Building },
   ];
 
+  const positions = ['Presidente', 'Vice Presidente', 'Segretario', 'Tesoriere', 'Prefetto', 'Consigliere'];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Indietro
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')}>
-                <Building className="w-4 h-4 mr-2" />
-                Dashboard
-              </Button>
-              <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
-                <Building className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Consiglio Direttivo</h1>
-                <p className="text-sm text-muted-foreground">Coordinamento direttivo e commissioni</p>
-              </div>
-            </div>
-            
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Nuova Riunione
-            </Button>
-          </div>
-        </div>
-      </header>
+    <>
+      <SectionPageHeader
+        title="Consiglio Direttivo"
+        subtitle="Coordinamento direttivo e commissioni"
+        icon={Building}
+        iconColor="bg-indigo-600"
+        actions={
+          <Button size="sm">
+            <Plus className="w-4 h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Nuova Riunione</span>
+          </Button>
+        }
+      />
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <SectionResponsible section="direttivo" />
-        
-        {/* Board Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {boardStats.map((stat, index) => (
-            <Card key={index}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                  </div>
-                  <div className={`p-2 ${stat.bgColor} rounded-full`}>
-                    <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <SectionStatsGrid stats={boardStats} />
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="riunioni">Riunioni</TabsTrigger>
-            <TabsTrigger value="membri">Membri</TabsTrigger>
-            <TabsTrigger value="commissioni">Commissioni</TabsTrigger>
-            <TabsTrigger value="delibere">Delibere</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="riunioni" className="text-xs sm:text-sm">Riunioni</TabsTrigger>
+            <TabsTrigger value="membri" className="text-xs sm:text-sm">Membri</TabsTrigger>
+            <TabsTrigger value="delibere" className="text-xs sm:text-sm">Delibere</TabsTrigger>
           </TabsList>
 
           <TabsContent value="riunioni" className="space-y-6">
             <BoardMeetingManager />
           </TabsContent>
 
-          <TabsContent value="membri" className="space-y-6">
-            {/* Board Members */}
+          <TabsContent value="membri" className="space-y-4 sm:space-y-6">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Cerca membri del direttivo..." 
-                        className="pl-10"
-                      />
-                    </div>
+              <CardContent className="pt-4 sm:pt-6">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Cerca membri del direttivo..." className="pl-10" />
                   </div>
-                  <Button variant="outline">
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filtri
-                  </Button>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Aggiungi Membro
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm"><Filter className="w-4 h-4 mr-2" />Filtri</Button>
+                    <Button size="sm"><Plus className="w-4 h-4 mr-2" />Aggiungi</Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Board Positions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {['Presidente', 'Vice Presidente', 'Segretario', 'Tesoriere', 'Prefetto', 'Consigliere'].map((position) => {
-                const assignedMember = boardMembers[position];
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {positions.map((position) => {
+                const member = boardMembers[position];
                 return (
                   <Card key={position}>
-                    <CardHeader className="pb-3">
+                    <CardHeader className="pb-2 sm:pb-3">
                       <CardTitle className="text-sm">{position}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-2">
-                        {loadingMembers ? (
-                          <p className="text-sm text-muted-foreground">Caricamento...</p>
-                        ) : assignedMember ? (
-                          <div>
-                            <p className="text-sm font-medium">{assignedMember.first_name} {assignedMember.last_name}</p>
-                            <p className="text-xs text-muted-foreground">{assignedMember.email}</p>
-                            <Badge variant="secondary" className="text-xs mt-1">Assegnato</Badge>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">Non assegnato</p>
-                        )}
-                        <Button size="sm" className="w-full" variant={assignedMember ? "outline" : "default"}>
-                          {assignedMember ? 'Modifica' : 'Assegna'}
-                        </Button>
-                      </div>
+                      {loadingMembers ? (
+                        <p className="text-sm text-muted-foreground">Caricamento...</p>
+                      ) : member ? (
+                        <div>
+                          <p className="text-sm font-medium">{member.first_name} {member.last_name}</p>
+                          <p className="text-xs text-muted-foreground">{member.email}</p>
+                          <Badge variant="secondary" className="text-xs mt-1">Assegnato</Badge>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Non assegnato</p>
+                      )}
+                      <Button size="sm" className="w-full mt-2" variant={member ? "outline" : "default"}>
+                        {member ? 'Modifica' : 'Assegna'}
+                      </Button>
                     </CardContent>
                   </Card>
                 );
@@ -232,32 +138,29 @@ export default function Direttivo() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Membri del Direttivo</CardTitle>
-                <CardDescription>
-                  Elenco dei membri del consiglio direttivo
-                </CardDescription>
+                <CardTitle className="text-base sm:text-lg">Membri del Direttivo</CardTitle>
+                <CardDescription>Elenco dei membri del consiglio direttivo</CardDescription>
               </CardHeader>
               <CardContent>
                 {loadingMembers ? (
                   <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Caricamento membri...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
                   </div>
                 ) : Object.keys(boardMembers).length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {Object.entries(boardMembers).map(([position, member]) => (
-                      <div key={position} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Users className="w-5 h-5 text-primary" />
+                      <div key={position} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                           </div>
                           <div>
-                            <p className="font-medium">{member.first_name} {member.last_name}</p>
-                            <p className="text-sm text-muted-foreground">{position}</p>
+                            <p className="font-medium text-sm">{member.first_name} {member.last_name}</p>
+                            <p className="text-xs text-muted-foreground">{position}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm text-muted-foreground">{member.email}</p>
+                        <div className="sm:text-right">
+                          <p className="text-xs text-muted-foreground">{member.email}</p>
                           <Badge variant="secondary" className="text-xs">
                             Dal {new Date(member.membership_start_date).toLocaleDateString('it-IT')}
                           </Badge>
@@ -276,15 +179,11 @@ export default function Direttivo() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="commissioni">
-            <CommissionManager />
-          </TabsContent>
-
           <TabsContent value="delibere">
             <BoardResolutionManager />
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </>
   );
 }
